@@ -7,7 +7,7 @@ ce: ce-macros.elc ce-unadorned.elc ce-validate.elc ce.elc
 	      --no-site-file \
 	      --no-init-file \
 	      --batch \
-	      --eval "(add-to-list 'load-path \".\")" \
+	      --directory '.' \
 	      --funcall batch-byte-compile \
 	    $*.el
 

@@ -726,7 +726,7 @@ errors in them are in particular."
   (interactive)
   (let (do-not-save)
   (when (buffer-modified-p)
-    (if (y-or-n-p "The buffer has not been saved; save now before validating?")
+    (if (y-or-n-p "The buffer has not been saved; save now before validating? ")
       (save-buffer)
       (setq do-not-save t)))
   (unless do-not-save

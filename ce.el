@@ -56,6 +56,21 @@
   "Return a symbolic representation of SYMBOL-OR-STRING."
   `(if (symbolp ,symbol-or-string) ,symbol-or-string (make-symbol ,symbol-or-string)))
 
+(defmacro beg-of-buffer ()
+  "Go to the beginning of the buffer.
+
+The Emacs Lisp function BEGINNING-OF-BUFFER can claim the most
+perspicuous name, but the Emacs Lisp compiler warns against
+using this function.  The documentation for
+`beginning-of-buffer' (as of Emacs 23.3) gives a hint:
+
+  Don't use this command in Lisp programs!
+  (goto-char (point-min)) is faster.
+
+But writing '(goto-char (point-min))' is the kind of
+speaking-in-code that I dislike so much.  Whence this macro."
+  `(goto-char (point-min)))
+
 ;;; User variables and customization
 
 (defgroup sep nil
@@ -176,7 +191,7 @@ The special \"source\" subdirectory is not excluded."
 		(title nil))
 	    (with-current-buffer buf
 	      (save-excursion
-		(beginning-of-buffer)
+		(beg-of-buffer)
 		(re-search-forward title-regexp nil t)
 		(setq title (match-string-no-properties 1))))
 	    (unless (get-file-buffer index-file)
@@ -359,7 +374,7 @@ corresponding file was found."
 	    (dolist (potential-violator-tag ce-unadorned-potential-violator-tags)
 	      (let ((opening-form (ce-unadorned-opening-form potential-violator-tag))
 		    (closing-form (ce-unadorned-closing-form potential-violator-tag)))
-		(beginning-of-buffer)
+		(beg-of-buffer)
 		(while (re-search-forward closing-form nil t)
 		  (save-excursion
 		    (re-search-forward "[^[:space:]]") ;; find the next non-whitespace character
@@ -382,7 +397,7 @@ corresponding file was found."
       (let ((opening-form (ce-unadorned-opening-form potential-violator-tag))
 	    (closing-form (ce-unadorned-closing-form potential-violator-tag)))
 	(save-excursion
-	  (beginning-of-buffer)
+	  (beg-of-buffer)
 	  (while (re-search-forward closing-form nil t)
 	    (save-excursion
 	      (re-search-forward "[^[:space:]]") ;; find the next non-whitespace character

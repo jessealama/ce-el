@@ -6,6 +6,9 @@
 
 ;;; Code:
 
+(require 'cl)
+(require 'ce-macros)
+
 (defgroup ce-validation nil
   "Variables for controlling how validation is carried out."
   :group 'ce)

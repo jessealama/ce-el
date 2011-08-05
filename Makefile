@@ -10,3 +10,6 @@ ce: ce-macros.elc ce-unadorned.elc ce-validate.elc ce.elc
 	      --eval "(add-to-list 'load-path \".\")" \
 	      --funcall batch-byte-compile \
 	    $*.el
+
+clean:
+	rm *.elc

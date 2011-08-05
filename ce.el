@@ -144,7 +144,7 @@ strings.  The special entries \"sample\" and \"template\" are
 (defun ce-trim-filename-with-respect-to-entry (entry filename)
   "Given ENTRY and FILENAME, delete the initial prefix.
 Entry may be either a symbol of a string, but FILENAME must be a
-string.  Uses \ce-entries-directyory\.  What this
+string.  Uses \ce-entries-directory\.  What this
 function in fact does is just take a certain substring of
 FILENAME; for now, it does not enforce any relation between ENTRY
 and FILENAME."

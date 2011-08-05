@@ -658,13 +658,6 @@ ENTRY-NAME can be either a symbol or a string, ."
 	(message "ce-onsgmls-warning-or-error-line: %s matches!" line)
 	result))))
 
-(defun select (pred lst)
-  "The sublist of LST whose members pass the test PRED."
-  (let (result)
-    (dolist (elt lst (reverse result))
-      (when (funcall pred elt)
-	(push elt result)))))
-
 (defun ce-validate-entries-quick (&rest entries)
   "Validate ENTRIES quickly.
 
@@ -687,7 +680,7 @@ are the invalid XHTML files under ENTRY's directory."
 		  (unless (string= entry-results "")
 		    (let (invalid-file-names)
 		      (let ((output-lines (split-string entry-results "\n" t)))
-			(let ((warning-or-error-lines (select #'ce-onsgmls-warning-or-error-line output-lines)))
+			(let ((warning-or-error-lines (remove-if-not #'ce-onsgmls-warning-or-error-line output-lines)))
 			  (dolist (line warning-or-error-lines)
 			    (let ((error-line-regexp (concat "onsgmls:" entry-directory "/" "\\(.+\\)\.html")))
 			      (message "Matching %s against %s" line error-line-regexp)

@@ -313,7 +313,7 @@ ENTRY can be either a symbol or a string."
 
 (defcustom ce-unadorned-fixed-site-directory
   "/tmp/ce"
-  "The directory under which entries will by copied and undorned text fixed."
+  "The directory under which entries will by copied and unadorned text fixed."
   :group 'ce)
 
 (defcustom ce-unadorned-potential-violator-tags

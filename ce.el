@@ -84,7 +84,8 @@ Encyclopedia of Philosophy."
   :group 'ce)
 
 (defun ce-published-entries ()
-  "A list of the published entries.  Members of the list are
+  "A list of the published entries.
+Members of the list are
 strings.  The special entries \"sample\" and \"template\" are
   excluded."
   (let ((candidates (directory-files ce-entries-directory nil "^[a-z0-9]"))
@@ -126,8 +127,8 @@ strings.  The special entries \"sample\" and \"template\" are
   (concat (ce-entry-directory entry) "/" "index.html"))
 
 (defun ce-trim-filename-with-respect-to-entry (entry filename)
-  "Given ENTRY and FILENAME, delete the initial prefix.  Entry
-may be either a symbol of a string, but FILENAME must be a
+  "Given ENTRY and FILENAME, delete the initial prefix.
+Entry may be either a symbol of a string, but FILENAME must be a
 string.  Uses \ce-entries-directyory\.  What this
 function in fact does is just take a certain substring of
 FILENAME; for now, it does not enforce any relation between ENTRY
@@ -184,8 +185,7 @@ The special \"source\" subdirectory is not excluded."
 	(error "No such entry %s" entry-as-string)))))
 
 (defun ce-find-entry-noselect (entry)
-  "Returns a buffer visiting the index file for ENTRY, but does
-not select that buffer."
+  "Visit (but don't select) a buffer visiting the index file for ENTRY."
   (let ((entry-as-string (stringify entry)))
     (let ((entry-filename (ce-entry-index entry)))
       (if (file-exists-p entry-filename)
@@ -200,7 +200,8 @@ not select that buffer."
 	  (error "No such entry %s" entry))))))
 
 (defun ce-find-entry (entry)
-  "In the current buffer, open the index file in the webspace directory for ENTRY.
+  "Open the index file in the webspace directory for ENTRY.
+
 ENTRY can be either a symbol or a string."
   (interactive
    (list (completing-read "Entry: " ce-published-entries nil t)))
@@ -324,8 +325,8 @@ Ed Zalta and I (Jesse Alama) talked about this list on August 27,
   (concat "<" (symbol-name tag)))
 
 (defun ce-unadorned-closing-form (tag)
-  "The XHTML closing form for TAG (assumed to be a symbol).  Just
-to be safe, we allow whitespace to come between the tag and the
+  "The XHTML closing form for TAG (assumed to be a symbol).
+Just to be safe, we allow whitespace to come between the tag and the
   closing \">\"."
   (concat "</" (symbol-name tag) "[:white:]*" ">"))
 
@@ -337,7 +338,8 @@ to be safe, we allow whitespace to come between the tag and the
 
 ;; TODO: This doesn't pay attention to comments in a robust way.
 (defun ce-unadorned-check-entry (entry)
-  "Find all violations for ENTRY.  ENTRY can be either a symbol
+  "Find all violations for ENTRY.
+ENTRY can be either a symbol
 or a string.  Return a list of cons cells whose car a
 filename (e.g., \"index.html\"), and whose cdr is a natural
 number indicating the character number where a violations in the
@@ -465,7 +467,8 @@ corresponding file was found."
 	      (kill-buffer buf))))))))
 
 (defun ce-unadorned-fix-everything ()
-  "Fix every entry.  Entries that do not need to be fixed are not
+  "Fix every entry.
+Entries that do not need to be fixed are not
 copied; the entries that do require fixing are copied and fixed."
   (dolist (entry ce-published-entries)
     (ce-unadorned-fix-entry entry)))
@@ -509,12 +512,13 @@ A leading space is unnecessary."
   :group 'ce-validation)
   
 (defun ce-validate-files (&rest files)
-  "Validate FILE using `ce-validator-program'."
+  "Validate FILES using `ce-validator-program'."
   (let ((compile-command (apply 'concat ce-validator-program-environment " " ce-validator-program " " ce-validator-program-flags " " files)))
     (compile compile-command)))
 
 (defun ce-validate-entry (entry)
-  "Validate all XHTML files under ENTRY.  The current window is
+  "Validate all XHTML files under ENTRY.
+The current window is
 split, and a new buffer (called `ce-validation-buffer-name')
   will be visited."
   (let ((entry-files (ce-entry-html-files entry)))
@@ -543,6 +547,18 @@ split, and a new buffer (called `ce-validation-buffer-name')
       (switch-to-buffer-other-window global-validation-buffer))))
 
 (defun ce-validate-find-command (directory type permission name command)
+  "A string representing an invocation of find.
+
+DIRECTORY is the directory in which the find command will be run.
+TYPE is either NIL or a symbol, 'directory or 'file, indicating
+the type of results desired from find.  PERMISSION is a string
+presenting permission bits for the resulting
+files/directories (e.g., '755', '644').  NAME is the
+name (properly speaking, a pattern) of the files/directories to
+match.  COMMAND is a command that will be executed for each of
+the found files/directories.
+
+All arguments can be NIL, except DIRECTORY."
   (concat ce-validator-program-environment " " 
 	  "find" " "
 	  directory " " 
@@ -560,6 +576,9 @@ split, and a new buffer (called `ce-validation-buffer-name')
 	      (concat "-exec " command " " "\";\""))))
 
 (defun ce-validate-find-command-with-validator (directory type permission name)
+  "Run CE-VALIDATOR-PROGRAM in DIRECTORY.
+See the documentation of
+`ce-validate-find-command` to learn how TYPE, PERMISSION, and NAME are used."
   (ce-validate-find-command directory
 			    type 
 			    permission 
@@ -567,6 +586,7 @@ split, and a new buffer (called `ce-validation-buffer-name')
 			    (concat ce-validator-program " " ce-validator-program-flags " {}")))
 
 (defun ce-validate-find-and-validate-readable-html-files-in-directory (directory)
+  "Apply the validtor to all readable HTML files in DIRECTORY."
   (ce-validate-find-command-with-validator directory
 					   'file
 					   "664"
@@ -574,10 +594,11 @@ split, and a new buffer (called `ce-validation-buffer-name')
 
 
 (defun ce-validate-entry-quick (entry)
-  "Validate ENTRY \"quickly\": if all files under ENTRY's
-directory are valid, then print a message saying so.
-  Otherwise, print a message indicating that at least one file
-  under ENTRY is invalid."
+  "Validate ENTRY \"quickly\".
+
+'Quickly' means: if all files under ENTRY's directory are valid,
+then print a message saying so.  Otherwise, print a message
+indicating that at least one file under ENTRY is invalid."
   (when (get-buffer ce-validation-buffer-name)
     (kill-buffer ce-validation-buffer-name))
   (let ((validation-buffer (generate-new-buffer ce-validation-buffer-name))
@@ -599,8 +620,8 @@ directory are valid, then print a message saying so.
 		(message "Validating XHTML files for %s...done (some are invalid)" entry-as-string)))))))
 
 (defun ce-validate-entries (&rest entries)
-  "Validate ENTRIES.  A new buffer (called
-`ce-validation-buffer-name') containing the results of the
+  "Validate ENTRIES.
+A new buffer (called `ce-validation-buffer-name') containing the results of the
 validation will be visited."
   (when (get-buffer ce-validation-buffer-name)
     (kill-buffer ce-validation-buffer-name))
@@ -623,13 +644,14 @@ validation will be visited."
 		 (message "Validating XHTML files for %s...done (some are invalid)" entry-as-string))))))))
 
 (defun ce-valid-entry-name? (entry-name)
-  "Determine whether ENTRY-NAME, which can be either a symbol or
-a string, is the name of a published entry."
+  "Is ENTRY-NAME the name of a published entry?
+
+ENTRY-NAME can be either a symbol or a string, ."
   (let ((entry-name-as-string (stringify entry-name)))
     (member entry-name-as-string ce-published-entries)))
 
 (defun ce-onsgmls-warning-or-error-line (line)
-  "Return the lines output by onsgmls that are either warning or error lines."
+  "Return the LINEs output by onsgmls that are either warning or error lines."
   (let ((warning-or-error-regexp (concat "onsgmls:" ce-entries-directory "/" ce-entry-name-regexp "/" ".+\.html" ":" "[0-9]+" ":" "[0-9]+" ":" "[WE]")))
     (let ((result (string-match warning-or-error-regexp line)))
       (when result
@@ -644,8 +666,10 @@ a string, is the name of a published entry."
 	(push elt result)))))
 
 (defun ce-validate-entries-quick (&rest entries)
-  "Validate ENTRIES \"quickly\" by testing for each whether there
-is at least one validation error.  Return a list of pairs (ENTRY
+  "Validate ENTRIES quickly.
+
+'Quickly' means: test, for each entry, whether there is at least
+one validation error.  Return a list of pairs (ENTRY
 . BAD-FILES), where ENTRY is a member of ENTRIES and BAD-FILES
 are the invalid XHTML files under ENTRY's directory."
   (if (every #'ce-valid-entry-name? entries)

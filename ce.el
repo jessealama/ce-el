@@ -601,7 +601,7 @@ See the documentation of
 			    (concat ce-validator-program " " ce-validator-program-flags " {}")))
 
 (defun ce-validate-find-and-validate-readable-html-files-in-directory (directory)
-  "Apply the validtor to all readable HTML files in DIRECTORY."
+  "Apply the validator to all readable HTML files in DIRECTORY."
   (ce-validate-find-command-with-validator directory
 					   'file
 					   "664"

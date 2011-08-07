@@ -103,7 +103,7 @@ strings.  The special entries \"sample\" and \"template\" are
 		  (when (> index-size 2000)
 		    (push candidate winners)))))))))))
 	
-(defvar ce-published-entries (ce-published-entries)
+(defvar ce-published-entries nil
   "The list of published entries for the SEP.")
 
 (defun ce-refresh-published-entries ()
@@ -319,6 +319,9 @@ ENTRY can be either a symbol or a string."
 		    ""
 		    (eval ce-menu)))
 
+(defun initialize-ce-mode ()
+  (setf ce-published-entries (ce-published-entries)))
+
 (define-minor-mode ce-mode
   "SEP copyediting utilities"
   :lighter " CE"
@@ -326,7 +329,8 @@ ENTRY can be either a symbol or a string."
   :global t
   :version "0.1"
   :group 'ce
-  (ce-mode-menu))
+  (ce-mode-menu)
+  (initialize-ce-mode))
 
 (provide 'ce)
 

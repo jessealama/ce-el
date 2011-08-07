@@ -79,29 +79,31 @@ Encyclopedia of Philosophy."
 
 (defun ce-published-entries ()
   "A list of the published entries.
-Members of the list are
-strings.  The special entries \"sample\" and \"template\" are
-  excluded."
-  (let ((candidates (directory-files ce-entries-directory nil "^[a-z0-9]"))
-	(winners nil))
-    (dolist (candidate candidates (reverse winners))
-      (unless (or (string= candidate "sample") (string= candidate "template"))
-	(let ((candidate-filename (concat ce-entries-directory "/" candidate)))
-	  (when (file-directory-p candidate-filename)
-	    ;; Uri's heuristic: directories in webspace that contain an
-	    ;; index.html file whose size is at least 2000 bytes.  "sample" is
-	    ;; not a real entry.
-	    ;;
-	    ;; Perhaps this would be quicker if we just ran the command
-	    ;;
-	    ;;   find ce-entries-directory -name "index.html" -size=+2000c | cut -d '/' -f 8
-	    ;;
-	    ;; But the Lisp approach seems quick enough.
-	    (let ((index-filename (concat candidate-filename "/" "index.html")))
-	      (when (file-exists-p index-filename)
-		(let ((index-size (nth 7 (file-attributes index-filename))))
-		  (when (> index-size 2000)
-		    (push candidate winners)))))))))))
+
+\"Published\" means (at least): it occurs as a subdirectory of
+`ce-entries-directory'.  Members of the list are strings.  The
+special entries \"sample\" and \"template\" are excluded."
+  (when (file-directory-p ce-entries-directory)
+    (let ((candidates (directory-files ce-entries-directory nil "^[a-z0-9]"))
+	  (winners nil))
+      (dolist (candidate candidates (reverse winners))
+	(unless (or (string= candidate "sample") (string= candidate "template"))
+	  (let ((candidate-filename (concat ce-entries-directory "/" candidate)))
+	    (when (file-directory-p candidate-filename)
+	      ;; Uri's heuristic: directories in webspace that contain an
+	      ;; index.html file whose size is at least 2000 bytes.  "sample" is
+	      ;; not a real entry.
+	      ;;
+	      ;; Perhaps this would be quicker if we just ran the command
+	      ;;
+	      ;;   find ce-entries-directory -name "index.html" -size=+2000c | cut -d '/' -f 8
+	      ;;
+	      ;; But the Lisp approach seems quick enough.
+	      (let ((index-filename (concat candidate-filename "/" "index.html")))
+		(when (file-exists-p index-filename)
+		  (let ((index-size (nth 7 (file-attributes index-filename))))
+		    (when (> index-size 2000)
+		      (push candidate winners))))))))))))
 	
 (defvar ce-published-entries nil
   "The list of published entries for the SEP.")

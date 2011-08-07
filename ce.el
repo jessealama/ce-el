@@ -321,11 +321,12 @@ ENTRY can be either a symbol or a string."
 		    ""
 		    (eval ce-menu)))
 
-(defun initialize-ce-mode ()
+(defun ce-initialize ()
+  (interactive)
   (message "Initializing CE-mode...")
   (ce-refresh-published-entries)
   (when (null ce-published-entries)
-    (warn "The list of published entries is empty!\n\nSome functionality of CE-mode will be unavailable.\n\nThe variable CE-ENTRIES-DIRECTORY is set to\n\n  %s\n\nIs that sensible?\n\nIf not, customize CE-ENTRIES-DIRECTORY and give it a better value.\nWhen you've changed the value, run\n\n  M-x ce-mode\n\nto reinitialize CE-mode.\n\nIf the value of CE-ENTRIES-DIRECTORY is correct, then it would seem\nthat something has gone wrong in the code of CE-mode; please inform the maintainers." ce-entries-directory))
+    (warn "The list of published entries is empty!\n\nSome functionality of CE-mode will be unavailable.\n\nThe variable CE-ENTRIES-DIRECTORY is set to\n\n  %s\n\nIs that sensible?\n\nIf not, customize CE-ENTRIES-DIRECTORY and give it a better value.\nWhen you've changed the value, run\n\n  M-x ce-initialize\n\nto reinitialize CE-mode.\n\nIf the value of CE-ENTRIES-DIRECTORY is correct, then it would seem\nthat something has gone wrong in the code of CE-mode; please inform the maintainers." ce-entries-directory))
   (message "Initializing CE-mode...done."))
 
 (define-minor-mode ce-mode
@@ -336,7 +337,7 @@ ENTRY can be either a symbol or a string."
   :version "0.1"
   :group 'ce
   (ce-mode-menu)
-  (initialize-ce-mode))
+  (ce-initialize))
 
 (provide 'ce)
 

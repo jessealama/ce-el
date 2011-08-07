@@ -1,6 +1,8 @@
 CE-INSTALL-DIR=$(HOME)/share/emacs/site-lisp/ce
 EMACS=/usr/bin/emacs
 
+unexport EMACSLOADPATH # evil emacs!
+
 all: ce
 
 ce: ce-macros.elc ce-unadorned.elc ce-validate.elc ce.elc

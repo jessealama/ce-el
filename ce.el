@@ -288,6 +288,46 @@ ENTRY can be either a symbol or a string."
   "Call pubminor on entry ENTRY."
   nil)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Definition of the minor mode and its keymap
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar ce-mode-map nil
+  "Keymap used by ce-mode.")
+
+(unless ce-mode-map
+  (setf ce-mode-map (make-sparse-keymap)))
+
+(defvar ce-menu
+  '(list "SEP"
+	 '("Validation"
+	   ["Locally validate the HTML of the current buffer"
+	    (call-interactively 'ce-validate-current-buffer-locally)
+	    t]
+	   ["Validate the HTML of the current buffer on Leibniz"
+	    (call-interactively 'ce-validate-current-buffer-on-leibniz)
+	    t])
+	 "-"
+	 ["Customize CE mode"
+	  (customize-group 'ce)
+	  t]))
+
+(defun ce-mode-menu ()
+  "Set up a menu for the CE minor mode (which is not yet defined)."
+  (easy-menu-define ce-menu-map
+                    ce-mode-map
+		    ""
+		    (eval ce-menu)))
+
+(define-minor-mode ce-mode
+  "SEP copyediting utilities"
+  :lighter " CE"
+  :require nil
+  :global t
+  :version "0.1"
+  :group 'ce
+  (ce-mode-menu))
+
 (provide 'ce)
 
 ;;; ce.el ends here

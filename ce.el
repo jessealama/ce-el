@@ -303,10 +303,10 @@ ENTRY can be either a symbol or a string."
 	 '("Validation"
 	   ["Locally validate the HTML of the current buffer"
 	    (call-interactively 'ce-validate-current-buffer-locally)
-	    t]
+	    (fboundp 'ce-validate-current-buffer-locally)]
 	   ["Validate the HTML of the current buffer on Leibniz"
 	    (call-interactively 'ce-validate-current-buffer-on-leibniz)
-	    t])
+	    (fboundp 'ce-validate-current-buffer-on-leibniz)])
 	 "-"
 	 ["Customize CE mode"
 	  (customize-group 'ce)

@@ -1,16 +1,17 @@
 CE-INSTALL-DIR=$(HOME)/share/emacs/site-lisp/ce
+EMACS=/usr/bin/emacs
 
 all: ce
 
 ce: ce-macros.elc ce-unadorned.elc ce-validate.elc ce.elc
 
-%.elc:
-	emacs --no-window-system \
-	      --no-site-file \
-	      --no-init-file \
-	      --batch \
-	      --directory '.' \
-	      --funcall batch-byte-compile \
+%.elc: %.el
+	$(EMACS) --no-window-system \
+	         --no-site-file \
+	         --no-init-file \
+	         --batch \
+	         --directory '.' \
+	         --funcall batch-byte-compile \
 	    $*.el
 
 install: ce

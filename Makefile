@@ -9,12 +9,11 @@ ce: ce-macros.elc ce-unadorned.elc ce-validate.elc ce.elc
 
 %.elc: %.el
 	$(EMACS) --no-window-system \
-	         --no-site-file \
-	         --no-init-file \
-	         --batch \
-	         --directory '.' \
-	         --funcall batch-byte-compile \
-	    $*.el
+                 --no-site-file \
+                 --no-init-file \
+                 --batch \
+                 --directory '.' \
+                 --funcall batch-byte-compile $*.el
 
 install: ce
 	mkdir -p $(CE-INSTALL-DIR)

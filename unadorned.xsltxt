@@ -2,25 +2,43 @@ stylesheet 1.0;
 
 output method=html indent="yes";
 
+#emit-html = { "0"; }
+
 tpl [*] {
-  $element-name = `local-name ()`;
-  <$element-name {
-    for-each [@*] {
-      copy-of `.`;
-    }
-    if [$element-name = "head"] {
-      <style {
-        @type = "text/css";
-        "p.elicited-from-unadorned-stylesheet { border: thin; background-color: silver; }";
+  if [not($emit-html = "0")] {
+    $element-name = `local-name ()`;
+    <$element-name {
+      for-each [@*] {
+        copy-of `.`;
       }
+      if [$element-name = "head"] {
+        <style {
+          @type = "text/css";
+          "p.elicited-from-unadorned-stylesheet { border: thin; background-color: silver; }";
+        }
+      }
+      apply [child::node()];
     }
+  } else {
     apply [child::node()];
   }
 }
 
 tpl [text()[not(normalize-space() = "") and preceding-sibling::*]] {
-  <p {
-  @class = "elicited-from-unadorned-stylesheet";
-  `.`;
+  if [$emit-html = "0"] {
+    $preceding-sibling-element-name = `local-name (preceding-sibling::*[1])`;
+    $message = `concat ("Warning: unadordned whitespace detected after an element named ", $preceding-sibling-element-name, ".")`;
+    msg $message;
+  } else {
+    <p {
+      @class = "elicited-from-unadorned-stylesheet";
+      `.`;
+    }
+  }
+}
+
+tpl [text()] {
+  if [not($emit-html = "0")] {
+    `.`;
   }
 }

@@ -1,0 +1,27 @@
+stylesheet 1.0;
+
+output method=html indent="yes";
+
+tpl [node()] {
+  $element-name = `local-name ()`;
+  <$element-name {
+    for-each [@*] {
+      copy-of `.`;
+    }
+    apply [child::text() | child::node()];
+  }
+}
+
+tpl [text()] {
+  $trimmed = `normalize-space ()`;
+  choose {
+    when [$trimmed = ""] { `.`; }
+    when [preceding-sibling::*] {
+      <p {
+      @class = "elicited-from-unadorned-stylesheet";
+      `.`;
+      }
+    }
+    otherwise { `.`; }
+  }
+}

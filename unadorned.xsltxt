@@ -2,7 +2,7 @@ stylesheet 1.0;
 
 output method=html indent="yes";
 
-tpl [node()] {
+tpl [*] {
   $element-name = `local-name ()`;
   <$element-name {
     for-each [@*] {
@@ -12,16 +12,9 @@ tpl [node()] {
   }
 }
 
-tpl [text()] {
-  $trimmed = `normalize-space ()`;
-  choose {
-    when [$trimmed = ""] { `.`; }
-    when [preceding-sibling::*] {
-      <p {
-      @class = "elicited-from-unadorned-stylesheet";
-      `.`;
-      }
-    }
-    otherwise { `.`; }
+tpl [text()[not(normalize-space() = "") and preceding-sibling::*]] {
+  <p {
+  @class = "elicited-from-unadorned-stylesheet";
+  `.`;
   }
 }

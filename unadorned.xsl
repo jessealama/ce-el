@@ -3,7 +3,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
   <xsl:output method="html" indent="yes"/>
 
-  <xsl:template match="node()">
+  <xsl:template match="*">
     <xsl:variable name="element-name" select="local-name ()"/>
     <xsl:element name="{$element-name}">
       <xsl:for-each select="@*">
@@ -13,23 +13,12 @@
     </xsl:element>
   </xsl:template>
 
-  <xsl:template match="text()">
-    <xsl:variable name="trimmed" select="normalize-space ()"/>
-    <xsl:choose>
-      <xsl:when test="$trimmed = &quot;&quot;">
-        <xsl:value-of select="."/>
-      </xsl:when>
-      <xsl:when test="preceding-sibling::*">
-        <xsl:element name="p">
-          <xsl:attribute name="class">
-            <xsl:text>elicited-from-unadorned-stylesheet</xsl:text>
-          </xsl:attribute>
-          <xsl:value-of select="."/>
-        </xsl:element>
-      </xsl:when>
-      <xsl:otherwise>
-        <xsl:value-of select="."/>
-      </xsl:otherwise>
-    </xsl:choose>
+  <xsl:template match="text()[not(normalize-space() = &quot;&quot;) and preceding-sibling::*]">
+    <xsl:element name="p">
+      <xsl:attribute name="class">
+        <xsl:text>elicited-from-unadorned-stylesheet</xsl:text>
+      </xsl:attribute>
+      <xsl:value-of select="."/>
+    </xsl:element>
   </xsl:template>
 </xsl:stylesheet>

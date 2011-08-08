@@ -9,6 +9,14 @@
       <xsl:for-each select="@*">
         <xsl:copy-of select="."/>
       </xsl:for-each>
+      <xsl:if test="$element-name = &quot;head&quot;">
+        <xsl:element name="style">
+          <xsl:attribute name="type">
+            <xsl:text>text/css</xsl:text>
+          </xsl:attribute>
+          <xsl:text>p.elicited-from-unadorned-stylesheet { border: thin; background-color: silver; }</xsl:text>
+        </xsl:element>
+      </xsl:if>
       <xsl:apply-templates select="child::node()"/>
     </xsl:element>
   </xsl:template>

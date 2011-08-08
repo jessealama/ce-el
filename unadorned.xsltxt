@@ -8,6 +8,12 @@ tpl [*] {
     for-each [@*] {
       copy-of `.`;
     }
+    if [$element-name = "head"] {
+      <style {
+        @type = "text/css";
+        "p.elicited-from-unadorned-stylesheet { border: thin; background-color: silver; }";
+      }
+    }
     apply [child::node()];
   }
 }

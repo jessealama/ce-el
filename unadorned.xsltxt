@@ -8,7 +8,7 @@ tpl [*] {
     for-each [@*] {
       copy-of `.`;
     }
-    apply [child::text() | child::node()];
+    apply [child::node()];
   }
 }
 

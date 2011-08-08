@@ -9,7 +9,7 @@
       <xsl:for-each select="@*">
         <xsl:copy-of select="."/>
       </xsl:for-each>
-      <xsl:apply-templates select="child::text() | child::node()"/>
+      <xsl:apply-templates select="child::node()"/>
     </xsl:element>
   </xsl:template>
 

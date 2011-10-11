@@ -4,6 +4,18 @@ output method=html indent="yes";
 
 // This stylesheet removes empty paragraphs.
 
+tpl [*] {
+  $element-name = `local-name ()`;
+  <$element-name {
+    for-each [@*] { copy-of `.`; }
+    apply [child::node()];
+  }
+}
+
 tpl [p[normalize-space() = ""]] {
   // do nothing
+}
+
+tpl [text()] {
+  `.`;
 }

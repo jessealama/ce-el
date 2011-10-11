@@ -104,7 +104,7 @@ special entries \"sample\" and \"template\" are excluded."
 		  (let ((index-size (nth 7 (file-attributes index-filename))))
 		    (when (> index-size 2000)
 		      (push candidate winners))))))))))))
-	
+
 (defvar ce-published-entries nil
   "The list of published entries for the SEP.")
 

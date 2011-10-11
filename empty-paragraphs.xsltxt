@@ -1,0 +1,9 @@
+stylesheet 1.0;
+
+output method=html indent="yes";
+
+// This stylesheet removes empty paragraphs.
+
+tpl [p[normalize-space() = ""]] {
+  // do nothing
+}

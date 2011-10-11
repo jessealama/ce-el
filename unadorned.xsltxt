@@ -27,7 +27,7 @@ tpl [*] {
 tpl [text()[not(normalize-space() = "") and preceding-sibling::*]] {
   if [$emit-html = "0"] {
     $preceding-sibling-element-name = `local-name (preceding-sibling::*[1])`;
-    $message = `concat ("Warning: unadordned whitespace detected after an element named ", $preceding-sibling-element-name, ".")`;
+    $message = `concat ("Warning: unadorned whitespace detected after an element named ", $preceding-sibling-element-name, ".")`;
     msg $message;
   } else {
     <p {

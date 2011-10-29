@@ -1,3 +1,5 @@
+;;; ce-quotes.el --- The variety of quotes
+
 (defvar *ce-quote-regexp* "'s\\($\\| \\)"
   "A regular expression matching the quotes we need to treat.")
 
@@ -48,3 +50,5 @@
 		    (t
 		     (message "Unable to process the reponse '%s'; quitting" response)
 		     (goto-char (point-max)))))))))))
+
+;;; ce-quotes.el ends here

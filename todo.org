@@ -4,3 +4,4 @@
    Currently, one needs to hit the enter key to move along.
 ** TODO Highlighting matches
    Like isearch.
+** TODO Balance of left and right single and double quotes

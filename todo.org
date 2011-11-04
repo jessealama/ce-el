@@ -5,3 +5,5 @@
 ** TODO Highlighting matches
    Like isearch.
 ** TODO Balance of left and right single and double quotes
+** TODO Support searching for and dealing with double sharp quotes
+** TODO Support escaping unicode characters like “ and ” and ‘ and ’

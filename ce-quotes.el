@@ -41,22 +41,24 @@
 	(while (re-search-forward *ce-quote-regexp* nil t)
 	  (decf num-candidates-remaining)
 	  (goto-char (match-beginning 0))
-	  (let ((message (concat "Replace 's by &apos;s? "
-				 (if (= num-candidates-remaining 1)
-				     "[1 candidate remaining] "
-				   (format "[%d candidates remaining] "
-					   num-candidates-remaining))
-				 "([y]es, [n]o, [q]uit) ")))
+	  (let* ((after-quote-char (match-string-no-properties 1))
+		 (message (concat (format "Replace '%s by &apos;%s? "
+					  after-quote-char
+					  after-quote-char)
+				  (if (= num-candidates-remaining 1)
+				      "[1 candidate remaining] "
+				    (format "[%d candidates remaining] "
+					    num-candidates-remaining))
+				  "([y]es, [n]o, [q]uit) ")))
 	    (let ((response (y-n-or-q message)))
-	      (cond ((string= response "y")
-		     (delete-char 2)
-		     (insert "&apos;s"))
-		    ((string= response "n")
-		     (forward-char 2))
-		    ((string= response "q")
-		     (goto-char (point-max)))
-		    (t
-		     (message "Unable to process the reponse '%s'; quitting" response)
-		     (goto-char (point-max)))))))))))
+	      (ecase response
+		(skip
+		 (forward-char 2))
+		(exit
+		 (goto-char (point-max)))
+		(act
+		 (delete-char 2)
+		 (insert "&apos;")
+		 (insert after-quote-char))))))))))
 
 ;;; ce-quotes.el ends here

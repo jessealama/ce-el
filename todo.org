@@ -1,6 +1,6 @@
 * ce-quotes.el
 ** TODO Undo edits
-** TODO One-button navigation
+** DONE One-button navigation
    Currently, one needs to hit the enter key to move along.
 ** TODO Highlighting matches
    Like isearch.

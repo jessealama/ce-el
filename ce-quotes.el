@@ -1,6 +1,6 @@
 ;;; ce-quotes.el --- The variety of quotes
 
-(defvar *ce-quote-regexp* "'s\\($\\| \\)"
+(defvar *ce-quote-regexp* "[']\\(.\\)"
   "A regular expression matching the quotes we need to treat.")
 
 (defun ce-quote-num-candidates ()

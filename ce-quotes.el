@@ -34,9 +34,9 @@
 	(message "No candidate quotes to inspect.")
       (save-excursion
 	(if (> num-candidates-remaining 1)
-	    (message "Inspecting %d posessive quote candidates..."
+	    (message "Inspecting %d sharp quote candidates..."
 		     num-candidates-remaining)
-	  (message "Inspecting 1 possessive quote candidate..."))
+	  (message "Inspecting 1 sharp quote candidate..."))
 	(goto-char (point-min))
 	(while (re-search-forward *ce-quote-regexp* nil t)
 	  (decf num-candidates-remaining)

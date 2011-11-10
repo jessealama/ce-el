@@ -27,8 +27,20 @@
     (setq key (vector key))
     (lookup-key *ce-quote-keymap* key)))
 
-(defun ce-quote-fix-quotes ()
-  (interactive)
+(defun ce-quote-fix-non-ascii-quotes ()
+  (dolist (bad-good (list (cons "[“]" "&ldquo;")
+			  (cons "[”]" "&rdquo;")
+			  (cons "[‘]" "&lsquo;")
+			  (cons "[’]" "&rsquo;")))
+    (destructuring-bind (quote-pattern . replacement)
+	bad-good
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward quote-pattern nil t)
+	  (replace-match replacement nil nil)))))
+  t)
+
+(defun ce-quote-fix-sharp-quotes ()
   (let ((num-candidates-remaining (ce-quote-num-candidates)))
     (if (zerop num-candidates-remaining)
 	(message "No candidate quotes to inspect.")
@@ -60,5 +72,11 @@
 		 (delete-char 2)
 		 (insert "&apos;")
 		 (insert after-quote-char))))))))))
+
+(defun ce-quote-fix-quotes ()
+  (interactive)
+  ;; deal with non-ascii quotes
+  (ce-quote-fix-non-ascii-quotes)
+  (ce-quote-fix-sharp-quotes))
 
 ;;; ce-quotes.el ends here

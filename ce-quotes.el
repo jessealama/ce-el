@@ -1,5 +1,7 @@
 ;;; ce-quotes.el --- The variety of quotes
 
+(require 'cl)
+
 (defvar *ce-quote-sharp-quote-regexp* "[']\\(.\\)"
   "A regular expression matching the quotes we need to treat.")
 

@@ -157,4 +157,6 @@
   (ce-quote-fix-right-quote-entities)
   (ce-quote-check-balanced))
 
+(provide 'ce-quotes)
+
 ;;; ce-quotes.el ends here

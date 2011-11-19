@@ -20,9 +20,16 @@
 
 (defvar *ce-quote-keymap*
   (let ((map (make-sparse-keymap)))
+    ;; we define only one key, for now: resuming paused quote fixing
+    (define-key map "C-x R" 'ce-quote-fix-resume)))
+
+(defvar *ce-quote-fix-keymap*
+  (let ((map (make-sparse-keymap)))
     (define-key map " " 'skip)
     (define-key map [delete] 'skip)
     (define-key map [backspace] 'skip)
+    (define-key map "e" 'edit)
+    (define-key map "E" 'edit)
     (define-key map "y" 'act)
     (define-key map "n" 'skip)
     (define-key map "Y" 'act)
@@ -35,55 +42,83 @@
 (defun y-n-or-q (message)
   (let ((key (read-event message)))
     (setq key (vector key))
-    (lookup-key *ce-quote-keymap* key)))
+    (lookup-key *ce-quote-fix-keymap* key)))
 
 (defun ce-quote-fix-non-ascii-quotes ()
   (dolist (bad-good (list (cons "[“]" "&ldquo;")
-			  (cons "[”]" "&rdquo;")
-			  (cons "[‘]" "&lsquo;")
-			  (cons "[’]" "&rsquo;")))
+                          (cons "[”]" "&rdquo;")
+                          (cons "[‘]" "&lsquo;")
+                          (cons "[’]" "&rsquo;")))
     (destructuring-bind (quote-pattern . replacement)
-	bad-good
+        bad-good
       (save-excursion
-	(goto-char (point-min))
-	(while (re-search-forward quote-pattern nil t)
-	  (replace-match replacement nil nil)))))
+        (goto-char (point-min))
+        (while (re-search-forward quote-pattern nil t)
+          (replace-match replacement nil nil)))))
   t)
 
-(defun ce-quote-fix-sharp-quotes ()
+(defvar *ce-quotes-position* nil
+  "The position where we last paused editing quotes.")
+
+(defun ce-quote-fix-resume ()
+  (interactive)
+  (if *ce-quotes-position*
+      (let ((buffer-size (buffer-size)))
+        (cond ((< *ce-quotes-position* 0)
+               (error "We somehow managed to save a negative position when last editing quotes; resuming from the beginning.")
+               (ce-quote-fix-sharp-quotes))
+              ((> *ce-quotes-position* (buffer-size))
+               (error "We somehow managed to save a negative position when last editing quotes; resuming from the beginning.")
+               (ce-quote-fix-sharp-quotes))
+              (t
+               (ce-quote-fix-sharp-quotes *ce-quotes-position*))))
+    (ce-quote-fix-sharp-quotes)))
+
+(defun ce-quote-fix-sharp-quotes (&optional starting-position)
+  (interactive)
   (let ((num-candidates-remaining (ce-quote-num-sharp-quote-candidates))
-	(num-fixed 0))
+        (num-fixed 0)
+        (bail-out nil))
     (if (zerop num-candidates-remaining)
-	(message "No candidate quotes to inspect.")
-      (save-excursion
-	(if (> num-candidates-remaining 1)
-	    (message "Inspecting %d sharp quote candidates..."
-		     num-candidates-remaining)
-	  (message "Inspecting 1 sharp quote candidate..."))
-	(goto-char (point-min))
-	(while (re-search-forward *ce-quote-sharp-quote-regexp* nil t)
-	  (decf num-candidates-remaining)
-	  (goto-char (match-beginning 0))
-	  (let* ((after-quote-char (match-string-no-properties 1))
-		 (message (concat (format "Replace '%s by &apos;%s? "
-					  after-quote-char
-					  after-quote-char)
-				  (if (= num-candidates-remaining 1)
-				      "[1 candidate remaining] "
-				    (format "[%d candidates remaining] "
-					    num-candidates-remaining))
-				  "([y]es, [n]o, [q]uit) ")))
-	    (let ((response (y-n-or-q message)))
-	      (ecase response
-		(skip
-		 (forward-char 2))
-		(exit
-		 (goto-char (point-max)))
-		(act
-		 (incf num-fixed)
-		 (delete-char 2)
-		 (insert "&apos;")
-		 (insert after-quote-char))))))))
+        (message "No candidate quotes to inspect.")
+      (if (> num-candidates-remaining 1)
+          (message "Inspecting %d sharp quote candidates..."
+                   num-candidates-remaining)
+        (message "Inspecting 1 sharp quote candidate..."))
+      (goto-char (cond (starting-position
+                        starting-position)
+                       (*ce-quotes-position*
+                        *ce-quotes-position*)
+                       (t (point-min))))
+      (while (and (not bail-out)
+                  (re-search-forward *ce-quote-sharp-quote-regexp* nil t))
+        (decf num-candidates-remaining)
+        (goto-char (match-beginning 0))
+        (let* ((after-quote-char (match-string-no-properties 1))
+               (message (concat (format "Replace '%s by &apos;%s? "
+                                        after-quote-char
+                                        after-quote-char)
+                                (if (= num-candidates-remaining 1)
+                                    "[1 candidate remaining] "
+                                  (format "[%d candidates remaining] "
+                                          num-candidates-remaining))
+                                "([y]es, [n]o, [e]dit, [q]uit) ")))
+          (let ((response (y-n-or-q message)))
+            (ecase response
+              (edit
+               (setf *ce-quotes-position* (point))
+               (setf bail-out t))
+              (skip
+               (forward-char 2))
+              (exit
+               (goto-char (point-max)))
+              (act
+               (incf num-fixed)
+               (delete-char 2)
+               (insert "&apos;")
+               (insert after-quote-char)))))))
+    (when bail-out
+      (message "Stopping for editing.  After editing, type C-x R to resume."))
     num-fixed))
 
 (defun ce-quote-count-quote (quote)
@@ -105,9 +140,9 @@
 
 (defun ce-quote-check-balanced ()
   (let ((lsquo (ce-quote-count-lsquo))
-	(rsquo (ce-quote-count-rsquo))
-	(ldquo (ce-quote-count-ldquo))
-	(rdquo (ce-quote-count-rdquo)))
+        (rsquo (ce-quote-count-rsquo))
+        (ldquo (ce-quote-count-ldquo))
+        (rdquo (ce-quote-count-rdquo)))
     (message "In this buffer, there are:
 * %d lsquo entities,
 * %d rsquo entities,
@@ -117,44 +152,44 @@
 (defun ce-quote-fix-right-quote-entities ()
   (let ((num-candidates-remaining (ce-quote-num-quote-entity-candidates)))
     (if (zerop num-candidates-remaining)
-	(message "No candidate quotes to inspect.")
+        (message "No candidate quotes to inspect.")
       (save-excursion
-	(if (> num-candidates-remaining 1)
-	    (message "Inspecting %d right quote entity candidates..."
-		     num-candidates-remaining)
-	  (message "Inspecting 1 right quote entity candidate..."))
-	(goto-char (point-min))
-	(while (re-search-forward *ce-quote-right-quote-entity-regexp* nil t)
-	  (decf num-candidates-remaining)
-	  (goto-char (match-beginning 0))
-	  ;; ugh -- magic constant.  Look at the definition of the
-	  ;; regular expression to see why we choose 3 here
-	  (let* ((after-quote-char (match-string-no-properties 3))
-		 (message (concat (format "Replace '%s by &apos;%s? "
-					  after-quote-char
-					  after-quote-char)
-				  (if (= num-candidates-remaining 1)
-				      "[1 candidate remaining] "
-				    (format "[%d candidates remaining] "
-					    num-candidates-remaining))
-				  "([y]es, [n]o, [q]uit) ")))
-	    (let ((response (y-n-or-q message)))
-	      (ecase response
-		(skip
-		 (forward-char 2))
-		(exit
-		 (goto-char (point-max)))
-		(act
-		 ;; ugh.  Thankfully '&lsquo;' and '&rsquo;' have the
-		 ;; same length.
-		 (delete-char (length "&lsquo;"))
-		 (insert "&apos;")
-		 (insert after-quote-char))))))))))
+        (if (> num-candidates-remaining 1)
+            (message "Inspecting %d right quote entity candidates..."
+                     num-candidates-remaining)
+          (message "Inspecting 1 right quote entity candidate..."))
+        (goto-char (point-min))
+        (while (re-search-forward *ce-quote-right-quote-entity-regexp* nil t)
+          (decf num-candidates-remaining)
+          (goto-char (match-beginning 0))
+          ;; ugh -- magic constant.  Look at the definition of the
+          ;; regular expression to see why we choose 3 here
+          (let* ((after-quote-char (match-string-no-properties 3))
+                 (message (concat (format "Replace '%s by &apos;%s? "
+                                          after-quote-char
+                                          after-quote-char)
+                                  (if (= num-candidates-remaining 1)
+                                      "[1 candidate remaining] "
+                                    (format "[%d candidates remaining] "
+                                            num-candidates-remaining))
+                                  "([y]es, [n]o, [q]uit) ")))
+            (let ((response (y-n-or-q message)))
+              (ecase response
+                (skip
+                 (forward-char 2))
+                (exit
+                 (goto-char (point-max)))
+                (act
+                 ;; ugh.  Thankfully '&lsquo;' and '&rsquo;' have the
+                 ;; same length.
+                 (delete-char (length "&lsquo;"))
+                 (insert "&apos;")
+                 (insert after-quote-char))))))))))
 
 (defun ce-quote-fix-quotes ()
   (interactive)
   ;; deal with non-ascii quotes
-  (ce-quote-fix-non-ascii-quotes)
+  (ce-quote-fix-non-ascii-quotes) ; not interactive
   (ce-quote-fix-sharp-quotes)
   (ce-quote-fix-right-quote-entities)
   (ce-quote-check-balanced))

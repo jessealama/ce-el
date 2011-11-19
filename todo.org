@@ -8,4 +8,6 @@
 ** TODO Support searching for and dealing with double sharp quotes
 ** DONE Support escaping unicode characters like “ and ” and ‘ and ’
 ** DONE Make a 'provide' statement for easy loading
+** TODO Menu for checking quotes
+** TODO Quit and resume later, pause
 

@@ -64,7 +64,7 @@
 
 (defun ce-quotes-resolve-quote-function ()
   (case *ce-quote-paused-from*
-    (fix-sharp-quotes 'ce-quotes-fix-sharp-quote)
+    (fix-sharp-quotes 'ce-quotes-fix-sharp-quotes)
     (otherwise nil)))
 
 (defun ce-quote-fix-resume ()

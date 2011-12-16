@@ -39,7 +39,7 @@
     (define-key map [return] 'exit)
     map))
 
-(defun y-n-or-q (message)
+(defun y-n-p-or-q (message)
   (let ((key (read-event message)))
     (setq key (vector key))
     (lookup-key *ce-quote-fix-keymap* key)))
@@ -103,9 +103,10 @@
                                   (format "[%d candidates remaining] "
                                           num-candidates-remaining))
                                 "([y]es, [n]o, [e]dit, [q]uit) ")))
-          (let ((response (y-n-or-q message)))
+          (let ((response (y-n-p-or-q message)))
             (ecase response
               (edit
+               (setf *ce-quote-paused-from* 'fix-sharp-quotes)
                (setf *ce-quotes-position* (point))
                (setf bail-out t))
               (skip
@@ -173,7 +174,7 @@
                                     (format "[%d candidates remaining] "
                                             num-candidates-remaining))
                                   "([y]es, [n]o, [q]uit) ")))
-            (let ((response (y-n-or-q message)))
+            (let ((response (y-n-p-or-q message)))
               (ecase response
                 (skip
                  (forward-char 2))

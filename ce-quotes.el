@@ -55,6 +55,8 @@
         (goto-char (point-min))
         (while (re-search-forward quote-pattern nil t)
           (replace-match replacement nil nil)))))
+  (message nil) ; clear anything that might have popped up in the minibuffer
+  (message "Done replacing non-ASCII quotes with their XHTML entity equivalents.")
   t)
 
 (defvar *ce-quotes-position* nil

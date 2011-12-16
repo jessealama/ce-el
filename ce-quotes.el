@@ -90,7 +90,9 @@
   (interactive)
   (let ((num-candidates-remaining (ce-quote-num-sharp-quote-candidates))
         (num-fixed 0)
-        (bail-out nil))
+        (bail-out nil)
+        (last-match-begin nil)
+        (last-match-end nil))
     (if (zerop num-candidates-remaining)
         (message "No candidate quotes to inspect.")
       (if (> num-candidates-remaining 1)
@@ -102,49 +104,56 @@
                        (*ce-quote-position*
                         *ce-quote-position*)
                        (t (point-min))))
-      (while (and (not bail-out)
-                  (re-search-forward *ce-quote-sharp-quote-regexp* nil t))
-        (let ((match-begin (match-beginning 0))
-              (match-end (match-end 0)))
-          (decf num-candidates-remaining)
-          (put-text-property match-begin
-                             match-end
-                             'font-lock-face
-                             'cursor)
-          (goto-char match-begin)
-        (let* ((after-quote-char (match-string-no-properties 1))
-               (message (concat (format "Replace '%s by &apos;%s? "
-                                        after-quote-char
-                                        after-quote-char)
-                                (if (= num-candidates-remaining 1)
-                                    "[1 candidate remaining] "
-                                  (format "[%d candidates remaining] "
-                                          num-candidates-remaining))
-                                "([y]es, [n]o, [e]dit, [q]uit) ")))
-          (let ((response (y-n-p-or-q message)))
-            (ecase response
-              (edit
-               (setf *ce-quote-paused-from* 'fix-sharp-quotes)
-               (setf *ce-quote-position* (point))
-               (setf bail-out t))
-              (skip
-               (forward-char 2))
-              (exit
-               (goto-char (point-max)))
-              (act
-               (incf num-fixed)
-               (delete-char 2)
-               (insert "&apos;")
-               (insert after-quote-char))))
-          (remove-text-properties match-begin
-                                  match-end
-                                  (list (cons 'font-lock-face nil))
-;;                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-;;                                This weird construction is an artifact of Emacs Lisp's insistence
-;;                                that the third argument to REMOVE-TEXT-PROPERTIES be a *property list*,
-;;                                even though only the names matter (the properties do not, so we are able to get
-;;                                away with a bogus value for the FONT-LOCK-FACE property
-                                  )))))
+      (unwind-protect
+          (while (and (not bail-out)
+                      (re-search-forward *ce-quote-sharp-quote-regexp* nil t))
+            (let ((match-begin (match-beginning 0))
+                  (match-end (match-end 0)))
+              (decf num-candidates-remaining)
+              (setf last-match-begin match-begin
+                    last-match-end match-end)
+              (put-text-property match-begin
+                                 match-end
+                                 'font-lock-face
+                                 'cursor)
+              (goto-char match-begin)
+              (let* ((after-quote-char (match-string-no-properties 1))
+                     (message (concat (format "Replace '%s by &apos;%s? "
+                                              after-quote-char
+                                              after-quote-char)
+                                      (if (= num-candidates-remaining 1)
+                                          "[1 candidate remaining] "
+                                        (format "[%d candidates remaining] "
+                                                num-candidates-remaining))
+                                      "([y]es, [n]o, [e]dit, [q]uit) ")))
+                (let ((response (y-n-p-or-q message)))
+                  (ecase response
+                    (edit
+                     (setf *ce-quote-paused-from* 'fix-sharp-quotes)
+                     (setf *ce-quote-position* (point))
+                     (setf bail-out t))
+                    (skip
+                     (forward-char 2))
+                    (exit
+                     (goto-char (point-max)))
+                    (act
+                     (incf num-fixed)
+                     (delete-char 2)
+                     (insert "&apos;")
+                     (insert after-quote-char))))
+                (remove-list-of-text-properties match-begin
+                                                match-end
+                                                (list 'font-lock-face)))))
+
+        ;; if the user quit during the middle of editing quotes, or if
+        ;; for some reason something goes wrong, we want to ensure
+        ;; that there aren't any regions in the buffer that we've
+        ;; highlighted
+        (progn
+          (message "You killed me! last-match-begin = %s and last-match-end = %s" last-match-begin last-match-end)
+          (remove-list-of-text-properties last-match-begin
+                                          last-match-end
+                                          (list 'font-lock-face)))))
     (when bail-out
       (message "Stopping for editing.  After editing, type C-x r RETURN to resume."))
     num-fixed))

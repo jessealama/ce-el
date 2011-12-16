@@ -190,7 +190,7 @@
 (defun ce-quote-fix-quotes ()
   (interactive)
   ;; deal with non-ascii quotes
-  (ce-quote-fix-non-ascii-quotes) ; not interactive
+  (ce-quote-fix-non-ascii-quotes)
   (ce-quote-fix-sharp-quotes)
   (ce-quote-fix-right-quote-entities)
   (ce-quote-check-balanced))

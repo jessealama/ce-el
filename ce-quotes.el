@@ -40,6 +40,7 @@
     (lookup-key *ce-quote-fix-keymap* key)))
 
 (defun ce-quote-fix-non-ascii-quotes ()
+  (interactive)
   (dolist (bad-good (list (cons "[“]" "&ldquo;")
                           (cons "[”]" "&rdquo;")
                           (cons "[‘]" "&lsquo;")
@@ -162,6 +163,7 @@
 * %d rdquo entities" lsquo rsquo ldquo rdquo)))
 
 (defun ce-quote-fix-right-quote-entities ()
+  (interactive)
   (let ((num-candidates-remaining (ce-quote-num-quote-entity-candidates)))
     (if (zerop num-candidates-remaining)
         (message "No candidate right quote entities to inspect.")

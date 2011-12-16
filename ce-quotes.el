@@ -214,8 +214,7 @@
   ;; deal with non-ascii quotes
   (ce-quote-fix-non-ascii-quotes)
   (ce-quote-fix-sharp-quotes)
-  (ce-quote-fix-right-quote-entities)
-  (ce-quote-check-balanced))
+  (ce-quote-fix-right-quote-entities))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Menu

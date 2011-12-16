@@ -227,6 +227,43 @@
           (customize-group 'ce)
           t]))
 
+(defun ce-mode-menu ()
+  "Set up a menu for the CE minor mode (which is not yet defined)."
+  (easy-menu-define ce-menu-map
+                    ce-mode-map
+                    ""
+                    (eval ce-menu)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Minor mode
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar ce-mode-map nil
+  "Keymap used by 'ce-mode'.")
+
+(unless ce-mode-map
+  (setf ce-mode-map (make-sparse-keymap)))
+
+;; we define just one-key for now
+(define-key ce-mode-map (kbd "C-x r RET") 'ce-quote-fix-resume)
+
+(defun ce-initialize ()
+  (interactive)
+  ;; do initialization stuff here
+
+  ;; currently nothing
+  )
+
+(define-minor-mode ce-mode
+  "SEP copyediting utilities"
+  :lighter " CE"
+  :require nil
+  :global t
+  :version "0.1"
+  :group 'ce
+  (ce-mode-menu)
+  (ce-initialize))
+
 (provide 'ce-quotes)
 
 ;;; ce-quotes.el ends here

@@ -138,7 +138,13 @@
                (insert after-quote-char))))
           (remove-text-properties match-begin
                                   match-end
-                                  'font-lock-face)))))
+                                  (list (cons 'font-lock-face nil))
+;;                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+;;                                This weird construction is an artifact of Emacs Lisp's insistence
+;;                                that the third argument to REMOVE-TEXT-PROPERTIES be a *property list*,
+;;                                even though only the names matter (the properties do not, so we are able to get
+;;                                away with a bogus value for the FONT-LOCK-FACE property
+                                  )))))
     (when bail-out
       (message "Stopping for editing.  After editing, type C-x r RETURN to resume."))
     num-fixed))

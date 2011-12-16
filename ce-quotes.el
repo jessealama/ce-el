@@ -1,6 +1,15 @@
 ;;; ce-quotes.el --- The variety of quotes
 
+
+;;; Commentary:
+;;
+;; This file contains Emacs Lisp functions for working with quotes in
+;; HTML files.  See 'ce-quote-fix-quotes for a list of the current
+;; functionality we support.
+
 (require 'cl)
+
+;;; Code:
 
 (defvar *ce-quote-sharp-quote-regexp* "[']\\(.\\)"
   "A regular expression matching the quotes we need to treat.")
@@ -9,11 +18,13 @@
   "A regular expression matching the entities of right quotes.")
 
 (defun ce-quote-num-sharp-quote-candidates ()
+  "Count the number of sharp quotes in the current buffer."
   (save-excursion
     (goto-char (point-min))
     (how-many *ce-quote-sharp-quote-regexp*)))
 
 (defun ce-quote-num-quote-entity-candidates ()
+  "Count the number of quote entities in the current buffer."
   (save-excursion
     (goto-char (point-min))
     (how-many *ce-quote-right-quote-entity-regexp*)))
@@ -35,11 +46,17 @@
     map))
 
 (defun y-n-p-or-q (message)
+  "Print MESSAGE, then wait for a yes, no, pause, or quit response."
   (let ((key (read-event message)))
     (setq key (vector key))
     (lookup-key *ce-quote-fix-keymap* key)))
 
 (defun ce-quote-fix-non-ascii-quotes ()
+  "Fix all non-ASCII quotes in the current buffer.
+
+The replacement is at the moment non-interactive in the sense
+that suitable transformations will be applied without any user
+intervention."
   (interactive)
   (dolist (bad-good (list (cons "[“]" "&ldquo;")
                           (cons "[”]" "&rdquo;")
@@ -59,15 +76,17 @@
   "The position where we last paused editing quotes.")
 
 (defvar *ce-quote-paused-from* nil
-  "A symbol indicating within which of the many interactive quote
-  fix-up functions was the repair paused for editing.")
+  "Within which of the many interactive quote fix-up functions
+was repair paused for editing.")
 
 (defun ce-quote-resolve-quote-function ()
+  "Map a symbol to a quote fixup function."
   (case *ce-quote-paused-from*
     (fix-sharp-quotes 'ce-quote-fix-sharp-quotes)
     (otherwise nil)))
 
 (defun ce-quote-fix-resume ()
+  "Pick up where we left off."
   (interactive)
   (let ((function-to-resume (ce-quote-resolve-quote-function)))
     (if function-to-resume
@@ -84,9 +103,14 @@
                            (funcall function-to-resume *ce-quote-position*)))
                   (funcall function-to-resume)))
             (funcall function-to-resume)))
-      (error "Unable to resume fixing quotes because we don't know how we left off."))))
+      (error "Unable to resume fixing quotes because we don't know how we left off"))))
 
 (defun ce-quote-fix-sharp-quotes (&optional starting-position)
+  "Interactively fix sharp quotes (') in the current buffer.
+
+If STARTING-POSITION is nil, then do this for the whole buffer.
+Otherwise, go to STARTING-POSITION.  (It is assumed that
+STARTING-POSITION makes sense as a buffer position.)"
   (interactive)
   (let ((num-candidates-remaining (ce-quote-num-sharp-quote-candidates))
         (num-fixed 0)
@@ -159,23 +183,30 @@
     num-fixed))
 
 (defun ce-quote-count-quote (quote)
+  "Count the number of occurrences of QUOTE in the buffer."
   (save-excursion
     (goto-char (point-min))
     (how-many quote)))
 
 (defun ce-quote-count-lsquo ()
+  "Count the number of &lsquo; entities in the current buffer."
   (ce-quote-count-quote "&lsquo;"))
 
 (defun ce-quote-count-rsquo ()
+  "Count the number of &rsquo; entities in the current buffer."
   (ce-quote-count-quote "&rsquo;"))
 
 (defun ce-quote-count-ldquo ()
+  "Count the number of &ldquo; entities in the current buffer."
   (ce-quote-count-quote "&ldquo;"))
 
 (defun ce-quote-count-rdquo ()
+  "Count the number of &rdquo; entities in the current buffer."
   (ce-quote-count-quote "&rdquo;"))
 
 (defun ce-quote-check-balanced ()
+  "Do a quick count of the quote entities in the current buffer.
+Report our findings."
   (let ((lsquo (ce-quote-count-lsquo))
         (rsquo (ce-quote-count-rsquo))
         (ldquo (ce-quote-count-ldquo))
@@ -187,6 +218,7 @@
 * %d rdquo entities" lsquo rsquo ldquo rdquo)))
 
 (defun ce-quote-fix-right-quote-entities ()
+  "Interactiely fix right quote entities in the current buffer."
   (interactive)
   (let ((num-candidates-remaining (ce-quote-num-quote-entity-candidates)))
     (if (zerop num-candidates-remaining)
@@ -228,6 +260,13 @@
                  (forward-char 2))))))))))
 
 (defun ce-quote-fix-quotes ()
+  "Apply all our quote-fixing utilities.
+
+This means:
+
+* fixing non-ASCII quotes,
+* fixing sharp quotes ('), and
+* fixing right-quote entities."
   (interactive)
   ;; deal with non-ascii quotes
   (ce-quote-fix-non-ascii-quotes)
@@ -283,6 +322,9 @@
 (define-key ce-mode-map (kbd "C-x r RET") 'ce-quote-fix-resume)
 
 (defun ce-initialize ()
+  "Initialize our mode.
+
+This currently is a stub; we don't do anything."
   (interactive)
   ;; do initialization stuff here
 

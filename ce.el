@@ -303,17 +303,20 @@ ENTRY can be either a symbol or a string."
 
 (defvar ce-menu
   '(list "SEP"
-	 '("Validation"
-	   ["Locally validate the HTML of the current buffer"
-	    (call-interactively 'ce-validate-current-buffer-locally)
-	    (fboundp 'ce-validate-current-buffer-locally)]
-	   ["Validate the HTML of the current buffer on Leibniz"
-	    (call-interactively 'ce-validate-current-buffer-on-leibniz)
-	    (fboundp 'ce-validate-current-buffer-on-leibniz)])
-	 "-"
-	 ["Customize CE mode"
-	  (customize-group 'ce)
-	  t]))
+         '("Quotes"
+           ["Fix non-ASCII quotes"
+            (call-interactively 'ce-quote-fix-non-ascii-quotes)
+            (fboundp 'ce-quote-fix-non-ascii-quotes)]
+           ["Fix sharp quotes"
+            (call-interactively 'ce-quote-fix-sharp-quotes)
+            (fboundp 'ce-quote-fix-sharp-quotes)]
+           ["Fix right quote entities"
+            (call-interactively 'ce-quote-fix-right-quote-entities)
+            (fboundp 'ce-quote-fix-right-quote-entities)])
+         "-"
+         ["Customize CE mode"
+          (customize-group 'ce)
+          t]))
 
 (defun ce-mode-menu ()
   "Set up a menu for the CE minor mode (which is not yet defined)."

@@ -224,6 +224,13 @@
 (defvar ce-menu
   '(list "SEP"
          '("Quotes"
+           ["Inspect all quotes"
+            (call-interactively 'ce-quote-fix-quotes)
+            (fboundp 'ce-quote-fix-quotes)]
+           ["Check quote balance"
+            (call-interactively 'ce-quote-check-balanced)
+            (fboundp 'ce-quote-check-balanced)]
+           "-"
            ["Fix non-ASCII quotes"
             (call-interactively 'ce-quote-fix-non-ascii-quotes)
             (fboundp 'ce-quote-fix-non-ascii-quotes)]

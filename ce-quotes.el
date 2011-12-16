@@ -60,19 +60,33 @@
 (defvar *ce-quotes-position* nil
   "The position where we last paused editing quotes.")
 
+(defvar *ce-quote-paused-from* nil
+  "A symbol indicating within which of the many interactive quote
+  fix-up functions was the repair paused for editing.")
+
+(defun ce-quotes-resolve-quote-function ()
+  (case *ce-quote-paused-from*
+    (fix-sharp-quotes 'ce-quotes-fix-sharp-quote)
+    (otherwise nil)))
+
 (defun ce-quote-fix-resume ()
   (interactive)
-  (if *ce-quotes-position*
-      (let ((buffer-size (buffer-size)))
-        (cond ((< *ce-quotes-position* 0)
-               (error "We somehow managed to save a negative position when last editing quotes; resuming from the beginning.")
-               (ce-quote-fix-sharp-quotes))
-              ((> *ce-quotes-position* (buffer-size))
-               (error "We somehow managed to save a negative position when last editing quotes; resuming from the beginning.")
-               (ce-quote-fix-sharp-quotes))
-              (t
-               (ce-quote-fix-sharp-quotes *ce-quotes-position*))))
-    (ce-quote-fix-sharp-quotes)))
+  (let ((function-to-resume (ce-quotes-resolve-quote-function)))
+    (if function-to-resume
+        (progn
+          (assert '(fboundp function-to-resume))
+          (if *ce-quotes-position*
+              (let ((buffer-size (buffer-size)))
+                (if (numberp *ce-quotes-position*)
+                    (cond ((< *ce-quotes-position* 0)
+                           (funcall function-to-resume))
+                          ((> *ce-quotes-position* (buffer-size))
+                           (funcall function-to-resume))
+                          (t
+                           (funcall function-to-resume *ce-quotes-position*)))
+                  (funcall function-to-resume)))
+            (funcall function-to-resume)))
+      (error "Unable to resume fixing quotes because we don't know how we left off."))))
 
 (defun ce-quote-fix-sharp-quotes (&optional starting-position)
   (interactive)

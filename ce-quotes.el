@@ -195,6 +195,27 @@
   (ce-quote-fix-right-quote-entities)
   (ce-quote-check-balanced))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Menu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar ce-menu
+  '(list "SEP"
+         '("Quotes"
+           ["Fix non-ASCII quotes"
+            (call-interactively 'ce-quote-fix-non-ascii-quotes)
+            (fboundp 'ce-quote-fix-non-ascii-quotes)]
+           ["Fix sharp quotes"
+            (call-interactively 'ce-quote-fix-sharp-quotes)
+            (fboundp 'ce-quote-fix-sharp-quotes)]
+           ["Fix right quote entities"
+            (call-interactively 'ce-quote-fix-right-quote-entities)
+            (fboundp 'ce-quote-fix-right-quote-entities)])
+         "-"
+         ["Customize CE mode"
+          (customize-group 'ce)
+          t]))
+
 (provide 'ce-quotes)
 
 ;;; ce-quotes.el ends here

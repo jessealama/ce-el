@@ -55,33 +55,33 @@
   (message "Done replacing non-ASCII quotes with their XHTML entity equivalents.")
   t)
 
-(defvar *ce-quotes-position* nil
+(defvar *ce-quote-position* nil
   "The position where we last paused editing quotes.")
 
 (defvar *ce-quote-paused-from* nil
   "A symbol indicating within which of the many interactive quote
   fix-up functions was the repair paused for editing.")
 
-(defun ce-quotes-resolve-quote-function ()
+(defun ce-quote-resolve-quote-function ()
   (case *ce-quote-paused-from*
-    (fix-sharp-quotes 'ce-quotes-fix-sharp-quotes)
+    (fix-sharp-quotes 'ce-quote-fix-sharp-quotes)
     (otherwise nil)))
 
 (defun ce-quote-fix-resume ()
   (interactive)
-  (let ((function-to-resume (ce-quotes-resolve-quote-function)))
+  (let ((function-to-resume (ce-quote-resolve-quote-function)))
     (if function-to-resume
         (progn
           (assert '(fboundp function-to-resume))
-          (if *ce-quotes-position*
+          (if *ce-quote-position*
               (let ((buffer-size (buffer-size)))
-                (if (numberp *ce-quotes-position*)
-                    (cond ((< *ce-quotes-position* 0)
+                (if (numberp *ce-quote-position*)
+                    (cond ((< *ce-quote-position* 0)
                            (funcall function-to-resume))
-                          ((> *ce-quotes-position* (buffer-size))
+                          ((> *ce-quote-position* (buffer-size))
                            (funcall function-to-resume))
                           (t
-                           (funcall function-to-resume *ce-quotes-position*)))
+                           (funcall function-to-resume *ce-quote-position*)))
                   (funcall function-to-resume)))
             (funcall function-to-resume)))
       (error "Unable to resume fixing quotes because we don't know how we left off."))))
@@ -99,8 +99,8 @@
         (message "Inspecting 1 sharp quote candidate..."))
       (goto-char (cond (starting-position
                         starting-position)
-                       (*ce-quotes-position*
-                        *ce-quotes-position*)
+                       (*ce-quote-position*
+                        *ce-quote-position*)
                        (t (point-min))))
       (while (and (not bail-out)
                   (re-search-forward *ce-quote-sharp-quote-regexp* nil t))
@@ -119,7 +119,7 @@
             (ecase response
               (edit
                (setf *ce-quote-paused-from* 'fix-sharp-quotes)
-               (setf *ce-quotes-position* (point))
+               (setf *ce-quote-position* (point))
                (setf bail-out t))
               (skip
                (forward-char 2))

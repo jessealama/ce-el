@@ -203,7 +203,7 @@
                                             num-candidates-remaining))
                                   "([y]es, [n]o, [q]uit) ")))
             (let ((response (y-n-p-or-q message)))
-              (ecase response
+              (case response
                 (skip
                  (forward-char 2))
                 (exit
@@ -213,7 +213,10 @@
                  ;; same length.
                  (delete-char (length "&lsquo;"))
                  (insert "&apos;")
-                 (insert after-quote-char))))))))))
+                 (insert after-quote-char))
+                (otherwise
+                 (message "Unknown response '~a'; skipping this quote..." response)
+                 (forward-char 2))))))))))
 
 (defun ce-quote-fix-quotes ()
   (interactive)

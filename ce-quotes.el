@@ -104,8 +104,14 @@
                        (t (point-min))))
       (while (and (not bail-out)
                   (re-search-forward *ce-quote-sharp-quote-regexp* nil t))
-        (decf num-candidates-remaining)
-        (goto-char (match-beginning 0))
+        (let ((match-begin (match-beginning 0))
+              (match-end (match-end 0)))
+          (decf num-candidates-remaining)
+          (put-text-property match-begin
+                             match-end
+                             'font-lock-face
+                             'cursor)
+          (goto-char match-begin)
         (let* ((after-quote-char (match-string-no-properties 1))
                (message (concat (format "Replace '%s by &apos;%s? "
                                         after-quote-char
@@ -129,7 +135,10 @@
                (incf num-fixed)
                (delete-char 2)
                (insert "&apos;")
-               (insert after-quote-char)))))))
+               (insert after-quote-char))))
+          (remove-text-properties match-begin
+                                  match-end
+                                  'font-lock-face)))))
     (when bail-out
       (message "Stopping for editing.  After editing, type C-x r RETURN to resume."))
     num-fixed))

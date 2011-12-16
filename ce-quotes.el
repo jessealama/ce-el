@@ -164,7 +164,7 @@
 (defun ce-quote-fix-right-quote-entities ()
   (let ((num-candidates-remaining (ce-quote-num-quote-entity-candidates)))
     (if (zerop num-candidates-remaining)
-        (message "No candidate quotes to inspect.")
+        (message "No candidate right quote entities to inspect.")
       (save-excursion
         (if (> num-candidates-remaining 1)
             (message "Inspecting %d right quote entity candidates..."

@@ -18,11 +18,6 @@
     (goto-char (point-min))
     (how-many *ce-quote-right-quote-entity-regexp*)))
 
-(defvar *ce-quote-keymap*
-  (let ((map (make-sparse-keymap)))
-    ;; we define only one key, for now: resuming paused quote fixing
-    (define-key map "C-x R" 'ce-quote-fix-resume)))
-
 (defvar *ce-quote-fix-keymap*
   (let ((map (make-sparse-keymap)))
     (define-key map " " 'skip)

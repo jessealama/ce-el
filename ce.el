@@ -322,8 +322,11 @@ ENTRY can be either a symbol or a string."
   "Set up a menu for the CE minor mode (which is not yet defined)."
   (easy-menu-define ce-menu-map
                     ce-mode-map
-		    ""
-		    (eval ce-menu)))
+                    ""
+                    (eval ce-menu)))
+
+;; we define just one-key for now
+(define-key ce-mode-map (kbd "C-x r RET") 'ce-quote-fix-resume)
 
 (defun ce-initialize ()
   (interactive)

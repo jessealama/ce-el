@@ -296,7 +296,7 @@ ENTRY can be either a symbol or a string."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defvar ce-mode-map nil
-  "Keymap used by ce-mode.")
+  "Keymap used by 'ce-mode'.")
 
 (unless ce-mode-map
   (setf ce-mode-map (make-sparse-keymap)))

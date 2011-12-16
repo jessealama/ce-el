@@ -119,7 +119,7 @@
                (insert "&apos;")
                (insert after-quote-char)))))))
     (when bail-out
-      (message "Stopping for editing.  After editing, type C-x R to resume."))
+      (message "Stopping for editing.  After editing, type C-x r RETURN to resume."))
     num-fixed))
 
 (defun ce-quote-count-quote (quote)

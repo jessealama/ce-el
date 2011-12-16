@@ -2,7 +2,7 @@
 ** TODO Undo edits
 ** DONE One-button navigation
    Currently, one needs to hit the enter key to move along.
-** TODO Highlighting matches
+** DONE Highlighting matches
    Like isearch.
 ** TODO Balance of left and right single and double quotes
 ** TODO Support searching for and dealing with double sharp quotes

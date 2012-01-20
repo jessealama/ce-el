@@ -10,4 +10,5 @@
 ** DONE Make a 'provide' statement for easy loading
 ** TODO Menu for checking quotes
 ** TODO Quit and resume later, pause
-
+** TODO Single quotes: finds them inside tags
+   Whoops.

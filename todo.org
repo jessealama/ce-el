@@ -1,14 +1,64 @@
+* Notes
+** Uri (2011-10-14)
+   - There is the general issue of partially-interactive editing
+   (i.e., some edits that it can make on its own and some that require
+   asking for user input).  So it would be great if there were a good
+   mechanism for interactive editing -- sort of like the way ce-aorq
+   and ce-dash work but within an emacs buffer.  It would be a big
+   advantage to be able to pause and/or save your work in the middle
+   and resume later.  Pausing is also important to allow you to fix an
+   unrelated problem you may notice nearby in the file.
+
+   It would be nice if one could specify a set of regular expressions
+   describing contexts for what change to make automatically and what
+   changes require user interaction.
+
+   - The specification of such regular expressions is complicated by
+   end-of-line issues (e.g., dashes that end a line or start a new
+   line).  It would be great if we could wrap and un-wrap the text as
+   needed. SEP wrapping conventions (for re-wrapping the text) are
+   slightly idiosyncratic, but can be specified.
+
+   - There is the general issue of template fragments which may need
+   to be edited from time to time and entry specific information that
+   may need to be plugged in to templates or other parts of an entry.
+   It would seem that there should be a master copy on plato and an
+   easy way to check that the local copy is up-to-date.
+
+   - Spell checking is important and complicated by the many technical
+   terms.  We keep a supplementary dictionary file on plato.  This is
+   similar to the previous bullet except it would be ideal if there
+   were a way to allow 2-way communication to the dictionary file.
+   That is, to allow for the possibility of occasionally merging any
+   edits you've made to your local copy of the dictionary file to the
+   main one on plato so those could be distributed to other document
+   editors. This is not at all a requirement and it may be that the
+   best way to solve this problem is outside of emacs -- if we decide
+   it is important enough to solve at all.
+
+   - Structure checking, contents generation, and validation.  These
+   larger issues may be better done outside of emacs.  I think the
+   current ce-entrytoc script shouldn't have too many (if any)
+   dependencies on other parts of the SEP code base and could be part
+   of a copyediting package.  It could be improved to make sure that
+   all the regular canonical sections of the entry are there and have
+   the correct names.  We also have validate.sh that is separate from
+   the SEP code base.
+
+   So, overall, I think we need a framework that allows for
+   (partial-)interactive editing based on regular expressions,
+   wrapping/un-wrapping, and communication with plato.
 * ce-quotes.el
 ** TODO Undo edits
 ** DONE One-button navigation
    Currently, one needs to hit the enter key to move along.
-** TODO Highlighting matches
+** DONE Highlighting matches
    Like isearch.
 ** TODO Balance of left and right single and double quotes
 ** TODO Support searching for and dealing with double sharp quotes
 ** DONE Support escaping unicode characters like “ and ” and ‘ and ’
 ** DONE Make a 'provide' statement for easy loading
 ** TODO Menu for checking quotes
-** TODO Quit and resume later, pause
 ** TODO Single quotes: finds them inside tags
    Whoops.
+** DONE Quit and resume later, pause

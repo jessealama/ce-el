@@ -60,4 +60,3 @@
 ** DONE Make a 'provide' statement for easy loading
 ** TODO Menu for checking quotes
 ** DONE Quit and resume later, pause
-

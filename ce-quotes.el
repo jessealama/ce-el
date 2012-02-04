@@ -140,7 +140,8 @@ STARTING-POSITION makes sense as a buffer position.)"
                        (*ce-quote-position*
                         *ce-quote-position*)
                        (t (point-min))))
-      (unwind-protect
+      (save-excursion
+	(unwind-protect
           (while (and (not bail-out)
                       (re-search-forward *ce-quote-sharp-quote-regexp* nil t))
             (let ((match-begin (match-beginning 0))
@@ -163,7 +164,7 @@ STARTING-POSITION makes sense as a buffer position.)"
                                                 num-candidates-remaining))
                                       "([y]es, [n]o, [e]dit, [q]uit) ")))
                 (let ((response (y-n-p-or-q message)))
-                  (ecase response
+                  (case response
                     (edit
                      (setf *ce-quote-paused-from* 'fix-sharp-quotes)
                      (setf *ce-quote-position* (point))

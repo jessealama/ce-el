@@ -289,6 +289,16 @@ This means:
   (ce-quote-fix-right-quote-entities))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Debugging and diagnosing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun ce-quote-reset-state ()
+  (interactive)
+  (setq *ce-quote-position* nil)
+  (setq *ce-quote-paused-from* nil)
+  t)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -310,7 +320,11 @@ This means:
             (fboundp 'ce-quote-fix-sharp-quotes)]
            ["Fix right quote entities"
             (call-interactively 'ce-quote-fix-right-quote-entities)
-            (fboundp 'ce-quote-fix-right-quote-entities)])
+            (fboundp 'ce-quote-fix-right-quote-entities)]
+	   "-"
+	   ["Reset quote-fixing state"
+	    (call-interactively 'ce-quote-reset-state)
+	    (fboundp 'ce-quote-reset-state)])
          "-"
          ["Customize CE mode"
           (customize-group 'ce)

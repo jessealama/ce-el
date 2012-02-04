@@ -14,7 +14,13 @@
 (defvar *ce-quote-sharp-quote-regexp* "[']\\(.\\)"
   "A regular expression matching the quotes we need to treat.")
 
-(defvar *ce-quote-right-quote-entity-regexp* "\\(&rsquo;\\)|\\(&rdquo;\\)\\(.\\)"
+(defvar *ce-quote-rsquo-entity* "&rsquo;")
+
+(defvar *ce-quote-rdquo-entity* "&rdquo;")
+
+(defvar *ce-quote-right-quote-entity-regexp*
+  (regexp-opt (list *ce-quote-rsquo-entity*
+		    *ce-quote-rdquo-entity*))
   "A regular expression matching the entities of right quotes.")
 
 (defun ce-quote-num-sharp-quote-candidates ()

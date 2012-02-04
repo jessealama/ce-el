@@ -67,7 +67,6 @@
    If something other than these keys is supplied, we should warn.
 
    Kill
-** TODO Provide undo
 ** DONE ce-quote-fix-right-quote-entities is falsely counting the # of occurrences
 ** TODO Dealing with double quotes: a-or-q clone
 ** TODO Rule-based operation

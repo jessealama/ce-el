@@ -46,10 +46,16 @@
     map))
 
 (defun y-n-p-or-q (message)
-  "Print MESSAGE, then wait for a yes, no, pause, or quit response."
-  (let ((key (read-event message)))
-    (setq key (vector key))
-    (lookup-key *ce-quote-fix-keymap* key)))
+  "Print MESSAGE, then wait for a yes, no, pause, quit, or pause
+response.  This function repeatedly prompts for a suitable
+response until an acceptable one is received."
+  (let (response)
+    (while (not response)
+      (let ((key (read-event message)))
+	(setq key (vector key))
+	(setq response
+	      (lookup-key *ce-quote-fix-keymap* key))))
+    response))
 
 (defun ce-quote-fix-non-ascii-quotes ()
   "Fix all non-ASCII quotes in the current buffer.
@@ -164,7 +170,10 @@ STARTING-POSITION makes sense as a buffer position.)"
                      (incf num-fixed)
                      (delete-char 2)
                      (insert "&apos;")
-                     (insert after-quote-char))))
+                     (insert after-quote-char))
+		    (otherwise
+		     (message "Unknown response '%a'; skipping this quote..." response)
+		     (forward-char 2))))
                 (remove-list-of-text-properties match-begin
                                                 match-end
                                                 (list 'font-lock-face)))))
@@ -174,10 +183,9 @@ STARTING-POSITION makes sense as a buffer position.)"
         ;; that there aren't any regions in the buffer that we've
         ;; highlighted
         (progn
-          (message "You killed me! last-match-begin = %s and last-match-end = %s" last-match-begin last-match-end)
-          (remove-list-of-text-properties last-match-begin
+	  (remove-list-of-text-properties last-match-begin
                                           last-match-end
-                                          (list 'font-lock-face)))))
+                                          (list 'font-lock-face))))))
     (when bail-out
       (message "Stopping for editing.  After editing, type C-x r RETURN to resume."))
     num-fixed))
@@ -256,7 +264,7 @@ Report our findings."
                  (insert "&apos;")
                  (insert after-quote-char))
                 (otherwise
-                 (message "Unknown response '~a'; skipping this quote..." response)
+                 (message "Unknown response '%a'; skipping this quote..." response)
                  (forward-char 2))))))))))
 
 (defun ce-quote-fix-quotes ()

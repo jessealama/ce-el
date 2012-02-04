@@ -63,7 +63,7 @@
    Whoops.
 ** DONE Quit and resume later, pause
 ** TODO Sometimes we print "No candidate quotes to inspect" after pausing for editing.
-** TODO Y-N-P-OR-Q doesn't seem to like things other than Y, N, P, and Q.
+** DONE Y-N-P-OR-Q doesn't seem to like things other than Y, N, P, and Q.
    If something other than these keys is supplied, we should warn.
 
    Kill

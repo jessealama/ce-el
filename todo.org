@@ -49,6 +49,14 @@
    (partial-)interactive editing based on regular expressions,
    wrapping/un-wrapping, and communication with plato.
 * ce-quotes.el
+** TODO Look at nxml-mode for useful utility code
+   - nxml-forward-balanced-item
+
+     This seems to do half of what we want: it moves us to the end of
+     a start element.  We still need to figure out how to do the other
+     half: determining the end of the data section of the current
+     element.
+   - nxml-forward-element
 ** TODO Undo edits
 ** DONE One-button navigation
    Currently, one needs to hit the enter key to move along.

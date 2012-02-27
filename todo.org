@@ -57,6 +57,14 @@
      half: determining the end of the data section of the current
      element.
    - nxml-forward-element
+** TODO Interaction
+   Invoking the quote fixer will move the point to the beginning of
+   buffer.  We will move forward until the next character data area.
+   Then we look in the character data area for trouble spots.
+
+   For each trouble spot, we invoke a function to recommend a fix.  If
+   the recommender has a fix, apply it; otherwise, ask the user what
+   to do.
 ** TODO Undo edits
 ** DONE One-button navigation
    Currently, one needs to hit the enter key to move along.

@@ -57,6 +57,10 @@
      half: determining the end of the data section of the current
      element.
    - nxml-forward-element
+   - xmltok-forward
+
+     This goes forward one "token", and returns a symbol whose name
+     expresses the kind of token over which we just jumped.
 ** TODO Interaction
    Invoking the quote fixer will move the point to the beginning of
    buffer.  We will move forward until the next character data area.

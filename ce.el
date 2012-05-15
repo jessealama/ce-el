@@ -313,6 +313,16 @@ ENTRY can be either a symbol or a string."
            ["Fix right quote entities"
             (call-interactively 'ce-quote-fix-right-quote-entities)
             (fboundp 'ce-quote-fix-right-quote-entities)])
+	 '("Validation"
+	   ["Validate XHTML of current buffer"
+	    (call-interactively 'ce-validate)
+	    (fboundp 'ce-validate)]
+	   ["Next error"
+	    (call-interactively 'ce-validate-next-error)
+	    (fboundp 'ce-validate-next-error)]
+	   ["Previous error"
+	    (call-interactively 'ce-validate-previous-error)
+	    (fboundp 'ce-validate-previous-error)])
          "-"
          ["Customize CE mode"
           (customize-group 'ce)

@@ -559,6 +559,27 @@ ENTRY can be either a symbol or a string."
     ["9830" "2666" "diams"]
     ))
 
+(defun member-of-some-array (thing list-of-arrays)
+  (some #'(lambda (entity-array)
+	    (or (string= thing (aref entity-array 0))
+		(string= thing (aref entity-array 1))
+		(string= thing (aref entity-array 2))))
+	list-of-arrays))
+
+(defun ce-validate-known-latin-1-entity (thing)
+  (member-of-some-array thing *xhtml-latin-1-entites*))
+
+(defun ce-validate-known-special-entity (thing)
+  (member-of-some-array thing *xhtml-special-entities*))
+
+(defun ce-validate-known-symbol (thing)
+  (member-of-some-array thing *xhtml-symbol-entities*))
+
+(defun ce-validate-known-entity (thing)
+  (or (ce-validate-known-latin-1-entity thing)
+      (ce-validate-known-special-entity thing)
+      (ce-validate-known-symbol thing)))
+
 (defun ce-validate ()
   "Validate the current buffer."
   ;; can we run rng-validate-mode?

@@ -575,10 +575,15 @@ ENTRY can be either a symbol or a string."
 (defun ce-validate-known-symbol (thing)
   (member-of-some-array thing *xhtml-symbol-entities*))
 
+(defun maybe-extract-entity-name (thing)
+  (string-match "\\([&]\\)?\\([a-zA-Z0-9]+\\)\\([;]\\)?" thing)
+  (match-string-no-properties 2 thing))
+
 (defun ce-validate-known-entity (thing)
-  (or (ce-validate-known-latin-1-entity thing)
-      (ce-validate-known-special-entity thing)
-      (ce-validate-known-symbol thing)))
+  (let ((entity-name (maybe-extract-entity-name thing)))
+    (or (ce-validate-known-latin-1-entity entity-name)
+	(ce-validate-known-special-entity entity-name)
+	(ce-validate-known-symbol entity-name))))
 
 (defun ce-validate ()
   "Validate the current buffer."
@@ -591,6 +596,38 @@ ENTRY can be either a symbol or a string."
     (nxml-mode))
   (when (not (member 'rng-validate-mode minor-mode-list))
     (rng-validate-mode)))
+
+(defun ce-validate-entities ()
+  "Check that all entities in the current buffer are valid XHTML entities."
+  (let (bad-entity bad-line bad-column bad-position)
+    (save-excursion
+      (goto-char (point-min))
+      (let* ((begin (point-min))
+	     (token (xmltok-forward))
+	     (end (point)))
+	(while token
+	  (if (eq token 'entity-ref)
+	      (let ((entity (buffer-substring-no-properties begin end)))
+		(if (ce-validate-known-entity entity)
+		    (setf begin end
+			  token (xmltok-forward)
+			  end (point))
+		  (setf bad-entity entity
+			bad-line (current-line)
+			bad-column (current-column)
+			bad-position begin
+			token nil)))
+	    (setf begin end
+			  token (xmltok-forward)
+			  end (point))))))
+    (if bad-entity
+	(progn
+	  (goto-char bad-position)
+	  (error "Bad entity '%s' at line %d and column %d"
+		 bad-entity
+		 bad-line
+		 bad-column))
+      (message "All entities in the current buffer are valid."))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Definition of the minor mode and its keymap

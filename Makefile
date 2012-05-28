@@ -1,5 +1,5 @@
 CE-INSTALL-DIR=$(HOME)/share/emacs/site-lisp/ce
-EMACS=/usr/bin/emacs
+EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 

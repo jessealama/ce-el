@@ -605,6 +605,13 @@ ENTRY can be either a symbol or a string."
 
 (defun ce-validate-entities ()
   "Check that all entities in the current buffer are valid XHTML entities."
+  (interactive)
+  (unless (eq major-mode 'nxml-mode)
+    (if (fboundp 'nxml-mode)
+	(progn
+	  (message "The major mode of the current buffer is not nxml-mode; switching...")
+	  (nxml-mode))
+      (error "nXML mode seems to be unavailable; we cannot proceed.")))
   (let (bad-entity bad-line bad-column bad-position)
     (save-excursion
       (goto-char (point-min))

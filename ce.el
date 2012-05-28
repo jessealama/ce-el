@@ -48,9 +48,9 @@
 (require 'ce-macros) ;; needs to come first among the splitoff
                      ;; packages to ensure that any uses of macros are
                      ;; properly expanded
-(require 'ce-unadorned)
-(require 'ce-validate)
-(require 'ce-quotes)
+;(require 'ce-unadorned)
+;(require 'ce-validate)
+;(require 'ce-quotes)
 
 ;;; User variables and customization
 

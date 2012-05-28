@@ -652,6 +652,14 @@ ENTRY can be either a symbol or a string."
 (unless ce-mode-map
   (setf ce-mode-map (make-sparse-keymap)))
 
+(defun ce-validate-next-error ()
+  (interactive)
+  (rng-next-error 1))
+
+(defun ce-validate-previous-error ()
+  (interactive)
+  (rng-next-error -1))
+
 (defvar ce-menu
   '(list "SEP"
          '("Quotes"

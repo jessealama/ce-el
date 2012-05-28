@@ -589,6 +589,7 @@ ENTRY can be either a symbol or a string."
 
 (defun ce-validate ()
   "Validate the current buffer."
+  (interactive)
   ;; can we run rng-validate-mode?
   (when (not (and (fboundp 'rng-validate-mode)
 		  (fboundp 'nxml-mode)))

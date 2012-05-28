@@ -666,7 +666,10 @@ ENTRY can be either a symbol or a string."
 	    (fboundp 'ce-validate-next-error)]
 	   ["Previous error"
 	    (call-interactively 'ce-validate-previous-error)
-	    (fboundp 'ce-validate-previous-error)])
+	    (fboundp 'ce-validate-previous-error)]
+	   ["Check XHTML entities"
+	    (call-interactively 'ce-validate-entities)
+	    (fboundp 'ce-validate-entities)])
          "-"
          ["Customize CE mode"
           (customize-group 'ce)

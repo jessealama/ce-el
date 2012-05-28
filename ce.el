@@ -598,23 +598,22 @@ ENTRY can be either a symbol or a string."
   (when (not (eq major-mode 'nxml-mode))
     (nxml-mode))
   (when (not (member 'rng-validate-mode minor-mode-list))
-    (rng-validate-mode)))
+    (rng-validate-mode))
+  (let ((next-structural-error (ce-validate-next-structural-error)))
+    (if next-structural-error
+	(goto-char next-structural-error)
+      (let ((next-entity-error (ce-validate-next-entity-error)))
+	(if next-entity-error
+	    (ce-validate-entities)
+	  (message "XHTML is structurally valid and all entities are known."))))))
 
 (defun current-line ()
   "Return current line number."
   (+ (count-lines 1 (point))
      (if (= (current-column) 0) 1 0)))
 
-(defun ce-validate-entities ()
-  "Check that all entities in the current buffer are valid XHTML entities."
-  (interactive)
-  (unless (eq major-mode 'nxml-mode)
-    (if (fboundp 'nxml-mode)
-	(progn
-	  (message "The major mode of the current buffer is not nxml-mode; switching...")
-	  (nxml-mode))
-      (error "nXML mode seems to be unavailable; we cannot proceed.")))
-  (let (bad-entity bad-line bad-column bad-position)
+(defun ce-validate-next-entity-error ()
+  (let (bad-position)
     (save-excursion
       (goto-char (point-min))
       (let* ((begin (point-min))
@@ -627,21 +626,21 @@ ENTRY can be either a symbol or a string."
 		    (setf begin end
 			  token (xmltok-forward)
 			  end (point))
-		  (setf bad-entity entity
-			bad-line (current-line)
-			bad-column (current-column)
-			bad-position begin
+		  (setf bad-position begin
 			token nil)))
 	    (setf begin end
-			  token (xmltok-forward)
-			  end (point))))))
-    (if bad-entity
+		  token (xmltok-forward)
+		  end (point))))))
+    bad-position))
+
+(defun ce-validate-entities ()
+  "Check that all entities in the current buffer are valid XHTML entities."
+  (interactive)
+  (let ((bad-position (ce-validate-next-entity-error)))
+    (if bad-position
 	(progn
 	  (goto-char bad-position)
-	  (error "Bad entity '%s' at line %d and column %d"
-		 bad-entity
-		 bad-line
-		 bad-column))
+	  (message "Bad entity here."))
       (message "All entities in the current buffer are valid."))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -652,11 +651,24 @@ ENTRY can be either a symbol or a string."
   "Keymap used by 'ce-mode'.")
 
 (unless ce-mode-map
-  (setf ce-mode-map (make-sparse-keymap)))
+  (setf ce-mode-map
+	(let ((map (make-sparse-keymap)))
+	  (define-key map "\C-c\C-n" 'ce-validate-next-error)
+	  (define-key map "\C-c\C-p" 'ce-validate-previous-error)
+	  (define-key map "\C-c\C-v" 'ce-validate)
+	  (define-key map "\C-c\C-e" 'ce-validate-entities)
+	  map)))
 
 (defun ce-validate-next-error ()
   (interactive)
   (rng-next-error 1))
+
+(defun ce-validate-next-structural-error ()
+  (let (error-position)
+    (save-excursion
+      (goto-char (point-min))
+      (setf error-position (rng-next-error 1)))
+    error-position))
 
 (defun ce-validate-previous-error ()
   (interactive)

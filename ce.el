@@ -598,6 +598,11 @@ ENTRY can be either a symbol or a string."
   (when (not (member 'rng-validate-mode minor-mode-list))
     (rng-validate-mode)))
 
+(defun current-line ()
+  "Return current line number."
+  (+ (count-lines 1 (point))
+     (if (= (current-column) 0) 1 0)))
+
 (defun ce-validate-entities ()
   "Check that all entities in the current buffer are valid XHTML entities."
   (let (bad-entity bad-line bad-column bad-position)

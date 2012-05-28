@@ -1,11 +1,11 @@
 CE-INSTALL-DIR=$(HOME)/share/emacs/site-lisp/ce
-EMACS=/usr/bin/emacs
+EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
 all: ce
 
-ce: ce-macros.elc ce-unadorned.elc ce-validate.elc ce.elc
+ce: ce-macros.elc ce.elc
 
 %.elc: %.el
 	$(EMACS) --no-window-system \

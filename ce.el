@@ -36,6 +36,7 @@
 (require 'custom)
 (require 'pp)
 (require 'nxml-mode)
+(require 'rng-valid)
 
 (eval-when (load eval)
   (message "Initializing copyeditor tools..."))

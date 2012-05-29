@@ -38,29 +38,29 @@ my $temp_fh = File::Temp->new (UNLINK => 0,
 			       SUFFIX => '.html');
 my $w3c_response_html_path = $temp_fh->filename ();
 
-my @wget_call = ('wget',
-		 "--post-data=${xhtml_path}",
-		 '--timeout=30',
-		 "--output-document=${w3c_response_html_path}",
+my @curl_call = ('curl',
+		 '--form', 'uploaded_file=@' . $xhtml_path,
+		 '--connect-timeout', '30',
+		 '--output', $w3c_response_html_path,
 		 $VALIDATOR_URI);
-my $wget_err = '';
-my $wget_harness = harness (\@wget_call,
-			    '2>', \$wget_err);
+my $curl_err = $EMPTY;
+my $curl_harness = harness (\@curl_call,
+			    '2>', \$curl_err);
 
-$wget_harness->start ();
-$wget_harness->finish ();
+$curl_harness->start ();
+$curl_harness->finish ();
 
-my $wget_exit_code = ($wget_harness->results)[0];
+my $curl_exit_code = ($curl_harness->results)[0];
 
-if ($wget_exit_code != 0) {
-    say {*STDERR} 'Error: wget did not exit cleanly.  Its exit code was ', $wget_exit_code, '.';
+if ($curl_exit_code != 0) {
+    say {*STDERR} 'Error: curl did not exit cleanly.  Its exit code was ', $curl_exit_code, '.';
     say {*STDERR} 'The error output was:';
-    say {*STDERR} $wget_err;
+    say {*STDERR} $curl_err;
     exit 1;
 }
 
 if (! -r $w3c_response_html_path) {
-    say {*STDERR} 'Error: the output of wget does not exit, or is unreadable.';
+    say {*STDERR} 'Error: the output of curl does not exit, or is unreadable.';
     exit 1;
 }
 

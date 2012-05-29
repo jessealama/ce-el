@@ -1,7 +1,7 @@
 ;;; ce-macros.el --- Macros for ce
 
 ;;; Commentary:
-;; 
+;;
 ;; This file defines some useful Emacs Lisp macros for the ce-el project.
 
 ;;; Code:
@@ -12,11 +12,15 @@
 
 (defmacro stringify (symbol-or-string)
   "Given SYMBOL-OR-STRING, return a string representation."
-  `(if (stringp ,symbol-or-string) ,symbol-or-string (symbol-name ,symbol-or-string)))
+  `(if (stringp ,symbol-or-string)
+       ,symbol-or-string
+     (symbol-name ,symbol-or-string)))
 
 (defmacro symbolify (symbol-or-string)
   "Return a symbolic representation of SYMBOL-OR-STRING."
-  `(if (symbolp ,symbol-or-string) ,symbol-or-string (make-symbol ,symbol-or-string)))
+  `(if (symbolp ,symbol-or-string)
+       ,symbol-or-string
+     (make-symbol ,symbol-or-string)))
 
 (defmacro beg-of-buffer ()
   "Go to the beginning of the buffer.

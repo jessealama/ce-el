@@ -5,11 +5,12 @@ use warnings;
 
 require v5.10.0; # for the 'say' feature
 use feature 'say';
-
+use English qw(-no_match_vars);
 use Readonly;
 use File::Temp qw(tempfile);
 use IPC::Run qw(harness);
 
+Readonly my $EMPTY => q{};
 Readonly my $VALIDATOR_URI => 'http://validator.w3.org/check';
 
 # Check command line
@@ -63,6 +64,6 @@ if (! -r $w3c_response_html_path) {
     exit 1;
 }
 
-system ('open', $w3c_response_html_path);
+system 'open', $w3c_response_html_path;
 
-exit $?;
+exit $CHILD_ERROR;

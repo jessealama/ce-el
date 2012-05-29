@@ -5,7 +5,7 @@ unexport EMACSLOADPATH # evil emacs!
 
 all: ce
 
-ce: ce-macros.elc ce.elc
+ce: ce-macros.elc ce-validate.elc ce.elc
 
 %.elc: %.el
 	$(EMACS) --no-window-system \

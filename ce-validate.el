@@ -278,6 +278,7 @@
     ))
 
 (defun member-of-some-array (thing list-of-arrays)
+  "Does THING belong to any of the arrays in LIST-OF-ARRAYS?"
   (some #'(lambda (entity-array)
 	    (or (string= thing (aref entity-array 0))
 		(string= thing (aref entity-array 1))
@@ -285,19 +286,34 @@
 	list-of-arrays))
 
 (defun ce-validate-known-latin-1-entity (thing)
+  "Is THING a known Latin-1 entity?
+
+\(It should not start with \"&\" and it should not end with
+\";\"."
   (member-of-some-array thing *xhtml-latin-1-entites*))
 
 (defun ce-validate-known-special-entity (thing)
+  "Is THING a known XHTML special entity?
+
+\(It should not start with \"&\" and it should not end with
+\";\"."
   (member-of-some-array thing *xhtml-special-entities*))
 
 (defun ce-validate-known-symbol (thing)
+  "Is THING a known XHTML entity?"
   (member-of-some-array thing *xhtml-symbol-entities*))
 
 (defun maybe-extract-entity-name (thing)
+  "Strip an initial ampersand and a final semicolon from THING.
+
+If THING does not start with an ampersand, don't strip the
+initial character.  If THING does not end with a semicolon, don't
+strip it."
   (string-match "\\([&]\\)?\\([a-zA-Z0-9]+\\)\\([;]\\)?" thing)
   (match-string-no-properties 2 thing))
 
 (defun ce-validate-known-entity (thing)
+  "Determine whether THING is a known XHTML entity."
   (let ((entity-name (maybe-extract-entity-name thing)))
     (or (ce-validate-known-latin-1-entity entity-name)
 	(ce-validate-known-special-entity entity-name)
@@ -309,7 +325,7 @@
   ;; can we run rng-validate-mode?
   (when (not (and (fboundp 'rng-validate-mode)
 		  (fboundp 'nxml-mode)))
-    (error "Unable to run the validator (either nxml-mode or rng-validate-mode seems to be missing)."))
+    (error "Unable to run the validator (either nxml-mode or rng-validate-mode seems to be missing)"))
   ;; switch to nxml mode
   (when (not (eq major-mode 'nxml-mode))
     (nxml-mode))
@@ -324,6 +340,9 @@
 	  (message "XHTML is structurally valid and all entities are known."))))))
 
 (defun ce-validate-next-entity-error ()
+  "The position of the first entity error in the current buffer.
+
+If there are no errors, return NIL."
   (let (bad-position)
     (save-excursion
       (goto-char (point-min))
@@ -355,17 +374,37 @@
       (message "All entities in the current buffer are valid."))))
 
 (defun ce-validate-next-error ()
+  "Go to the next structural XML error."
   (interactive)
-  (rng-next-error 1))
+  (let ((structure-error (ce-validate-next-structural-error)))
+    (if structure-error
+	(progn
+	  (message "Malformed/unexpected XHTML structure.")
+	  (goto-char structure-error))
+      (let ((entity-error (ce-validate-next-entity-error)))
+	(message "") ; clear the echo area in case some rng or nxml
+		  ; function put something there
+	(if entity-error
+	    (progn
+	      (goto-char entity-error)
+	      (message "Bad entity here."))
+	  (message "No XHTML errors in the current buffer."))))))
 
 (defun ce-validate-next-structural-error ()
+  "The position of the next structural XML error.
+
+If there is no structural XML error, return NIL."
   (let (error-position)
     (save-excursion
       (goto-char (point-min))
-      (setf error-position (rng-next-error 1)))
+      (let ((err (rng-next-error 1)))
+	(when err
+	  (setf error-position (point))))
+      (message ""))
     error-position))
 
 (defun ce-validate-previous-error ()
+  "Go to the previous structural XML error."
   (interactive)
   (rng-next-error -1))
 

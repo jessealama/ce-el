@@ -607,11 +607,6 @@ ENTRY can be either a symbol or a string."
 	    (ce-validate-entities)
 	  (message "XHTML is structurally valid and all entities are known."))))))
 
-(defun current-line ()
-  "Return current line number."
-  (+ (count-lines 1 (point))
-     (if (= (current-column) 0) 1 0)))
-
 (defun ce-validate-next-entity-error ()
   (let (bad-position)
     (save-excursion

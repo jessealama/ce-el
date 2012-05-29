@@ -37,6 +37,13 @@ But writing '(goto-char (point-min))' is the kind of
 speaking-in-code that I dislike so much.  Whence this macro."
   `(goto-char (point-min)))
 
+(defmacro current-line ()
+  "The current line number."
+  `(+ (count-lines 1 (point))
+      (if (= (current-column) 0)
+	  1
+	0)))
+
 (provide 'ce-macros)
 
 ;;; ce-macros.el ends here

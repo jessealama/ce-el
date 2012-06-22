@@ -408,6 +408,12 @@ If there is no structural XML error, return NIL."
   (interactive)
   (rng-next-error -1))
 
+(defun ce-validate-confirm ()
+  (start-process "validate"
+		 (current-buffer)
+		 "/Users/alama/sources/sep/ce-el/validate.pl"
+		 (buffer-file-name)))
+
 (provide 'ce-validate)
 
 ;;; ce-validate.el ends here

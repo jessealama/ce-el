@@ -1,4 +1,7 @@
 
+(require 'cl)
+(require 'ispell)
+
 (defun ce-spell-check ()
   t)
 

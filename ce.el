@@ -309,16 +309,9 @@ ENTRY can be either a symbol or a string."
 
 (defvar ce-menu
   '(list "SEP"
-         '("Quotes"
-           ["Fix non-ASCII quotes"
-            (call-interactively 'ce-quote-fix-non-ascii-quotes)
-            (fboundp 'ce-quote-fix-non-ascii-quotes)]
-           ["Fix sharp quotes"
-            (call-interactively 'ce-quote-fix-sharp-quotes)
-            (fboundp 'ce-quote-fix-sharp-quotes)]
-           ["Fix right quote entities"
-            (call-interactively 'ce-quote-fix-right-quote-entities)
-            (fboundp 'ce-quote-fix-right-quote-entities)])
+	 ["Inspect quotes"
+	    (call-interactively 'ce-quote-fix-quotes)
+	    (fboundp 'ce-quote-fix-quotes)]
 	 '("Validation"
 	   ["Validate XHTML of current buffer"
 	    (call-interactively 'ce-validate)

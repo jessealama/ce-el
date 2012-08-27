@@ -256,7 +256,7 @@ Report our findings."
                  (insert "&apos;")
                  (insert after-quote-char))
                 (otherwise
-                 (message "Unknown response '~a'; skipping this quote..." response)
+                 (message "Unknown response '%a'; skipping this quote..." response)
                  (forward-char 2))))))))))
 
 (defun ce-quote-fix-quotes ()

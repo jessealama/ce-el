@@ -49,7 +49,7 @@
                      ;; properly expanded
 ;(require 'ce-unadorned)
 (require 'ce-validate)
-;(require 'ce-quotes)
+(require 'ce-quotes)
 
 ;;; User variables and customization
 

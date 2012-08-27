@@ -292,6 +292,16 @@ ENTRY can be either a symbol or a string."
   nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; The whole shebang
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun ce-inspect-everything ()
+  (interactive)
+  (ce-quote-fix-quotes)
+  (ce-spell-check)
+  (ce-validate))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Definition of the minor mode and its keymap
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -309,6 +319,9 @@ ENTRY can be either a symbol or a string."
 
 (defvar ce-menu
   '(list "SEP"
+	 ["Check everything"
+	  (call-interactively 'ce-inspect-everything)
+	  (fboundp 'ce-inspect-everything)]
 	 ["Inspect quotes"
 	    (call-interactively 'ce-quote-fix-quotes)
 	    (fboundp 'ce-quote-fix-quotes)]

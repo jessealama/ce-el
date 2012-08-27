@@ -1,4 +1,16 @@
 * Notes
+** Symbol italiczation
+   Leave off for the moment.
+** Hyphen/dash fixing
+   endash, emdash
+
+   Add/remove hard wrapping
+** Spell checking
+   Shared dictionary, contains philosophical terms.
+** Indentation
+   Unwrap wrapped text
+
+   Simple XSLT transformation.
 ** Uri (2011-10-14)
    - There is the general issue of partially-interactive editing
    (i.e., some edits that it can make on its own and some that require

@@ -66,35 +66,6 @@ Encyclopedia of Philosophy."
   :tag "Copyediting"
   :group 'sep)
 
-;;; Copyediting utilities
-
-(defun ce-spell ()
-  "Spell-check the current entry."
-  nil)
-
-(defun ce-diction ()
-  "Interactively run diction(1) on the current entry."
-  nil)
-
-(defun ce-aorq ()
-  "Do it."
-  nil)
-
-(defun ce-wrap ()
-  "Wrap the current entry."
-  nil)
-
-(defun ce-checklinks ()
-  "Determine whether all links on this page are valid."
-  nil)
-
-(defun ce-check-everything ()
-  "Check everything."
-  (ce-spell)
-  (ce-checklinks)
-  (ce-aorq)
-  (ce-wrap))
-
 ;Function to run Tidy HTML parser on buffer
 ; NOTE: this requires external Tidy program.
 (defun ce-tidy ()

@@ -179,6 +179,10 @@ ENTRY can be either a symbol or a string."
           (switch-to-buffer-other-frame entry-buffer)
           (message "Visiting %s" entry-as-string))))))
 
+(defun ce-pubminor (entry)
+  "Call pubminor on entry ENTRY."
+  nil)
+
 (provide 'ce-entries)
 
 ;;; ce-entries.el ends here

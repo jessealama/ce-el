@@ -79,10 +79,6 @@ Encyclopedia of Philosophy."
   (delete-file "/tmp/tidy-errs")
   (message "buffer tidy'd"))
 
-(defun ce-pubminor (entry)
-  "Call pubminor on entry ENTRY."
-  nil)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; The whole shebang
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

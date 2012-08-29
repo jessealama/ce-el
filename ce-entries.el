@@ -12,7 +12,7 @@
 
 (defcustom ce-entry-name-regexp
   "[a-zA-Z0-9]+\\(-[a-zA-Z0-9]+\\)*"
-  "A regular expression that matches potentially entry names."
+  "A regular expression that matches potential entry names."
   :group 'ce)
 
 (defun ce-published-entries ()

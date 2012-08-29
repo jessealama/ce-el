@@ -26,4 +26,4 @@ install: ce
 	@echo "so that SEP copyeditor mode is loaded whenever you start Emacs."
 
 clean:
-	rm *.elc
+	rm -f *.elc

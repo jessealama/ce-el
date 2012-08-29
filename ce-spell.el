@@ -3,6 +3,9 @@
 (require 'ispell)
 
 (defun ce-spell-check ()
-  t)
+  (ispell))
+
+(defun ce-spell-change-dictionary ()
+  (ispell-change-dictionary))
 
 ;;; ce-spell.el ends here

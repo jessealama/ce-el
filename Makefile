@@ -3,7 +3,11 @@ EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
-all: ce-entries.el ce-macros.el ce-quotes.el ce-spell.el ce-tidy.el ce-unadorned.el ce-validate.el ce.el
+.PHONY : ce install clean
+
+all: ce
+
+ce: ce-entries.elc ce-macros.elc ce-quotes.elc ce-spell.elc ce-tidy.elc ce-unadorned.elc ce-validate.elc ce.elc
 
 %.elc: %.el
 	$(EMACS) --no-window-system \

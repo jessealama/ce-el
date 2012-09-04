@@ -331,13 +331,14 @@ strip it."
     (nxml-mode))
   (when (not (member 'rng-validate-mode minor-mode-list))
     (rng-validate-mode))
-  (let ((next-structural-error (ce-validate-next-structural-error)))
-    (if next-structural-error
-	(goto-char next-structural-error)
-      (let ((next-entity-error (ce-validate-next-entity-error)))
-	(if next-entity-error
-	    (ce-validate-entities)
-	  (message "XHTML is structurally valid and all entities are known."))))))
+  (save-excursion
+    (let ((next-structural-error (ce-validate-next-structural-error)))
+      (if next-structural-error
+	  (goto-char next-structural-error)
+	(let ((next-entity-error (ce-validate-next-entity-error)))
+	  (if next-entity-error
+	      (ce-validate-entities)
+	    (message "XHTML is structurally valid and all entities are known.")))))))
 
 (defun ce-validate-next-entity-error ()
   "The position of the first entity error in the current buffer.

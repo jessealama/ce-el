@@ -6,6 +6,8 @@
 
 ;;; Code:
 
+(require 'cl)
+
 (defmacro at-least-two (list)
   "Quickly determine whether LIST has at least two members."
   `(and ,list (cdr ,list)))

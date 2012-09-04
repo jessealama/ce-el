@@ -73,15 +73,10 @@ Encyclopedia of Philosophy."
 
 (defun ce-inspect-everything ()
   (interactive)
-  (condition-case quote-error
-      (ce-quote-fix-quotes)
-    (error (message "While fixing quotes, the following error occurred:%c%c  %s%c%cContinuing anyway with spell checking..." ?\n ?\n (error-message-string quote-error) ?\n ?\n)))
-  (condition-case spell-check-error
-      (ce-spell-check)
-    (error (message "While checking spelling, the following error occurred:%c%c  %s%c%cContinuing anyway with validation..." ?\n ?\n (error-message-string spell-check-error) ?\n ?\n)))
-  (condition-case validate-error
-      (ce-validate)
-    (error (message "While validating, the following error occurred:%c%c  %s%n" ?\n ?\n (error-message-string validate-error) ?\n))))
+  (keep-evaluating
+   (ce-quote-fix-quotes)
+   (ce-spell-check)
+   (ce-validate)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Definition of the minor mode and its keymap

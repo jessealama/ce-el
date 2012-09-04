@@ -1,7 +1,8 @@
 
 ;; Entries and their locations
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
 (require 'ce-macros)
 
 (defcustom ce-entries-directory

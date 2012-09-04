@@ -6,7 +6,8 @@
 
 ;;; Code:
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
 
 (defmacro at-least-two (list)
   "Quickly determine whether LIST has at least two members."

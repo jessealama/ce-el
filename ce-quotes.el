@@ -7,7 +7,8 @@
 ;; HTML files.  See 'ce-quote-fix-quotes for a list of the current
 ;; functionality we support.
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
 
 ;;; Code:
 

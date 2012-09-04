@@ -6,7 +6,9 @@
 
 ;;; Code:
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
+
 (require 'nxml-mode)
 (require 'rng-valid)
 

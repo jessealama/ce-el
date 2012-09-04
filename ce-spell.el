@@ -1,5 +1,7 @@
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
+
 (require 'ispell)
 
 (defun ce-spell-check ()

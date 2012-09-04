@@ -51,6 +51,7 @@
 (require 'ce-entries)
 (require 'ce-validate)
 (require 'ce-quotes)
+(require 'ce-spell)
 
 ;;; User variables and customization
 

@@ -13,4 +13,6 @@
 	(ispell-change-dictionary dictionary)
       (error "The dictionary '%s' is unknown." dictionary))))
 
+(provide 'ce-spell)
+
 ;;; ce-spell.el ends here

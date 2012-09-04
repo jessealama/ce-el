@@ -40,7 +40,7 @@ speaking-in-code that I dislike so much.  Whence this macro."
 (defmacro current-line ()
   "The current line number."
   `(+ (count-lines 1 (point))
-      (if (= (current-column) 0)
+      (if (zerop (current-column))
 	  1
 	0)))
 

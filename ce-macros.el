@@ -46,6 +46,20 @@ speaking-in-code that I dislike so much.  Whence this macro."
 	  1
 	0)))
 
+(defmacro keep-evaluating (&rest body)
+  (let ((condition-case-forms
+	 (mapcar #'(lambda (form)
+		     (list 'condition-case
+			   'error-var
+			   form
+			   (list 'error
+				 (list 'message
+				       "Something went wrong; the error was:%n%n  %s%n"
+				       (list 'error-message-string 'error-var)))))
+		 body)))
+    `(progn
+       ,@condition-case-forms)))
+
 (provide 'ce-macros)
 
 ;;; ce-macros.el ends here

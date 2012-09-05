@@ -54,8 +54,8 @@ speaking-in-code that I dislike so much.  Whence this macro."
 			   form
 			   (list 'error
 				 (list 'message
-				       "Something went wrong; the error was:%n%n  %s%n"
-				       (list 'error-message-string 'error-var)))))
+				       "Something went wrong; the error was:%c%c  %s%c"
+				       ?\n ?\n (list 'error-message-string 'error-var) ?\n))))
 		 body)))
     `(progn
        ,@condition-case-forms)))

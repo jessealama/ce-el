@@ -1,7 +1,7 @@
 ;;; ce-unadorned.el --- Check for and fix unadorned text following HTML elements
 
 ;;; Commentary:
-;; 
+;;
 ;; In XHTML 1.0 Transitional, it is valid to write HTML such as this:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

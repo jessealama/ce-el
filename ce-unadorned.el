@@ -20,6 +20,11 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
+(require 'ce-entries)
+
 (defcustom ce-unadorned-fixed-site-directory
   "/tmp/ce"
   "The directory under which entries will by copied and unadorned text fixed."

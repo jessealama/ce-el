@@ -6,8 +6,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (require 'nxml-mode)
 (require 'rng-valid)
@@ -418,5 +417,9 @@ If there is no structural XML error, return NIL."
 		 (buffer-file-name)))
 
 (provide 'ce-validate)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-validate.el ends here

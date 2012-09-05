@@ -32,8 +32,7 @@
 ;; (sometimes interactively with a human copyeditor, sometimes
 ;; non-interactively).
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (require 'custom)
 (require 'pp)
@@ -149,5 +148,9 @@ Encyclopedia of Philosophy."
   (ce-initialize))
 
 (provide 'ce)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce.el ends here

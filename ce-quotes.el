@@ -7,8 +7,7 @@
 ;; HTML files.  See 'ce-quote-fix-quotes for a list of the current
 ;; functionality we support.
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 ;;; Code:
 
@@ -275,5 +274,9 @@ This means:
   (ce-quote-fix-right-quote-entities))
 
 (provide 'ce-quotes)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-quotes.el ends here

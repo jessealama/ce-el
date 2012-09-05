@@ -1,8 +1,7 @@
 
 ;; Entries and their locations
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 (require 'ce-macros)
 
 (defcustom ce-entries-directory
@@ -188,5 +187,9 @@ ENTRY can be either a symbol or a string."
   nil)
 
 (provide 'ce-entries)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-entries.el ends here

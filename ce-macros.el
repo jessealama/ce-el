@@ -6,8 +6,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (defmacro at-least-two (list)
   "Quickly determine whether LIST has at least two members."
@@ -62,5 +61,9 @@ speaking-in-code that I dislike so much.  Whence this macro."
        ,@condition-case-forms)))
 
 (provide 'ce-macros)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-macros.el ends here

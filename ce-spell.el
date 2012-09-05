@@ -1,6 +1,5 @@
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (require 'ispell)
 
@@ -16,5 +15,9 @@
       (error "The dictionary '%s' is unknown." dictionary))))
 
 (provide 'ce-spell)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-spell.el ends here

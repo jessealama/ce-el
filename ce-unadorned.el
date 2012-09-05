@@ -20,8 +20,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl)
 
 (require 'ce-entries)
 
@@ -205,5 +204,9 @@ copied; the entries that do require fixing are copied and fixed."
 (provide 'ce-unadorned)
 
 (provide 'ce-unadorned)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-unadorned.el ends here

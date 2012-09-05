@@ -32,7 +32,9 @@
 ;; (sometimes interactively with a human copyeditor, sometimes
 ;; non-interactively).
 
-(require 'cl)
+(eval-when-compile
+  (require 'cl))
+
 (require 'custom)
 (require 'pp)
 

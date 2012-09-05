@@ -203,8 +203,6 @@ copied; the entries that do require fixing are copied and fixed."
 
 (provide 'ce-unadorned)
 
-(provide 'ce-unadorned)
-
 ;; Local Variables:
 ;; byte-compile-warnings: (not cl-functions)
 ;; End:

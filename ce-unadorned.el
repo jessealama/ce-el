@@ -117,7 +117,7 @@ corresponding file was found."
 		;; of a tags following "Related Entries".  But
 		;; it seems to do the job for now.
 		(push (line-number-at-pos) violations)))))))))
-    
+
 (defun ce-unadorned-check-this-buffer ()
   "Check the current buffer for unadorned text."
   (interactive)

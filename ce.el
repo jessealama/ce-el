@@ -53,6 +53,7 @@
 (require 'ce-validate)
 (require 'ce-quotes)
 (require 'ce-spell)
+(require 'ce-dash)
 
 ;;; User variables and customization
 

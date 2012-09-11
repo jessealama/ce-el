@@ -13,7 +13,7 @@ elcs = $(addsuffix .elc,$(files))
 all: emacs-is-real $(elcs)
 
 emacs-is-real:
-	which $(emacs)
+	@which $(emacs)
 
 %.elc: %.el
 	$(emacs) --no-window-system \

@@ -5,6 +5,20 @@
    endash, emdash
 
    Add/remove hard wrapping
+
+   removing spaces around mdashes
+
+   corner cases: beginnings of lines, ends of lines
+* Validator
+** TODO Deal with high bit characters.
+   Perfectly valid UTF8 characters are regarded as invalid, if the
+   charset is changed.  Perhaps the validator should have two modes:
+   accept the document as it is encoded, and as plain text.  According
+   to the first, the document would be OK; according to the second
+   mode, it would be invalid.
+
+   Maybe we need to run convert.py on the buffer.  Or otherwise do the
+   substitution.
 ** Spell checking
    Shared dictionary, contains philosophical terms.
 ** Indentation

@@ -35,6 +35,9 @@ install: $(elcs)
 	@echo
 	@echo "so that SEP copyeditor mode is loaded whenever you start Emacs."
 
+uninstall:
+	rm -Rf $(CE-INSTALL-DIR)
+
 clean:
 	rm -f $(emacs-backups)
 	rm -f $(elcs)

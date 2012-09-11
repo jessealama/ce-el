@@ -20,6 +20,7 @@ ce: ce-entries.elc ce-macros.elc ce-quotes.elc ce-spell.elc ce-tidy.elc ce-unado
 install: ce
 	mkdir -p $(CE-INSTALL-DIR)
 	cp *.el *.elc $(CE-INSTALL-DIR)
+	@echo
 	@echo "Don't forget to add $(CE-INSTALL-DIR) to your Emacs load path!"
 	@echo "In your Emacs initialization file, add"
 	@echo

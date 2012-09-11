@@ -3,11 +3,17 @@ EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
-.PHONY : ce install clean
+.PHONY : ce install clean emacs-is-real
 
-all: ce
+files = ce-entries ce-macros ce-quotes ce-spell ce-tidy ce-unadorned ce-validate ce
+els = $(addsuffix .el,$(files))
+emacs-backups = $(addsuffix ~,$(els))
+elcs = $(addsuffix .elc,$(files))
 
-ce: ce-entries.elc ce-macros.elc ce-quotes.elc ce-spell.elc ce-tidy.elc ce-unadorned.elc ce-validate.elc ce.elc
+all: emacs-is-real $(elcs)
+
+emacs-is-real:
+	which $(EMACS)
 
 %.elc: %.el
 	$(EMACS) --no-window-system \
@@ -17,9 +23,10 @@ ce: ce-entries.elc ce-macros.elc ce-quotes.elc ce-spell.elc ce-tidy.elc ce-unado
                  --directory '.' \
                  --funcall batch-byte-compile $*.el
 
-install: ce
-	mkdir -p $(CE-INSTALL-DIR)
-	cp *.el *.elc $(CE-INSTALL-DIR)
+install: $(elcs)
+	install --directory $(CE-INSTALL-DIR)
+	install --mode 644 --target-directory $(CE-INSTALL-DIR) $(els)
+	install --mode 644 --target-directory $(CE-INSTALL-DIR) $(elcs)
 	@echo
 	@echo "Don't forget to add $(CE-INSTALL-DIR) to your Emacs load path!"
 	@echo "In your Emacs initialization file, add"
@@ -29,5 +36,5 @@ install: ce
 	@echo "so that SEP copyeditor mode is loaded whenever you start Emacs."
 
 clean:
-	rm -f *~
-	rm -f *.elc
+	rm -f $(emacs-backups)
+	rm -f $(elcs)

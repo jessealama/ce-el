@@ -1,5 +1,5 @@
 CE-INSTALL-DIR=$(HOME)/share/emacs/site-lisp/ce
-EMACS=/Applications/Emacs.app/Contents/MacOS/Emacs
+emacs = /Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
@@ -13,10 +13,10 @@ elcs = $(addsuffix .elc,$(files))
 all: emacs-is-real $(elcs)
 
 emacs-is-real:
-	which $(EMACS)
+	which $(emacs)
 
 %.elc: %.el
-	$(EMACS) --no-window-system \
+	$(emacs) --no-window-system \
                  --no-site-file \
                  --no-init-file \
                  --batch \

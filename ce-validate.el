@@ -313,6 +313,8 @@ strip it."
 	(ce-validate-known-special-entity entity-name)
 	(ce-validate-known-symbol entity-name))))
 
+(defconst +non-ascii-regexp+ "[[:nonascii:]]")
+
 (defun ce-validate ()
   "Validate the current buffer."
   (interactive)
@@ -332,7 +334,12 @@ strip it."
 	(let ((next-entity-error (ce-validate-next-entity-error)))
 	  (if next-entity-error
 	      (ce-validate-entities)
-	    (message "XHTML is structurally valid and all entities are known.")))))))
+	    (let ((num-non-ascii-chars (count-matches +non-ascii-regexp+)))
+	      (if (zerop num-non-ascii-chars)
+		  (message "XHTML is structurally valid, all entities are known, and there are no non-ASCII characters.")
+		  (progn
+		    (occur +non-ascii-regexp+)
+		    (message "XHTML is structurally valid and all entities are valid XHTML entities, but there is at least one non-ASCII character in the current buffer."))))))))))
 
 (defun ce-validate-next-entity-error ()
   "The position of the first entity error in the current buffer.

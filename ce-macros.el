@@ -1,10 +1,12 @@
 ;;; ce-macros.el --- Macros for ce
 
 ;;; Commentary:
-;; 
+;;
 ;; This file defines some useful Emacs Lisp macros for the ce-el project.
 
 ;;; Code:
+
+(require 'cl)
 
 (defmacro at-least-two (list)
   "Quickly determine whether LIST has at least two members."
@@ -12,11 +14,15 @@
 
 (defmacro stringify (symbol-or-string)
   "Given SYMBOL-OR-STRING, return a string representation."
-  `(if (stringp ,symbol-or-string) ,symbol-or-string (symbol-name ,symbol-or-string)))
+  `(if (stringp ,symbol-or-string)
+       ,symbol-or-string
+     (symbol-name ,symbol-or-string)))
 
 (defmacro symbolify (symbol-or-string)
   "Return a symbolic representation of SYMBOL-OR-STRING."
-  `(if (symbolp ,symbol-or-string) ,symbol-or-string (make-symbol ,symbol-or-string)))
+  `(if (symbolp ,symbol-or-string)
+       ,symbol-or-string
+     (make-symbol ,symbol-or-string)))
 
 (defmacro beg-of-buffer ()
   "Go to the beginning of the buffer.
@@ -33,6 +39,31 @@ But writing '(goto-char (point-min))' is the kind of
 speaking-in-code that I dislike so much.  Whence this macro."
   `(goto-char (point-min)))
 
+(defmacro current-line ()
+  "The current line number."
+  `(+ (count-lines 1 (point))
+      (if (zerop (current-column))
+	  1
+	0)))
+
+(defmacro keep-evaluating (&rest body)
+  (let ((condition-case-forms
+	 (mapcar #'(lambda (form)
+		     (list 'condition-case
+			   'error-var
+			   form
+			   (list 'error
+				 (list 'message
+				       "Something went wrong; the error was:%c%c  %s%c"
+				       ?\n ?\n (list 'error-message-string 'error-var) ?\n))))
+		 body)))
+    `(progn
+       ,@condition-case-forms)))
+
 (provide 'ce-macros)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-macros.el ends here

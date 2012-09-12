@@ -1,7 +1,7 @@
 ;;; ce-unadorned.el --- Check for and fix unadorned text following HTML elements
 
 ;;; Commentary:
-;; 
+;;
 ;; In XHTML 1.0 Transitional, it is valid to write HTML such as this:
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -19,6 +19,10 @@
 ;; unadorned text.
 
 ;;; Code:
+
+(require 'cl)
+
+(require 'ce-entries)
 
 (defcustom ce-unadorned-fixed-site-directory
   "/tmp/ce"
@@ -117,7 +121,7 @@ corresponding file was found."
 		;; of a tags following "Related Entries".  But
 		;; it seems to do the job for now.
 		(push (line-number-at-pos) violations)))))))))
-    
+
 (defun ce-unadorned-check-this-buffer ()
   "Check the current buffer for unadorned text."
   (interactive)
@@ -199,6 +203,8 @@ copied; the entries that do require fixing are copied and fixed."
 
 (provide 'ce-unadorned)
 
-(provide 'ce-unadorned)
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-unadorned.el ends here

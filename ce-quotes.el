@@ -288,6 +288,7 @@ This means:
   (ce-quote-fix-sharp-quotes)
   (ce-quote-fix-right-quote-entities))
 
+<<<<<<< HEAD
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Debugging and diagnosing
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -371,5 +372,9 @@ This currently is a stub; we don't do anything."
   (ce-initialize))
 
 (provide 'ce-quotes)
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
 
 ;;; ce-quotes.el ends here

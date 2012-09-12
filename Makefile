@@ -5,7 +5,7 @@ unexport EMACSLOADPATH # evil emacs!
 
 .PHONY : ce install clean emacs-is-real
 
-files = ce-entries ce-macros ce-quotes ce-spell ce-tidy ce-unadorned ce-validate ce
+files = ce-entries ce-macros ce-quotes ce-spell ce-tidy ce-unadorned ce-validate ce-dash ce
 els = $(addsuffix .el,$(files))
 emacs-backups = $(addsuffix ~,$(els))
 elcs = $(addsuffix .elc,$(files))

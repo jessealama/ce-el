@@ -1,4 +1,4 @@
-CE-INSTALL-DIR=$(HOME)/share/emacs/site-lisp/ce
+install-dir = $(HOME)/share/emacs/site-lisp/ce
 emacs = /Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
@@ -24,19 +24,19 @@ emacs-is-real:
                  --funcall batch-byte-compile $*.el
 
 install: $(elcs)
-	install --directory $(CE-INSTALL-DIR)
-	install --mode 644 --target-directory $(CE-INSTALL-DIR) $(els)
-	install --mode 644 --target-directory $(CE-INSTALL-DIR) $(elcs)
+	install --directory $(install-dir)
+	install --mode 644 --target-directory $(install-dir) $(els)
+	install --mode 644 --target-directory $(install-dir) $(elcs)
 	@echo
-	@echo "Don't forget to add $(CE-INSTALL-DIR) to your Emacs load path!"
+	@echo "Don't forget to add $(install-dir) to your Emacs load path!"
 	@echo "In your Emacs initialization file, add"
 	@echo
-	@echo "  (add-to-list 'load-path \"$(CE-INSTALL-DIR)\")"
+	@echo "  (add-to-list 'load-path \"$(install-dir)\")"
 	@echo
 	@echo "so that SEP copyeditor mode is loaded whenever you start Emacs."
 
 uninstall:
-	rm -Rf $(CE-INSTALL-DIR)
+	rm -Rf $(install-dir)
 
 clean:
 	rm -f $(emacs-backups)

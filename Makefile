@@ -16,12 +16,12 @@ emacs-is-real:
 	@which $(emacs)
 
 %.elc: %.el
-	$(emacs) --no-window-system \
-                 --no-site-file \
-                 --no-init-file \
-                 --batch \
-                 --directory '.' \
-                 --funcall batch-byte-compile $*.el
+	@$(emacs) --no-window-system \
+                  --no-site-file \
+                  --no-init-file \
+                  --batch \
+                  --directory '.' \
+                  --funcall batch-byte-compile $*.el
 
 install: $(elcs)
 	install --directory $(install-dir)

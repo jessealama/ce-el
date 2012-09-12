@@ -13,6 +13,7 @@
 
 ;; Our stuff
 (require 'ce-macros)
+(require 'ce-utils)
 
 (defvar *xhtml-latin-1-entites*
   '(
@@ -277,14 +278,6 @@
     ["9829" "2665" "hearts"]
     ["9830" "2666" "diams"]
     ))
-
-(defun member-of-some-array (thing list-of-arrays)
-  "Does THING belong to any of the arrays in LIST-OF-ARRAYS?"
-  (some #'(lambda (entity-array)
-	    (or (string= thing (aref entity-array 0))
-		(string= thing (aref entity-array 1))
-		(string= thing (aref entity-array 2))))
-	list-of-arrays))
 
 (defun ce-validate-known-latin-1-entity (thing)
   "Is THING a known Latin-1 entity?

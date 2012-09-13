@@ -13,7 +13,7 @@
 ;; XML utilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defvar *xhtml-latin-1-entites*
+(defconst *xhtml-latin-1-entites*
   '(
     ["160" "A0" "nbsp"]
     ["161" "A1" "iexcl"]
@@ -112,7 +112,7 @@
     ["254" "FE" "thorn"]
     ["255" "FF" "yuml"]))
 
-(defvar *xhtml-special-entities*
+(defconst *xhtml-special-entities*
   '(
     ["34" "22" "quot"]
     ["38" "26" "amp"]
@@ -149,7 +149,7 @@
     ["8364" "20AC" "euro"]
     ))
 
-(defvar *xhtml-symbol-entities*
+(defconst *xhtml-symbol-entities*
   '(
     ["402" "192" "fnof"]
     ["913" "391" "Alpha"]

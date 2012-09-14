@@ -303,8 +303,7 @@
 		  (code-point (gethash entity *decimal-code-point-for-entity*)))
 	     (when code-point
 	       (delete-region begin end)
-	       (insert ?\& ?\# code-point ?\;)
-	       (setf end (point))))
+	       (insert ?\& ?\# code-point ?\;)))
 	 (error "The string '%s' appears not to be an entity." data))))))
 
 (provide 'ce-utils)

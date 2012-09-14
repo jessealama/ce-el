@@ -1,5 +1,6 @@
 
 (require 'cl)
+(require 'nxml-mode)
 
 (defun member-of-some-array (thing list-of-arrays)
   "Does THING belong to any of the arrays in LIST-OF-ARRAYS?"
@@ -276,6 +277,44 @@
     ["9829" "2665" "hearts"]
     ["9830" "2666" "diams"]
     ))
+
+(defconst *decimal-code-point-for-entity*
+  (let ((hash (make-hash-table :test 'equal)))
+    (dolist (triple (append *xhtml-latin-1-entites*
+			    *xhtml-special-entities*
+			    *xhtml-symbol-entities*))
+      (let ((code-point (aref triple 0))
+	    (entity (aref triple 2)))
+	(setf (gethash entity hash) code-point)))
+    hash))
+
+(defun resolve-named-entities-decimally ()
+  (when (not (fboundp 'nxml-mode))
+    (error "We rely on the nXML parser to resolve entities, but it seems that nxml-mode is not available."))
+  ;; switch to nxml mode
+  (when (not (eq major-mode 'nxml-mode))
+    (nxml-mode))
+  (save-excursion
+    (goto-char (point-min))
+    (let* ((begin (point))
+	   (current-xml-token (xmltok-forward))
+	   (end (point)))
+      (while current-xml-token
+	(when (eq current-xml-token 'entity-ref)
+	  (message "current xml token is '%s'.  Char is at %d, begin = %d and end = %d" current-xml-token (point) begin end)
+	  (let ((data (buffer-substring-no-properties begin end)))
+	    (message "data is '%s'" data)
+	    (if (string-match "^[&]\\\([^: ]+\\\)[;]$" data)
+		(let* ((entity (match-string 1 data))
+		       (code-point (gethash entity *decimal-code-point-for-entity*)))
+		  ;; (error "entity is '%s' and code-point is '%s'" entity code-point)
+		  (when code-point
+		    (delete-region begin (1+ end))
+		    (insert ?\& ?\# code-point ?\;)))
+	      (error "The string '%s' appears not to be an entity." data))))
+	(setf begin end
+	      current-xml-token (xmltok-forward)
+	      end (point))))))
 
 (provide 'ce-utils)
 

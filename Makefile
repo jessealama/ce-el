@@ -21,7 +21,7 @@ els := $(addsuffix .el,$(elisp-files))
 elcs := $(addsuffix .elc,$(elisp-files))
 pls := $(addsuffix .pl,$(perl-scripts))
 
-files := Makefile $(elisp-files)
+files := Makefile $(els) $(pls)
 emacs-backups := $(addsuffix ~,$(files))
 
 all: $(elcs)

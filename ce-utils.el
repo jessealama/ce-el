@@ -1,6 +1,7 @@
 
 (require 'cl)
 (require 'nxml-mode)
+(require 'ce-macros)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sequences
@@ -293,30 +294,18 @@
     hash))
 
 (defun resolve-named-entities-decimally ()
-  (when (not (fboundp 'nxml-mode))
-    (error "We rely on the nXML parser to resolve entities, but it seems that nxml-mode is not available."))
-  ;; switch to nxml mode
-  (when (not (eq major-mode 'nxml-mode))
-    (nxml-mode))
-  (save-excursion
-    (goto-char (point-min))
-    (let* ((begin (point))
-	   (current-xml-token (xmltok-forward))
-	   (end (point)))
-      (while current-xml-token
-	(when (eq current-xml-token 'entity-ref)
-	  (let ((data (buffer-substring-no-properties begin end)))
-	    (if (string-match "^[&]\\\([[:alnum:]]+\\\)[;]$" data)
-		(let* ((entity (match-string 1 data))
-		       (code-point (gethash entity *decimal-code-point-for-entity*)))
-		  (when code-point
-		    (delete-region begin end)
-		    (insert ?\& ?\# code-point ?\;)
-		    (setf end (point))))
-	      (error "The string '%s' appears not to be an entity." data))))
-	(setf begin end
-	      current-xml-token (xmltok-forward)
-	      end (point))))))
+  (ensure-nxml-mode)
+  (foreach-xml-token
+   (when (eq current-xml-token 'entity-ref)
+     (let ((data (buffer-substring-no-properties begin end)))
+       (if (string-match "^[&]\\\([[:alnum:]]+\\\)[;]$" data)
+	   (let* ((entity (match-string 1 data))
+		  (code-point (gethash entity *decimal-code-point-for-entity*)))
+	     (when code-point
+	       (delete-region begin end)
+	       (insert ?\& ?\# code-point ?\;)
+	       (setf end (point))))
+	 (error "The string '%s' appears not to be an entity." data))))))
 
 (provide 'ce-utils)
 

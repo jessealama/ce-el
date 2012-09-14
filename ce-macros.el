@@ -60,6 +60,25 @@ speaking-in-code that I dislike so much.  Whence this macro."
     `(progn
        ,@condition-case-forms)))
 
+(defmacro ensure-nxml-mode ()
+  `(progn
+     (when (not (fboundp 'nxml-mode))
+       (error "It seems that nxml-mode is not available."))
+     (when (not (eq major-mode 'nxml-mode))
+       (nxml-mode))))
+
+(defmacro foreach-xml-token (&rest body)
+  `(save-excursion
+     (goto-char (point-min))
+     (let* ((begin (point))
+	    (current-xml-token (xmltok-forward))
+	    (end (point)))
+       (while current-xml-token
+	 ,@body
+	 (setf begin end
+	       current-xml-token (xmltok-forward)
+	       end (point))))))
+
 (provide 'ce-macros)
 
 ;; Local Variables:

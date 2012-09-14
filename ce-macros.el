@@ -75,8 +75,7 @@ speaking-in-code that I dislike so much.  Whence this macro."
 	    (end (point)))
        (while current-xml-token
 	 ,@body
-	 (setf end (point)
-	       begin end
+	 (setf begin end
 	       current-xml-token (xmltok-forward)
 	       end (point))))))
 

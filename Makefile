@@ -1,28 +1,28 @@
-install-dir = $(HOME)/share/emacs/site-lisp/ce
-emacs = /Applications/Emacs.app/Contents/MacOS/Emacs
+install-dir := $(HOME)/share/emacs/site-lisp/ce
+emacs := /Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
 .PHONY : ce install clean
 
-elisp-files = ce-entries \
-              ce-macros \
-              ce-quotes \
-              ce-spell \
-              ce-tidy \
-              ce-unadorned \
-              ce-validate \
-              ce-dash \
-              ce-utils \
-              ce
-perl-scripts = validate
+elisp-files := ce-entries \
+               ce-macros \
+               ce-quotes \
+               ce-spell \
+               ce-tidy \
+               ce-unadorned \
+               ce-validate \
+               ce-dash \
+               ce-utils \
+               ce
+perl-scripts := validate
 
-els = $(addsuffix .el,$(elisp-files))
-elcs = $(addsuffix .elc,$(elisp-files))
-pls = $(addsuffix .pl,$(perl-scripts))
+els := $(addsuffix .el,$(elisp-files))
+elcs := $(addsuffix .elc,$(elisp-files))
+pls := $(addsuffix .pl,$(perl-scripts))
 
-files = Makefile $(elisp-files)
-emacs-backups = $(addsuffix ~,$(files))
+files := Makefile $(elisp-files)
+emacs-backups := $(addsuffix ~,$(files))
 
 all: $(elcs)
 

@@ -5,11 +5,20 @@ unexport EMACSLOADPATH # evil emacs!
 
 .PHONY : ce install clean
 
-elisp-files = ce-entries ce-macros ce-quotes ce-spell ce-tidy ce-unadorned ce-validate ce-dash ce-utils ce
+elisp-files = ce-entries \
+              ce-macros \
+              ce-quotes \
+              ce-spell \
+              ce-tidy \
+              ce-unadorned \
+              ce-validate \
+              ce-dash \
+              ce-utils \
+              ce
+perl-scripts = validate
+
 els = $(addsuffix .el,$(elisp-files))
 elcs = $(addsuffix .elc,$(elisp-files))
-
-perl-scripts = validate
 pls = $(addsuffix .pl,$(perl-scripts))
 
 files = Makefile $(elisp-files)

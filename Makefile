@@ -3,7 +3,7 @@ emacs = /Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
-.PHONY : ce install clean emacs-is-real
+.PHONY : ce install clean
 
 elisp-files = ce-entries ce-macros ce-quotes ce-spell ce-tidy ce-unadorned ce-validate ce-dash ce-utils ce
 els = $(addsuffix .el,$(elisp-files))
@@ -15,10 +15,7 @@ pls = $(addsuffix .pl,$(perl-scripts))
 files = Makefile $(elisp-files)
 emacs-backups = $(addsuffix ~,$(files))
 
-all: emacs-is-real $(elcs)
-
-emacs-is-real:
-	@which $(emacs)
+all: $(elcs)
 
 %.elc: %.el
 	@$(emacs) --no-window-system \

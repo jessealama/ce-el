@@ -305,16 +305,14 @@
 	   (end (point)))
       (while current-xml-token
 	(when (eq current-xml-token 'entity-ref)
-	  (message "current xml token is '%s'.  Char is at %d, begin = %d and end = %d" current-xml-token (point) begin end)
 	  (let ((data (buffer-substring-no-properties begin end)))
-	    (message "data is '%s'" data)
-	    (if (string-match "^[&]\\\([^: ]+\\\)[;]$" data)
+	    (if (string-match "^[&]\\\([[:alnum:]]+\\\)[;]$" data)
 		(let* ((entity (match-string 1 data))
 		       (code-point (gethash entity *decimal-code-point-for-entity*)))
-		  ;; (error "entity is '%s' and code-point is '%s'" entity code-point)
 		  (when code-point
-		    (delete-region begin (1+ end))
-		    (insert ?\& ?\# code-point ?\;)))
+		    (delete-region begin end)
+		    (insert ?\& ?\# code-point ?\;)
+		    (setf end (point))))
 	      (error "The string '%s' appears not to be an entity." data))))
 	(setf begin end
 	      current-xml-token (xmltok-forward)

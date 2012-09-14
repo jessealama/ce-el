@@ -2,6 +2,10 @@
 (require 'cl)
 (require 'nxml-mode)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Sequences
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun member-of-some-array (thing list-of-arrays)
   "Does THING belong to any of the arrays in LIST-OF-ARRAYS?"
   (some #'(lambda (entity-array)

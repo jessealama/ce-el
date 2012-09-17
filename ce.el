@@ -54,6 +54,7 @@
 (require 'ce-quotes)
 (require 'ce-spell)
 (require 'ce-dash)
+(require 'ce-entities)
 
 ;;; User variables and customization
 

@@ -113,11 +113,18 @@ Encyclopedia of Philosophy."
 	    (fboundp 'ce-validate-next-error)]
 	   ["Previous error"
 	    (call-interactively 'ce-validate-previous-error)
-	    (fboundp 'ce-validate-previous-error)]
+	    (fboundp 'ce-validate-previous-error)])
+	 '("Entities"
+	   ["Rewrite entities decimally"
+	    (call-interactively 'ce-entities-resolve-named-entities-decimally)
+	    (fboundp 'ce-entities-resolve-named-entities-decimally)]
+	   ["Name (hexi)decimal entities"
+	    (call-interactively 'ce-entities-name-decimal-entities)
+	    (fboundp 'ce-entities-name-decimal-entities)]
 	   ["Check XHTML entities"
 	    (call-interactively 'ce-validate-entities)
 	    (fboundp 'ce-validate-entities)])
-         "-"
+	 "-"
          ["Customize CE mode"
           (customize-group 'ce)
           t]))

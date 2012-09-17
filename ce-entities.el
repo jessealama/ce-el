@@ -317,4 +317,8 @@
 
 (provide 'ce-entities)
 
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:
+
 ;;; ce-entities.el ends here

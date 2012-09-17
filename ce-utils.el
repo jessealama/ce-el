@@ -298,6 +298,7 @@
 
 (defun resolve-named-entities-decimally ()
   "Replace all named XHTML entites by their decimal character reference equivalents."
+  (interactive)
   (ensure-nxml-mode)
   (foreach-xml-token
    (when (eq current-xml-token 'entity-ref)
@@ -313,6 +314,7 @@
 
 (defun name-decimal-entities ()
   "Rewrite decimal character references as XHTML named entities (when possible)."
+  (interactive)
   (ensure-nxml-mode)
   (foreach-xml-token
    (when (eq current-xml-token 'char-ref)

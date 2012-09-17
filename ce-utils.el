@@ -297,6 +297,7 @@
     (defconst *name-for-decimal-entity* name-hash)))
 
 (defun resolve-named-entities-decimally ()
+  "Replace all named XHTML entites by their decimal character reference equivalents."
   (ensure-nxml-mode)
   (foreach-xml-token
    (when (eq current-xml-token 'entity-ref)
@@ -311,6 +312,7 @@
 	 (error "The string '%s' appears not to be an entity." data))))))
 
 (defun name-decimal-entities ()
+  "Rewrite decimal character references as XHTML named entities (when possible)."
   (ensure-nxml-mode)
   (foreach-xml-token
    (when (eq current-xml-token 'char-ref)

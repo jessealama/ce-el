@@ -14,40 +14,7 @@
 ;; Our stuff
 (require 'ce-macros)
 (require 'ce-utils)
-
-(defun ce-validate-known-latin-1-entity (thing)
-  "Is THING a known Latin-1 entity?
-
-\(It should not start with \"&\" and it should not end with
-\";\"."
-  (member-of-some-array thing *xhtml-latin-1-entites*))
-
-(defun ce-validate-known-special-entity (thing)
-  "Is THING a known XHTML special entity?
-
-\(It should not start with \"&\" and it should not end with
-\";\"."
-  (member-of-some-array thing *xhtml-special-entities*))
-
-(defun ce-validate-known-symbol (thing)
-  "Is THING a known XHTML entity?"
-  (member-of-some-array thing *xhtml-symbol-entities*))
-
-(defun maybe-extract-entity-name (thing)
-  "Strip an initial ampersand and a final semicolon from THING.
-
-If THING does not start with an ampersand, don't strip the
-initial character.  If THING does not end with a semicolon, don't
-strip it."
-  (string-match "\\([&]\\)?\\([a-zA-Z0-9]+\\)\\([;]\\)?" thing)
-  (match-string-no-properties 2 thing))
-
-(defun ce-validate-known-entity (thing)
-  "Determine whether THING is a known XHTML entity."
-  (let ((entity-name (maybe-extract-entity-name thing)))
-    (or (ce-validate-known-latin-1-entity entity-name)
-	(ce-validate-known-special-entity entity-name)
-	(ce-validate-known-symbol entity-name))))
+(require 'ce-entities)
 
 (defconst +non-ascii-regexp+ "[[:nonascii:]]")
 
@@ -90,7 +57,7 @@ If there are no errors, return NIL."
 	(while token
 	  (if (eq token 'entity-ref)
 	      (let ((entity (buffer-substring-no-properties begin end)))
-		(if (ce-validate-known-entity entity)
+		(if (ce-entities-known-entity entity)
 		    (setf begin end
 			  token (xmltok-forward)
 			  end (point))

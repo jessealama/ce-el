@@ -310,6 +310,20 @@
 	       (setf end (point))))
 	 (error "The string '%s' appears not to be an entity." data))))))
 
+(defun name-decimal-entities ()
+  (ensure-nxml-mode)
+  (foreach-xml-token
+   (when (eq current-xml-token 'char-ref)
+     (let ((data (buffer-substring-no-properties begin end)))
+       (if (string-match "^[&][#]\\\([[:digit:]]+\\\)[;]$" data)
+	   (let* ((code-point (match-string 1 data))
+		  (entity (gethash code-point *name-for-decimal-entity*)))
+	     (when entity
+	       (delete-region begin end)
+	       (insert ?\& entity ?\;)
+	       (setf end (point))))
+	 (error "The string '%s' appears not to be an entity." data))))))
+
 (provide 'ce-utils)
 
 ;; Local Variables:

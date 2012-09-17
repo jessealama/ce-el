@@ -283,15 +283,18 @@
     ["9830" "2666" "diams"]
     ))
 
-(defconst *decimal-code-point-for-entity*
-  (let ((hash (make-hash-table :test 'equal)))
+(eval-when-compile
+  (let ((code-point-hash (make-hash-table :test 'equal))
+	(name-hash (make-hash-table :test 'equal)))
     (dolist (triple (append *xhtml-latin-1-entites*
 			    *xhtml-special-entities*
 			    *xhtml-symbol-entities*))
       (let ((code-point (aref triple 0))
 	    (entity (aref triple 2)))
-	(setf (gethash entity hash) code-point)))
-    hash))
+	(setf (gethash entity code-point-hash) code-point)
+	(setf (gethash code-point name-hash) entity)))
+    (defconst *decimal-code-point-for-entity* code-point-hash)
+    (defconst *name-for-decimal-entity* name-hash)))
 
 (defun resolve-named-entities-decimally ()
   (ensure-nxml-mode)

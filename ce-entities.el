@@ -276,12 +276,48 @@
     (dolist (triple (append *xhtml-latin-1-entites*
 			    *xhtml-special-entities*
 			    *xhtml-symbol-entities*))
-      (let ((code-point (aref triple 0))
+      (let ((decimal-code-point (aref triple 0))
+	    (hexidecimal-code-point (aref triple 1))
 	    (entity (aref triple 2)))
-	(setf (gethash entity code-point-hash) code-point)
-	(setf (gethash code-point name-hash) entity)))
+	(setf (gethash entity code-point-hash) decimal-code-point)
+	(setf (gethash decimal-code-point name-hash) entity)
+	(setf (gethash hexidecimal-code-point name-hash) entity)))
     (defconst *decimal-code-point-for-entity* code-point-hash)
-    (defconst *name-for-decimal-entity* name-hash)))
+    (defconst *name-for-entity* name-hash)))
+
+(defun ce-entities-known-latin-1-entity (thing)
+  "Is THING a known Latin-1 entity?
+
+\(It should not start with \"&\" and it should not end with
+\";\"."
+  (member-of-some-array thing *xhtml-latin-1-entites*))
+
+(defun ce-entities-known-special-entity (thing)
+  "Is THING a known XHTML special entity?
+
+\(It should not start with \"&\" and it should not end with
+\";\"."
+  (member-of-some-array thing *xhtml-special-entities*))
+
+(defun ce-entities-known-symbol (thing)
+  "Is THING a known XHTML entity?"
+  (member-of-some-array thing *xhtml-symbol-entities*))
+
+(defun ce-entities-maybe-extract-entity-name (thing)
+  "Strip an initial ampersand and a final semicolon from THING.
+
+If THING does not start with an ampersand, don't strip the
+initial character.  If THING does not end with a semicolon, don't
+strip it."
+  (string-match "\\([&]\\)?\\([a-zA-Z0-9]+\\)\\([;]\\)?" thing)
+  (match-string-no-properties 2 thing))
+
+(defun ce-entities-known-entity (thing)
+  "Determine whether THING is a known XHTML entity."
+  (let ((entity-name (maybe-extract-entity-name thing)))
+    (or (ce-entities-known-latin-1-entity entity-name)
+	(ce-entities-known-special-entity entity-name)
+	(ce-entities-known-symbol entity-name))))
 
 (defun ce-entities-resolve-named-entities-decimally ()
   "Replace all named XHTML entites by their decimal character reference equivalents."
@@ -299,7 +335,7 @@
 	       (setf end (point))))
 	 (error "The string '%s' appears not to be an entity." data))))))
 
-(defun ce-entities-name-decimal-entities ()
+(defun ce-entities-name-numeric-entities ()
   "Rewrite decimal character references as XHTML named entities (when possible)."
   (interactive)
   (ensure-nxml-mode)
@@ -308,7 +344,7 @@
      (let ((data (buffer-substring-no-properties begin end)))
        (if (string-match "^[&][#]\\\([[:digit:]]+\\\)[;]$" data)
 	   (let* ((code-point (match-string 1 data))
-		  (entity (gethash code-point *name-for-decimal-entity*)))
+		  (entity (gethash code-point *name-for-entity*)))
 	     (when entity
 	       (delete-region begin end)
 	       (insert ?\& entity ?\;)

@@ -33,7 +33,7 @@ all: $(elcs)
 
 %.deps: %.el
 	@set -e; rm -f $@; \
-	/bin/echo -n "$< $@ : " | sed -e 's/\.el/.elc/' > $@; \
+	/bin/echo -n "$< : " | sed -e 's/\.el/.elc/' > $@; \
 	egrep --only-matching "^\(require .+\)" $< \
 	  | tr -d "()'" \
 	  | sed -e 's/^require //' \

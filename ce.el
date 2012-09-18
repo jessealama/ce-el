@@ -120,8 +120,8 @@ Encyclopedia of Philosophy."
 	    (call-interactively 'ce-entities-resolve-named-entities-decimally)
 	    (fboundp 'ce-entities-resolve-named-entities-decimally)]
 	   ["Name (hexi)decimal entities"
-	    (call-interactively 'ce-entities-name-decimal-entities)
-	    (fboundp 'ce-entities-name-decimal-entities)]
+	    (call-interactively 'ce-entities-name-numeric-entities)
+	    (fboundp 'ce-entities-name-numeric-entities)]
 	   ["Check XHTML entities"
 	    (call-interactively 'ce-validate-entities)
 	    (fboundp 'ce-validate-entities)])

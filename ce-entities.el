@@ -315,7 +315,7 @@ strip it."
 
 (defun ce-entities-known-entity (thing)
   "Determine whether THING is a known XHTML entity."
-  (let ((entity-name (maybe-extract-entity-name thing)))
+  (let ((entity-name (ce-entities-maybe-extract-entity-name thing)))
     (or (ce-entities-known-latin-1-entity entity-name)
 	(ce-entities-known-special-entity entity-name)
 	(ce-entities-known-symbol entity-name))))

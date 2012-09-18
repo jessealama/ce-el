@@ -22,13 +22,27 @@ elisp-files := $(project-prefix)-entries \
 perl-scripts := validate
 
 els := $(addsuffix .el,$(elisp-files))
+el-deps := $(addsuffix .deps,$(elisp-files))
 elcs := $(addsuffix .elc,$(elisp-files))
 pls := $(addsuffix .pl,$(perl-scripts))
 
 files := Makefile $(els) $(pls)
 emacs-backups := $(addsuffix ~,$(files))
 
+-include $(el-deps)
+
 all: $(elcs)
+
+%.deps: %.el
+	@set -e; rm -f $@; \
+	/bin/echo -n "$< $@ : " | sed -e 's/\.el/.elc/' > $@; \
+	egrep --only-matching "^\(require .+\)" $< \
+	  | tr -d "()'" \
+	  | sed -e 's/^require //' \
+	  | grep '^$(project-prefix)-' \
+	  | sed -e 's/$$/.elc/' \
+	  | tr '\n' ' ' \
+	  >> $@
 
 %.elc: %.el
 	@$(emacs) --no-window-system \
@@ -56,5 +70,4 @@ uninstall:
 clean:
 	rm -f $(emacs-backups)
 	rm -f $(elcs)
-
-include Makefile.deps
+	rm -f $(el-deps)

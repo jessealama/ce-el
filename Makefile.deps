@@ -1,0 +1,14 @@
+ce-dash.elc:
+ce-entities.elc: ce-macros.elc ce-utils.elc
+ce-entries.elc: ce-macros.elc
+ce-macros.elc:
+ce-quotes.elc:
+ce-spell.elc:
+ce-tidy.elc:
+ce-unadorned.elc: ce-entries.elc
+ce-utils.elc: ce-macros.elc
+ce-validate.elc: ce-macros.elc ce-utils.elc ce-entities.elc
+ce-xhtml.elc:
+ce.elc: ce-macros.elc ce-entries.elc ce-validate.elc ce-quotes.elc ce-spell.elc ce-dash.elc ce-entities.elc
+
+# -*- mode:makefile; -*-

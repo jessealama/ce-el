@@ -15,6 +15,7 @@ elisp-files := ce-entries \
                ce-dash \
                ce-utils \
                ce-entities \
+               ce-xhtml \
                ce
 perl-scripts := validate
 

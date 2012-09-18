@@ -2,6 +2,7 @@
 (require 'cl)
 (require 'nxml-mode)
 (require 'ce-macros)
+(require 'ce-utils)
 
 (eval-when-compile
   (defconst *xhtml-latin-1-entites*

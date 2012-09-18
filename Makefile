@@ -53,3 +53,5 @@ uninstall:
 clean:
 	rm -f $(emacs-backups)
 	rm -f $(elcs)
+
+include Makefile.deps

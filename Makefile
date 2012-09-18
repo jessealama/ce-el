@@ -5,18 +5,20 @@ unexport EMACSLOADPATH # evil emacs!
 
 .PHONY : ce install clean
 
-elisp-files := ce-entries \
-               ce-macros \
-               ce-quotes \
-               ce-spell \
-               ce-tidy \
-               ce-unadorned \
-               ce-validate \
-               ce-dash \
-               ce-utils \
-               ce-entities \
-               ce-xhtml \
-               ce
+project-prefix := ce
+
+elisp-files := $(project-prefix)-entries \
+               $(project-prefix)-macros \
+               $(project-prefix)-quotes \
+               $(project-prefix)-spell \
+               $(project-prefix)-tidy \
+               $(project-prefix)-unadorned \
+               $(project-prefix)-validate \
+               $(project-prefix)-dash \
+               $(project-prefix)-utils \
+               $(project-prefix)-entities \
+               $(project-prefix)-xhtml \
+               $(project-prefix)
 perl-scripts := validate
 
 els := $(addsuffix .el,$(elisp-files))

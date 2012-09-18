@@ -29,8 +29,6 @@ pls := $(addsuffix .pl,$(perl-scripts))
 files := Makefile $(els) $(pls)
 emacs-backups := $(addsuffix ~,$(files))
 
--include $(el-deps)
-
 all: $(elcs)
 
 %.deps: %.el
@@ -71,3 +69,5 @@ clean:
 	rm -f $(emacs-backups)
 	rm -f $(elcs)
 	rm -f $(el-deps)
+
+-include $(el-deps)

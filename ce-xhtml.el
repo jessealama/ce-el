@@ -92,7 +92,15 @@
 		   (princ (ce-xhtml-render-nxml-thing child)))
 		 (princ (ce-xhtml-render-closing-tag element))))
 	   (error
-	    (error "Unable to make sense of the nXML thing%c%c%s%c%cas an nXML element.%c%cThe error is:%c%s" ?\n ?\n thing ?\n ?\n ?\n ?\n ?\n (error-message-string structure-error)))))
+	    (error "Unable to make sense of the nXML thing
+
+%s
+
+cas an nXML element.
+
+The error is:
+
+%s" thing (error-message-string structure-error)))))
 	(t
 	 (error "Unable to handle nXML thing%c%c'%s'" ?\n ?\n thing))))
 

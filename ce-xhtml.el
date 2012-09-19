@@ -2,20 +2,6 @@
 (require 'cl)
 (require 'nxml-mode)
 
-(defun ce-xhtml-character-blocks-of (thing)
-  (cond ((null thing) nil)
-	((symbolp thing) nil)
-	((stringp thing) (list thing))
-	((consp thing)
-	 (condition-case nil
-	     (destructuring-bind (element attributes . children)
-		 thing
-	       (reduce 'append (mapcar 'ce-xhtml-character-blocks-of children)))
-	   (error
-	    (error "Don't know how to extract the character blocks of '%s'" thing))))
-	(t
-	 (error "Don't know how to extract the character blocks of '%s'" thing))))
-
 (defun ce-xhtml-render-attribute (attribute)
   (cond ((stringp attribute) attribute)
 	((consp attribute)

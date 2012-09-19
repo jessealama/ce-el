@@ -8,7 +8,14 @@
   (or (string= entity-str "&ndash;")
       (string= entity-str "&mdash;")))
 
+(defconst *ce-dash-dashes* (list "-" " " " "))
+
+(defconst *ce-dash-dash-regexp* (regexp-opt *ce-dash-dashes*))
+
 (defun ce-dash-inspect-string (string)
+  (let ((dash-position (string-match *ce-dash-dash-regexp* string)))
+    (when dash-position
+      (setf (aref string dash-position) ?\#)))
   string)
 
 (defun ce-dash-inspect-nxml-thing (thing)

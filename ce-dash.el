@@ -12,8 +12,10 @@
   string)
 
 (defun ce-dash-inspect-nxml-thing (thing)
-  (cond ((stringp thing) (ce-dash-inspect-string thing))
-	((null thing) nil)
+  (cond ((stringp thing)
+	 (ce-dash-inspect-string thing))
+	((null thing)
+	 nil)
 	((consp thing)
 	 (let ((element nil)
 	       (attributes nil)

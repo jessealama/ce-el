@@ -38,7 +38,9 @@
   (let ((tree (condition-case nxml-parse-error
 		  (nxml-parse-file (buffer-file-name))
 		(error
-		 (error "Unable to parse the current buffer as XML:%c%c%s" ?\n ?\n (error-message-string nxml-parse-error))))))
+		 (error "Unable to parse the current buffer as XML:
+
+%s" (error-message-string nxml-parse-error))))))
     (let ((new-tree (ce-dash-inspect-nxml-thing tree)))
       (erase-buffer)
       (insert (ce-xhtml-render-nxml-thing new-tree)))))

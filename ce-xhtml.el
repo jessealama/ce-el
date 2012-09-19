@@ -75,7 +75,9 @@
 	  (princ name)
 	  (princ ">")))
     (error
-     (error "Cannot render closing tag for '%s':%c%c%s" element ?\n ?\n (error-message-string structure-error)))))
+     (error "Cannot render closing tag for '%s'.  The error was:
+
+%s" element (error-message-string structure-error)))))
 
 (defun ce-xhtml-render-nxml-thing (thing)
   (cond ((null thing)

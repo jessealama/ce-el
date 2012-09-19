@@ -52,7 +52,17 @@
 	    (princ (ce-xhtml-render-attribute-and-value attribute)))
 	  (princ ">")))
     (error
-     (error "Cannot render tag '%s' with attributes '%s':%c%c%s" element attributes ?\n ?\n (error-message-string structure-error)))))
+     (error "Cannot render tag
+
+%s
+
+with attributes
+
+  %s
+
+The error was:
+
+%s" element attributes (error-message-string structure-error)))))
 
 (defun ce-xhtml-render-closing-tag (element)
   (condition-case structure-error

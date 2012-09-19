@@ -102,7 +102,9 @@ The error is:
 
 %s" thing (error-message-string structure-error)))))
 	(t
-	 (error "Unable to handle nXML thing%c%c'%s'" ?\n ?\n thing))))
+	 (error "Unable to handle the nXML thing
+
+%s" thing))))
 
 (provide 'ce-xhtml)
 

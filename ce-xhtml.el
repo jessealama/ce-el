@@ -80,8 +80,6 @@
 (defun ce-xhtml-render-nxml-thing (thing)
   (cond ((null thing)
 	 "")
-	((symbolp thing)
-	 (error "Don't know how to handle a symbol '%s'" thing))
 	((stringp thing)
 	 thing)
 	((consp thing)

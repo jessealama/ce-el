@@ -86,7 +86,6 @@
 	 (condition-case structure-error
 	     (destructuring-bind (element attributes . children)
 		 thing
-	       (message "there are %d children" (length children))
 	       (with-output-to-string
 		 (princ (ce-xhtml-render-tag element attributes))
 		 (dolist (child children)

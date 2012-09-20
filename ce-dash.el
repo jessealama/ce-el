@@ -3,6 +3,7 @@
 (require 'nxml-mode)
 (require 'ce-xhtml)
 (require 'ce-entities)
+(require 'ce-utils)
 
 (defun ce-dash-is-dash-entity (entity-str)
   (or (string= entity-str "&ndash;")
@@ -12,51 +13,18 @@
 
 (defconst *ce-dash-dash-regexp* (regexp-opt *ce-dash-dashes*))
 
-(defun ce-dash-discretize-string (string)
-  (let ((len (length string)))
-    (cond ((= len 0) "")
-	  ((= len 1) string)
-	  (t
-	   (with-output-to-string
-	     (loop
-	      initially (princ "| ")
-	      for i from 0 upto (- len 2)
-	      for char across string do (princ (format "%c | " char))
-	      finally (princ (format "%c |" (aref string (- len 1))))))))))
-
-(defun ce-dash-position-in-digitized-string (string position)
-  (let ((len (length string)))
-    (unless (and (<= 0 position)
-		 (< position len))
-      (error "Cannot look at position %d of the string '%s' because the string has only %d characters." position string len))
-    (if (zerop position)
-	2
-      (+ (* position 4) 3))))
-
-(defun ce-dash-range-of-position-in-digitized-string (string position)
-  (let ((len (length string)))
-    (unless (and (<= 0 position)
-		 (< position len))
-      (error "Cannot look at position %d of the string '%s' because the string has only %d characters." position string len))
-    (let ((position-in-digitized (ce-dash-position-in-digitized-string string position)))
-      (cons (- position-in-digitized 2)
-	    (+ position-in-digitized 1)))))
-
 (defun ce-dash-inspect-string (string)
   (let ((dash-position (string-match *ce-dash-dash-regexp* string)))
     (when dash-position
-      (let ((dash-editor-buf (get-buffer-create "*Dash Editor*"))
-	    (digitized (ce-dash-discretize-string string))
-	    (digitized-cursor (ce-dash-position-in-digitized-string string dash-position)))
-	(put-text-property dash-position dash-position 'face 'bold digitized)
-	(let ((range (ce-dash-range-of-position-in-digitized-string string dash-position)))
-	    (destructuring-bind (begin . end)
-		range
-	      (add-text-properties begin end (list 'face 'highlight) digitized)))
+      (let* ((dash-editor-buf (get-buffer-create "*Dash Editor*"))
+	     (cs (cursored-string "dash-ful"
+				  :string string
+				  :initial-position dash-position))
+	     (pos (cursor-in-digitized-string cs)))
 	(with-current-buffer dash-editor-buf
 	  (erase-buffer)
-	  (insert digitized)
-	  (goto-char digitized-cursor)))))
+	  (insert (cs-render cs))
+	  (goto-char pos)))))
   string)
 
 (defun ce-dash-inspect-nxml-thing (thing)

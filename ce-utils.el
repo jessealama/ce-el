@@ -31,7 +31,7 @@
 	   :documentation "The current position of the cursored string.")))
 
 (defmethod cs-length ((cs cursored-string))
-  (length (oref cs string)))
+  (values (length (oref cs string))))
 
 (defconst +cs-render-separator+ "|"
   "The string used to separate the characters of a rendered cursorsed-string.")

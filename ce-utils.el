@@ -2,6 +2,7 @@
 (require 'cl)
 (require 'nxml-mode)
 (require 'ce-macros)
+(require 'eieio)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sequences

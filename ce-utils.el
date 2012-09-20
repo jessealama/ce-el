@@ -36,7 +36,7 @@
 (defconst +cs-render-separator+ "|"
   "The string used to separate the characters of a rendered cursorsed-string.")
 
-(defmethod cs-discretize ((cs cursored-string))
+(defmethod cs-digitize ((cs cursored-string))
   (let ((string (copy-sequence (oref cs string)))
 	(cursor-pos (oref cs cursor)))
     (with-output-to-string
@@ -44,16 +44,34 @@
        initially (princ (format "%s" +cs-render-separator+))
        for char across string
        do
-       (princ (format " %c %s") char +cs-render-separator+)))))
+       (princ (format " %c %s" char +cs-render-separator+))))))
+
+(defmethod cursor-in-digitized-string ((cs cursored-string))
+  "What is the cursor in CS, were it digitized?
+
+If cs-digitize changes, this function may need to be changed."
+  (let ((cursor (oref cs cursor)))
+    (if (zerop cursor)
+	2
+      (+ (* cursor 4) 3))))
 
 (defmethod range-of-cursor-in-digitized-string ((cs cursored-string))
-  (let ((cursor (ce-dash-position-in-digitized-string string position)))
-    (cons (- position-in-digitized 2)
-	  (+ position-in-digitized 1))))
+  "What would the range of the cursor of CS be if it were digitized?
+
+The answer is a pair of integers.
+
+If cs-digitize changes, then this function may need to be changed."
+  (let ((cursor-in-digitized (cursor-in-digitized-string cs)))
+    (cons (- cursor-in-digitized 2)
+	  (+ cursor-in-digitized 1))))
 
 (defmethod cs-render ((cs cursored-string))
-  (let ((cursor-pos (oref cs cursor)))
-    (let ((discretized (cs-discretize cs))))))
+  (let ((digitized (cs-digitize cs)))
+    (let ((range (range-of-cursor-in-digitized-string cs)))
+      (destructuring-bind (begin . end)
+	  range
+	(add-text-properties begin end (list 'face 'highlight) digitized)))
+    digitized))
 
 (provide 'ce-utils)
 

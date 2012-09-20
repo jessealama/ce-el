@@ -22,7 +22,7 @@
 
 (defclass cursored-string ()
   ((string :initarg :string
-	   :initform (error "To create a cursored-string, a string must be provided.")
+	   :initform ""
 	   :type string
 	   :documentation "The underlying string (sequence of characters).")
    (cursor :initarg :initial-position

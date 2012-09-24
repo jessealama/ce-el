@@ -17,28 +17,44 @@
 
 (defun ce-dash-inspect-string (string)
   (let ((dash-position (string-match *ce-dash-dash-regexp* string)))
-    (if (numberp dash-position)
-	(let ((dash-editor-buf (get-buffer-create +ce-dash-editor-buffer-name+)))
-	  (if (bufferp dash-editor-buf)
-	      (ce-dash-edit-dashes-in-buffer string dash-editor-buf)
-	    (error "We could neither find nor create the dash editor buffer."))))
-    string))
+    (cond ((numberp dash-position)
+	   (let ((dash-editor-buf (get-buffer-create +ce-dash-editor-buffer-name+)))
+	     (if (bufferp dash-editor-buf)
+		 (ce-dash-edit-dashes-in-buffer string dash-editor-buf)
+	       (error "We could neither find nor create the dash editor buffer."))))
+	  ((null dash-position)
+	   string)
+	  (t
+	    (error "Unknown result
 
-(defun ce-dash-edit-dashes-in-buffer (string buffer)
-  (unless (stringp string)
-    (error "Cannot edit dashes of a non-string: '%s'" string))
+%s
+
+from string-match applied to the string
+
+  %s" dash-position string)))))
+
+(defun ce-dash-edit-dashes-in-buffer (str buffer)
+  (unless (stringp str)
+    (error "Cannot edit dashes of a non-string: '%s'" str))
   (unless (bufferp buffer)
     (error "Cannot edit dashes in a non-buffer."))
-  (let ((dash-position (string-match *ce-dash-dash-regexp* string)))
+  (let ((dash-position (string-match *ce-dash-dash-regexp* str)))
     (cond (dash-position
 	   (switch-to-buffer buffer)
 	   (erase-buffer)
-	   (insert string)
-	   (add-text-properties dash-position dash-position 'face 'highlight)
-	   (ce-dash-mode)
-	   (message "You are now editing dashes."))
+	   (insert str)
+	   (add-text-properties (+ dash-position 1) (+ dash-position 2) (list 'face 'highlight))
+	   (goto-char dash-position)
+	   (let ((command (read-string "d to delete: ")))
+	     (cond ((string= command "d")
+		    (let ((before-dash (subseq str 0 (1- dash-position)))
+			  (after-dash (subseq str (1+ dash-position))))
+		      (kill-buffer buffer)
+		      (ce-dash-inspect-string (concat before-dash after-dash))))
+		   (t
+		    (error "Unknown command '%s'" command)))))
 	  (t
-	   string))))
+	   str))))
 
 (defun ce-dash-inspect-nxml-thing (thing)
   (cond ((stringp thing)
@@ -80,19 +96,36 @@
 ;; ce-dash mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defun ce-dash-refresh-dash-editor (dash-editor-buffer)
+  (let ((str (buffer-local-value 'string dash-editor-buffer))
+	(pos (buffer-local-value 'cursor dash-editor-buffer)))
+    (cond ((null str)
+	   (error "The dash editor buffer lacks a string!"))
+	  ((null pos)
+	   (kill-buffer dash-editor-buffer)
+	   str)
+	  ((numberp pos)
+	   (erase-buffer)
+	   (insert str)
+	   (add-text-properties (+ pos 1) (+ pos 2) (list 'face 'highlight))
+	   (goto-char (point-min))
+	   str)
+	  (t
+	   (error "Cannot refresh the dash editor buffer because we are in an unknown state.")))))
+
 (defun ce-dash-delete-character ()
   (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))
     (unless (bufferp dash-editor-buf)
       (error "The dash editor buffer could not be found!"))
-    (let ((string (buffer-local-value 'string dash-editor-buf))
-	  (cursor (buffer-local-value 'cursor dash-editor-buf)))
-      (let ((before-cursor (subseq string 0 (1- cursor)))
-	    (after-cursor (subseq string (1+ cursor))))
-	(let ((new-string (concat before-cursor after-cursor)))
-	  (setf string new-string)
-	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
-	    (setf cursor new-dash-position))
-	  new-string)))))
+    (let* ((string (buffer-local-value 'string dash-editor-buf))
+	   (cursor (buffer-local-value 'cursor dash-editor-buf))
+	   (before-cursor (subseq string 0 (1- cursor)))
+	   (after-cursor (subseq string (1+ cursor)))
+	   (new-string (concat before-cursor after-cursor))
+	   (new-dash-position (string-match *ce-dash-dash-regexp* new-string (1- cursor))))
+      (setf string new-string
+	    cursor new-dash-position))
+    (ce-dash-refresh-dash-editor dash-editor-buf)))
 
 (defun ce-dash-replace-with-mdash ()
   (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))
@@ -103,9 +136,9 @@
       (let ((before-cursor (subseq string 0 (1- cursor)))
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat before-cursor "—" after-cursor)))
-	  (setf string new-string)
+	  (setq string new-string)
 	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
-	    (setf cursor new-dash-position))
+	    (setq cursor new-dash-position))
 	  new-string)))))
 
 (defun ce-dash-replace-with-ndash ()
@@ -117,9 +150,9 @@
       (let ((before-cursor (subseq string 0 (1- cursor)))
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat before-cursor "–" after-cursor)))
-	  (setf string new-string)
+	  (setq string new-string)
 	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
-	    (setf cursor new-dash-position))
+	    (setq cursor new-dash-position))
 	  new-string)))))
 
 (defun ce-dash-replace-with-minus ()
@@ -131,9 +164,9 @@
       (let ((before-cursor (subseq string 0 (1- cursor)))
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat before-cursor "-" after-cursor)))
-	  (setf string new-string)
+	  (setq string new-string)
 	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
-	    (setf cursor new-dash-position))
+	    (setq cursor new-dash-position))
 	  new-string)))))
 
 (defun ce-dash-insert-space-left ()
@@ -145,9 +178,9 @@
       (let ((before-cursor (subseq string 0 (1- cursor)))
 	    (from-cursor (subseq string cursor)))
 	(let ((new-string (concat before-cursor " " from-cursor)))
-	  (setf string new-string)
+	  (setq string new-string)
 	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
-	    (setf cursor new-dash-position))
+	    (setq cursor new-dash-position))
 	  new-string)))))
 
 (defun ce-dash-insert-space-right ()
@@ -159,9 +192,9 @@
       (let ((to-cursor (subseq string 0 cursor))
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat to-cursor " " after-cursor)))
-	  (setf string new-string)
+	  (setq string new-string)
 	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
-	    (setf cursor new-dash-position))
+	    (setq cursor new-dash-position))
 	  new-string)))))
 
 (defun ce-dash-undo ()
@@ -173,7 +206,7 @@
       (error "The dash editor buffer could not be found!"))
     (let ((string (buffer-local-value 'string dash-editor-buf))
 	  (cursor (buffer-local-value 'cursor dash-editor-buf)))
-      (setf cursor (length string))
+      (setq cursor (length string))
       string)))
 
 (define-derived-mode ce-dash-mode

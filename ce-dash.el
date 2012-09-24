@@ -46,8 +46,7 @@
     (let ((cs (cursored-string "dash-ful"
 			     :string string
 			     :initial-position dash-position))
-	(pos (cursor-in-digitized-string cs)))))
-  )
+	(pos (cursor-in-digitized-string cs))))))
 
 (defun ce-dash-inspect-nxml-thing (thing)
   (cond ((stringp thing)

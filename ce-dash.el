@@ -9,52 +9,48 @@
   (or (string= entity-str "&ndash;")
       (string= entity-str "&mdash;")))
 
-(defconst *ce-dash-dashes* (list "-" "–" "—"))
+(defconst +ce-dash-dashes+ (list ?- ?– ?—))
 
-(defconst *ce-dash-dash-regexp* (regexp-opt *ce-dash-dashes*))
+(defconst +ce-dash-dash-regexp+ (regexp-opt *ce-dash-dashes*))
 
 (defconst +ce-dash-editor-buffer-name+ "*Dash Editor*")
 
 (defun ce-dash-inspect-string (string)
-  (let ((dash-position (string-match *ce-dash-dash-regexp* string)))
-    (cond ((numberp dash-position)
-	   (let ((dash-editor-buf (get-buffer-create +ce-dash-editor-buffer-name+)))
-	     (if (bufferp dash-editor-buf)
-		 (ce-dash-edit-dashes-in-buffer string dash-editor-buf)
-	       (error "We could neither find nor create the dash editor buffer."))))
-	  ((null dash-position)
-	   string)
-	  (t
-	    (error "Unknown result
+  (if (string-match +ce-dash-dash-regexp+ string)
+      (ce-dash-edit-dashes string 0)
+    string))
 
-%s
+(defvar ce-dash-editor-mode-map
+  (let ((map (make-keymap)))
 
-from string-match applied to the string
+    (define-key map (kbd "d") 'ce-dash-delete-character)
+    (define-key map (kbd "m") 'ce-dash-replace-with-mdash)
+    (define-key map (kbd "n") 'ce-dash-replace-with-ndash)
+    (define-key map (kbd "-") 'ce-dash-replace-with-minus)
+    (define-key map (kbd "l") 'ce-dash-insert-space-left)
+    (define-key map (kbd "r") 'ce-dash-insert-space-right)
+    (define-key map (kbd "u") 'ce-dash-undo)
+    (define-key map (kbd "c") 'ce-dash-commit-edits)
+    (define-key map (kbd "?") 'describe-mode)
+    (define-key map (kbd "h") 'describe-mode)
+    (define-key map (kbd "q") 'ce-dash-quit)
 
-  %s" dash-position string)))))
+    map))
 
-(defun ce-dash-edit-dashes-in-buffer (str buffer)
-  (unless (stringp str)
-    (error "Cannot edit dashes of a non-string: '%s'" str))
-  (unless (bufferp buffer)
-    (error "Cannot edit dashes in a non-buffer."))
-  (let ((dash-position (string-match *ce-dash-dash-regexp* str)))
-    (cond (dash-position
-	   (switch-to-buffer buffer)
-	   (erase-buffer)
-	   (insert str)
-	   (add-text-properties (+ dash-position 1) (+ dash-position 2) (list 'face 'highlight))
-	   (goto-char dash-position)
-	   (let ((command (read-string "d to delete: ")))
-	     (cond ((string= command "d")
-		    (let ((before-dash (subseq str 0 (1- dash-position)))
-			  (after-dash (subseq str (1+ dash-position))))
-		      (kill-buffer buffer)
-		      (ce-dash-inspect-string (concat before-dash after-dash))))
-		   (t
-		    (error "Unknown command '%s'" command)))))
-	  (t
-	   str))))
+(defun ce-dash-edit-dashes (string initial-search-position)
+  (let ((dash-position (string-match *ce-dash-dash-regexp* string initial-search-position)))
+    (if (null dash-position)
+	string
+      (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
+	(switch-to-buffer dash-editor-buffer)
+	(erase-buffer)
+	(kill-all-local-variables)
+	(use-local-map ce-dash-editor-mode-map)
+	(insert string)
+	(add-text-properties (+ dash-position 1) (+ dash-position 2) (list 'face 'highlight))
+	(setf mode-name "Dash Editor")
+	(setf buffer-read-only t)
+	(message "Commands: n, p, SPC, RET; h for help")))))
 
 (defun ce-dash-inspect-nxml-thing (thing)
   (cond ((stringp thing)
@@ -78,6 +74,38 @@ from string-match applied to the string
 	(t
 	 (error "Don't know how to make sense of the nxml object '%s'" thing))))
 
+(defun ce-dash-string-contains-dash (string)
+  (not (null (string-match-p +ce-dash-dash-regexp+ string))))
+
+(defun ce-dash-count-dashes-in-string (string)
+  (let ((count 0))
+    (loop
+     for char across string
+     do
+     (when (member char +ce-dash-dashes+)
+       (incf count)))
+    count))
+
+(defun ce-dash-character-data-sections (nxml-thing)
+  (cond ((stringp nxml-thing) (list nxml-thing))
+	((null nxml-thing) nil)
+	((consp nxml-thing)
+	 (let ((element nil)
+	       (attributes nil)
+	       (children nil))
+	   (condition-case nil
+	       (destructuring-bind (local-element local-attributes . local-children)
+		   nxml-thing
+		 (setf element local-element
+		       attributes local-attributes
+		       children local-children))
+	     (error
+	      (error "Unable to make sense of the nXML node '%s'" nxml-thing)))
+	   (reduce 'append
+		   (mapcar 'ce-dash-character-data-sections children))))
+	(t
+	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
+
 (defun ce-dash-inspect-dashes ()
   (interactive)
   (ce-entities-resolve-named-entities-decimally)
@@ -88,9 +116,25 @@ from string-match applied to the string
 		 (error "Unable to parse the current buffer as XML:
 
 %s" (error-message-string nxml-parse-error))))))
-    (let ((new-tree (ce-dash-inspect-nxml-thing tree)))
-      (erase-buffer)
-      (insert (ce-xhtml-render-nxml-thing new-tree)))))
+    (let ((character-data-sections (ce-dash-character-data-sections tree)))
+      (let ((candidate-sections (remove-if-not 'ce-dash-string-contains-dash
+					       character-data-sections)))
+	(if candidate-sections
+	    (let ((total-dashes (reduce '+ (mapcar 'ce-dash-count-dashes-in-string
+						   candidate-sections)))
+		  (num-candidate-sections (length candidate-sections)))
+	      (message "%d dashes across %d character data sections"
+		       total-dashes
+		       num-candidate-sections)
+	      (switch-to-buffer (get-buffer-create +ce-dash-editor-buffer-name+))
+	      (erase-buffer)
+	      (dolist (candidate-section candidate-sections)
+		(setf candidate-section (ce-dash-nuke-newlines candidate-section))
+		(insert candidate-section)
+		(newline)
+		(insert "======================================================================")
+		(newline)))
+	  (message "No dashes to edit."))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ce-dash mode
@@ -215,15 +259,6 @@ from string-match applied to the string
   "Major mode for editing dashes in text.
 
 \\{ce-dash-mode-map}")
-
-(define-key ce-dash-mode-map [d] 'ce-dash-delete-character)
-(define-key ce-dash-mode-map [m] 'ce-dash-replace-with-mdash)
-(define-key ce-dash-mode-map [n] 'ce-dash-replace-with-ndash)
-(define-key ce-dash-mode-map [-] 'ce-dash-replace-with-minus)
-(define-key ce-dash-mode-map [l] 'ce-dash-insert-space-left)
-(define-key ce-dash-mode-map [r] 'ce-dash-insert-space-right)
-(define-key ce-dash-mode-map [u] 'ce-dash-undo)
-(define-key ce-dash-mode-map [c] 'ce-dash-commit-edits)
 
 (provide 'ce-dash)
 

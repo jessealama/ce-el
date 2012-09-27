@@ -73,6 +73,33 @@ If cs-digitize changes, then this function may need to be changed."
 	(add-text-properties begin end (list 'face 'highlight) digitized)))
     digitized))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Strings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun ce-dash-squeeze-spaces (string)
+  (let ((space-space-position (string-match "[[:space:]][[:space:]]" string)))
+    (if space-space-position
+	(concat (subseq string 0 (1- space-space-position))
+		(ce-dash-squeeze-spaces (subseq string (1+ space-space-position))))
+      string)))
+
+(defun ce-dash-first-non-space-position (string)
+  (string-match "[^[:space:]]" string))
+
+(defun ce-dash-kill-initial-whitespace (string)
+  (let ((first-non-space-position (ce-dash-first-non-space-position string)))
+    (if first-non-space-position
+	(subseq string first-non-space-position)
+      "")))
+
+(defun ce-dash-nuke-newlines (string)
+  (ce-dash-squeeze-spaces (substitute ?\s
+				      ?\t
+				      (substitute ?\s
+						  ?\n
+						  (ce-dash-kill-initial-whitespace string)))))
+
 (provide 'ce-utils)
 
 ;; Local Variables:

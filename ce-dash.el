@@ -106,6 +106,25 @@
 	(t
 	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
 
+(defun ce-dash-some-dash-in-nxml-thing (nxml-thing)
+  (cond ((stringp nxml-thing) (string-match +ce-dash-dash-regexp+ nxml-thing))
+	((null nxml-thing) nil)
+	((consp nxml-thing)
+	 (let ((element nil)
+	       (attributes nil)
+	       (children nil))
+	   (condition-case nil
+	       (destructuring-bind (local-element local-attributes . local-children)
+		   nxml-thing
+		 (setf element local-element
+		       attributes local-attributes
+		       children local-children))
+	     (error
+	      (error "Unable to make sense of the nXML node '%s'" nxml-thing)))
+	   (some 'ce-dash-some-dash-in-nxml-thing children)))
+	(t
+	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
+
 (defun ce-dash-inspect-dashes ()
   (interactive)
   (ce-entities-resolve-named-entities-decimally)
@@ -116,25 +135,61 @@
 		 (error "Unable to parse the current buffer as XML:
 
 %s" (error-message-string nxml-parse-error))))))
-    (let ((character-data-sections (ce-dash-character-data-sections tree)))
-      (let ((candidate-sections (remove-if-not 'ce-dash-string-contains-dash
+    (if (ce-dash-some-dash-in-nxml-thing tree)
+	(progn
+	  (when (get-buffer +ce-dash-editor-buffer-name+)
+	    (kill-buffer (get-buffer +ce-dash-editor-buffer-name+)))
+	  (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
+	    (with-current-buffer dash-editor-buffer
+	      (kill-all-local-variables)
+	      (use-local-map ce-dash-editor-mode-map)
+	      (set (make-local-variable 'document-tree) tree)
+	      (ce-dash-render-dash-editor dash-editor-buffer))
+	    (switch-to-buffer dash-editor-buffer)))
+      (message "No dashes to edit."))))
+
+(defun ce-dash-elide-string-around (string position)
+  (let ((new-string (copy-seq string)))
+    (add-text-properties position (1+ position) (list 'face 'highlight) new-string)
+    (let ((padding 10)
+	  (len (length string)))
+      (if (< position padding)
+	  (if (> (+ position padding) len)
+	      new-string
+	    (format "%s…" (substring new-string 0 (+ position padding))))
+	(if (> (+ position padding) len)
+	    (format "…%s" (substring new-string (- position padding)))
+	  (format "…%s…" (substring new-string (- position padding) (+ position padding))))))))
+
+(defun ce-dash-render-dash-editor (editor-buffer)
+  (let* ((tree (buffer-local-value 'document-tree editor-buffer))
+	 (character-data-sections (ce-dash-character-data-sections tree))
+	 (candidate-sections (remove-if-not 'ce-dash-string-contains-dash
+					    character-data-sections)))
+    (if candidate-sections
+	(let ((total-dashes (reduce '+ (mapcar 'ce-dash-count-dashes-in-string
 					       character-data-sections)))
-	(if candidate-sections
-	    (let ((total-dashes (reduce '+ (mapcar 'ce-dash-count-dashes-in-string
-						   candidate-sections)))
-		  (num-candidate-sections (length candidate-sections)))
-	      (message "%d dashes across %d character data sections"
-		       total-dashes
-		       num-candidate-sections)
-	      (switch-to-buffer (get-buffer-create +ce-dash-editor-buffer-name+))
-	      (erase-buffer)
-	      (dolist (candidate-section candidate-sections)
-		(setf candidate-section (ce-dash-nuke-newlines candidate-section))
-		(insert candidate-section)
-		(newline)
-		(insert "======================================================================")
-		(newline)))
-	  (message "No dashes to edit."))))))
+	      (num-candidate-sections (length character-data-sections)))
+	  (with-current-buffer editor-buffer
+	    (erase-buffer)
+	    (message "%d dashes across %d character data sections"
+		     total-dashes
+		     num-candidate-sections)
+	    (dolist (candidate-section candidate-sections)
+	      (setf candidate-section (ce-dash-nuke-newlines candidate-section))
+	      (let ((dash-position (string-match +ce-dash-dash-regexp+ candidate-section 0)))
+		(while dash-position
+		  (let ((elided-string (ce-dash-elide-string-around candidate-section dash-position)))
+		    (insert elided-string)
+		    (newline)
+		    (insert "======================================================================")
+		    (newline))
+		  (setf dash-position (string-match +ce-dash-dash-regexp+
+						    candidate-section
+						    (1+ dash-position))))))
+	    (set-buffer-modified-p nil)
+	    (setf buffer-read-only t)))
+      (message "No dashes to edit."))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ce-dash mode

@@ -11,7 +11,8 @@
 
 (defconst +ce-dash-dashes+ (list ?- ?– ?—))
 
-(defconst +ce-dash-dash-regexp+ (regexp-opt *ce-dash-dashes*))
+(defconst +ce-dash-dash-regexp+
+  (regexp-opt (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))
 
 (defconst +ce-dash-editor-buffer-name+ "*Dash Editor*")
 
@@ -38,7 +39,8 @@
     map))
 
 (defun ce-dash-edit-dashes (string initial-search-position)
-  (let ((dash-position (string-match *ce-dash-dash-regexp* string initial-search-position)))
+  (let ((dash-position (string-match +ce-dash-dash-regexp+
+				     string initial-search-position)))
     (if (null dash-position)
 	string
       (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
@@ -125,6 +127,8 @@
 	(t
 	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
 
+(defvar ce-dash-document-tree nil)
+
 (defun ce-dash-inspect-dashes ()
   (interactive)
   (ce-entities-resolve-named-entities-decimally)
@@ -143,7 +147,7 @@
 	    (with-current-buffer dash-editor-buffer
 	      (kill-all-local-variables)
 	      (use-local-map ce-dash-editor-mode-map)
-	      (set (make-local-variable 'document-tree) tree)
+	      (set (make-local-variable 'ce-dash-document-tree) tree)
 	      (ce-dash-render-dash-editor dash-editor-buffer))
 	    (switch-to-buffer dash-editor-buffer)))
       (message "No dashes to edit."))))
@@ -162,7 +166,7 @@
 	  (format "…%s…" (substring new-string (- position padding) (+ position padding))))))))
 
 (defun ce-dash-render-dash-editor (editor-buffer)
-  (let* ((tree (buffer-local-value 'document-tree editor-buffer))
+  (let* ((tree (buffer-local-value 'ce-dash-document-tree editor-buffer))
 	 (character-data-sections (ce-dash-character-data-sections tree))
 	 (candidate-sections (remove-if-not 'ce-dash-string-contains-dash
 					    character-data-sections)))
@@ -221,7 +225,9 @@
 	   (before-cursor (subseq string 0 (1- cursor)))
 	   (after-cursor (subseq string (1+ cursor)))
 	   (new-string (concat before-cursor after-cursor))
-	   (new-dash-position (string-match *ce-dash-dash-regexp* new-string (1- cursor))))
+	   (new-dash-position (string-match +ce-dash-dash-regexp+
+					    new-string
+					    (1- cursor))))
       (setf string new-string
 	    cursor new-dash-position))
     (ce-dash-refresh-dash-editor dash-editor-buf)))
@@ -236,7 +242,9 @@
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat before-cursor "—" after-cursor)))
 	  (setq string new-string)
-	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
+	  (let ((new-dash-position (string-match +ce-dash-dash-regexp+
+						 new-string
+						 cursor)))
 	    (setq cursor new-dash-position))
 	  new-string)))))
 
@@ -250,7 +258,9 @@
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat before-cursor "–" after-cursor)))
 	  (setq string new-string)
-	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
+	  (let ((new-dash-position (string-match +ce-dash-dash-regexp+
+						 new-string
+						 cursor)))
 	    (setq cursor new-dash-position))
 	  new-string)))))
 
@@ -264,7 +274,9 @@
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat before-cursor "-" after-cursor)))
 	  (setq string new-string)
-	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
+	  (let ((new-dash-position (string-match +ce-dash-dash-regexp+
+						 new-string
+						 cursor)))
 	    (setq cursor new-dash-position))
 	  new-string)))))
 
@@ -278,7 +290,9 @@
 	    (from-cursor (subseq string cursor)))
 	(let ((new-string (concat before-cursor " " from-cursor)))
 	  (setq string new-string)
-	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
+	  (let ((new-dash-position (string-match +ce-dash-dash-regexp+
+						 new-string
+						 cursor)))
 	    (setq cursor new-dash-position))
 	  new-string)))))
 
@@ -292,7 +306,9 @@
 	    (after-cursor (subseq string (1+ cursor))))
 	(let ((new-string (concat to-cursor " " after-cursor)))
 	  (setq string new-string)
-	  (let ((new-dash-position (string-match *ce-dash-dash-regexp* new-string cursor)))
+	  (let ((new-dash-position (string-match +ce-dash-dash-regexp+
+						 new-string
+						 cursor)))
 	    (setq cursor new-dash-position))
 	  new-string)))))
 

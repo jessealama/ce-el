@@ -93,7 +93,7 @@ If cs-digitize changes, then this function may need to be changed."
 	(subseq string first-non-space-position)
       "")))
 
-(defun ce-dash-nuke-newlines (string)
+(defun ce-dash-nuke-whitespace (string)
   (ce-dash-squeeze-spaces (substitute ?\s
 				      ?\t
 				      (substitute ?\s

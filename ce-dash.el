@@ -21,9 +21,10 @@
       (ce-dash-edit-dashes string 0)
     string))
 
-(defvar ce-dash-editor-mode-map
+(defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))
 
+    (define-key map (kbd "RET") 'ce-dash-edit-dash-occurrence)
     (define-key map (kbd "d") 'ce-dash-delete-character)
     (define-key map (kbd "m") 'ce-dash-replace-with-mdash)
     (define-key map (kbd "n") 'ce-dash-replace-with-ndash)
@@ -37,6 +38,128 @@
     (define-key map (kbd "q") 'ce-dash-quit)
 
     map))
+
+(defmacro with-dash-editor (buffer &rest body)
+  (unless (symbolp buffer)
+    (error "A symbol is rqeuired for a buffer name"))
+  `(let ((,buffer (get-buffer +ce-dash-editor-buffer-name+)))
+     (unless (bufferp ,buffer)
+       (error "The dash editor buffer could not be found!"))
+     ,@body))
+
+(defun ce-dash-nth-dash (strings n)
+  "Given a list STRINGS of strings, return the string that contains that dash number N.
+
+N starts from 1, not 0."
+  (cond ((<= n 0)
+	 (error "The second argument of ce-dash-nth-dash must be greater than zero."))
+	((null strings)
+	 (error "The list of strings must be non-empty"))
+	(t
+	 (let ((string (first strings)))
+	   (let ((num-dashes (ce-dash-count-dashes-in-string string)))
+	     (if (< num-dashes n)
+		 (ce-dash-nth-dash (rest strings) (- n num-dashes))
+	       string))))))
+
+(defun ce-dash-update-dash-editor (dash-editor-buffer tree)
+  (let* ((cdata-sections (ce-dash-character-data-sections tree))
+	 (dash-positions (mapcar 'ce-dash-dash-positions cdata-sections)))
+    (with-current-buffer dash-editor-buffer
+      (set (make-local-variable 'ce-dash-document-tree) tree)
+      (set (make-local-variable 'ce-dash-cdata-sections-containing-dashes) dash-positions)
+      (set (make-local-variable 'ce-dash-occurence-list)
+	   (let (occurrences)
+	     (loop
+	      for i from 1 upto (length cdata-sections)
+	      for cdata-section in cdata-sections
+	      do
+	      (when (ce-dash-string-contains-dash cdata-section)
+		(let ((dash-positions (ce-dash-dash-positions cdata-section)))
+		  (dolist (dash-position dash-positions)
+		    (push (list (1- i) dash-position) occurrences)))))
+	     (reverse occurrences))))))
+
+(defun ce-dash-replace-character-at-position-with (string position character)
+  (format "%s%c%s" (substring string 0 (1- position)) character (substring string (1+ position))))
+
+(defun ce-dash-count-cdata-sections (nxml-thing)
+  (cond ((stringp nxml-thing) 1)
+	((null nxml-thing) 0)
+	((consp nxml-thing)
+	 (let ((element nil)
+	       (attributes nil)
+	       (children nil))
+	   (condition-case nil
+	       (destructuring-bind (local-element local-attributes . local-children)
+		   nxml-thing
+		 (setf element local-element
+		       attributes local-attributes
+		       children local-children))
+	     (error
+	      (error "Unable to make sense of the nXML node '%s'" nxml-thing)))
+	   (reduce '+ (mapcar 'ce-dash-count-cdata-sections children))))
+	(t
+	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
+
+(defun ce-dash-replace-nth-cdata-section (nxml-thing cdata-section-number new-cdata-section &optional seen-so-far)
+  (let ((seen seen-so-far))
+    (cond ((stringp nxml-thing)
+	   (if (= (1+ seen-so-far) cdata-section-number)
+	       new-cdata-section
+	     nxml-thing))
+	  ((consp nxml-thing)
+	   (let ((element nil)
+		 (attributes nil)
+		 (children nil))
+	     (condition-case nil
+		 (destructuring-bind (local-element local-attributes . local-children)
+		     nxml-thing
+		   (setf element local-element
+			 attributes local-attributes
+			 children local-children))
+	       (error
+		(error "Unable to make sense of the nXML node '%s'" nxml-thing)))
+	     (let (new-children)
+	       (dolist (child children)
+		 (push (ce-dash-replace-nth-cdata-section child
+							  cdata-section-number
+							  new-cdata-section
+							  seen)
+		       new-children)
+		 (incf seen (ce-dash-count-cdata-sections child)))
+	       (append (list element attributes)
+		       (reverse new-children))))))))
+
+(defun ce-dash-edit-dash-occurrence ()
+  (interactive)
+  (with-dash-editor buf
+    (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
+	  (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
+	  (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
+	  (line-number (current-line)))
+      (let ((cdata-sections (ce-dash-character-data-sections tree)))
+	(assert (= (length cdata-dash-positions)
+		   (length cdata-sections)))
+	(if (<= line-number (length dash-occurrences))
+	    (let ((dash-occurrence (nth (1- line-number) dash-occurrences)))
+	      (destructuring-bind (cdata-section-number dash-position)
+		  dash-occurrence
+		(let ((cdata-section (nth cdata-section-number cdata-sections)))
+		  (let ((action (read-string "[e]ndash, e[m]dash, [s]ubtraction (RET to accept as is)")))
+		    (let ((new-tree
+			   (cond ((string= action "") tree)
+				 ((string= action "e")
+				  (let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ?–)))
+				    (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0)))
+				 ((string= action "m")
+				  (let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ?—)))
+				    (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0)))
+				 (t
+				  (message "Action '%s' not implemented yet." action)
+				  tree))))
+		      (ce-dash-update-dash-editor buf new-tree))))))
+	  (error "The current line number is greater than the total number of dash occurences."))))))
 
 (defun ce-dash-edit-dashes (string initial-search-position)
   (let ((dash-position (string-match +ce-dash-dash-regexp+
@@ -54,27 +177,11 @@
 	(setf buffer-read-only t)
 	(message "Commands: n, p, SPC, RET; h for help")))))
 
-(defun ce-dash-inspect-nxml-thing (thing)
-  (cond ((stringp thing)
-	 (ce-dash-inspect-string thing))
-	((null thing)
-	 nil)
-	((consp thing)
-	 (let ((element nil)
-	       (attributes nil)
-	       (children nil))
-	   (condition-case nil
-	       (destructuring-bind (local-element local-attributes . local-children)
-		   thing
-		 (setf element local-element
-		       attributes local-attributes
-		       children local-children))
-	     (error
-	      (error "Unable to make sense of the node '%s'" thing)))
-	   (append (list element attributes)
-		   (mapcar 'ce-dash-inspect-nxml-thing children))))
-	(t
-	 (error "Don't know how to make sense of the nxml object '%s'" thing))))
+(defun ce-dash-quit ()
+  (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))
+    (unless (bufferp dash-editor-buf)
+      (error "Unable to find the dash-editor buffer!"))
+    ))
 
 (defun ce-dash-string-contains-dash (string)
   (not (null (string-match-p +ce-dash-dash-regexp+ string))))
@@ -128,6 +235,16 @@
 	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
 
 (defvar ce-dash-document-tree nil)
+(defvar ce-dash-cdata-sections-containing-dashes nil)
+(defvar ce-dash-occurence-list nil)
+
+(defun ce-dash-dash-positions (string)
+  (let ((positions nil)
+	(position (string-match +ce-dash-dash-regexp+ string)))
+    (while position
+      (push position positions)
+      (setf position (string-match +ce-dash-dash-regexp+ string (1+ position))))
+    (reverse positions)))
 
 (defun ce-dash-inspect-dashes ()
   (interactive)
@@ -147,52 +264,82 @@
 	    (with-current-buffer dash-editor-buffer
 	      (kill-all-local-variables)
 	      (use-local-map ce-dash-editor-mode-map)
-	      (set (make-local-variable 'ce-dash-document-tree) tree)
+	      (ce-dash-update-dash-editor dash-editor-buffer tree)
 	      (ce-dash-render-dash-editor dash-editor-buffer))
 	    (switch-to-buffer dash-editor-buffer)))
       (message "No dashes to edit."))))
 
-(defun ce-dash-elide-string-around (string position)
+(defcustom *ce-dash-preview-window-padding* 25
+  "The number of characters to be displayed before and after an occurrence of a dash.
+
+Don't give this variabe a big value unless you ensure that your
+window width is wide: the overall length of the preview string to
+be displayed is generally two times the value of this variable."
+  :group 'ce)
+
+(defun ce-dash-highlight-string-at-position (string position)
   (let ((new-string (copy-seq string)))
     (add-text-properties position (1+ position) (list 'face 'highlight) new-string)
-    (let ((padding 10)
-	  (len (length string)))
-      (if (< position padding)
-	  (if (> (+ position padding) len)
-	      new-string
-	    (format "%s…" (substring new-string 0 (+ position padding))))
-	(if (> (+ position padding) len)
-	    (format "…%s" (substring new-string (- position padding)))
-	  (format "…%s…" (substring new-string (- position padding) (+ position padding))))))))
+    new-string))
+
+(defun ce-dash-prepend-^-sigil (string)
+  (let ((new-string (format "^%s" string)))
+    (add-text-properties 0 1 (list 'face 'trailing-whitespace) new-string)
+    new-string))
+
+(defun ce-dash-append-$-sigil (string)
+  (let* ((new-string (format "%s$ " string))
+	 (len (length new-string)))
+    (add-text-properties (- len 2) (- len 1) (list 'face 'trailing-whitespace) new-string)
+    new-string))
+
+(defun ce-dash-elide-string-around (string position)
+  (let ((len (length string)))
+    (if (and (< position len)
+	     (<= 0 position))
+	(let* ((highlighted-string (ce-dash-highlight-string-at-position string position))
+	       (string-window-padding *ce-dash-preview-window-padding*)
+	       (pos-before-window (- position string-window-padding))
+	       (pos-after-window (+ position string-window-padding)))
+	  (if (< position string-window-padding)
+	      (if (< len (* string-window-padding 2))
+		  (ce-dash-append-$-sigil (ce-dash-prepend-^-sigil highlighted-string))
+		(ce-dash-prepend-^-sigil (format "%s…" (substring highlighted-string
+								  0
+								  pos-after-window))))
+	    (if (> pos-after-window len)
+		(ce-dash-append-$-sigil (format "…%s" (substring highlighted-string
+								 pos-before-window)))
+	      (format "…%s…" (substring highlighted-string
+					pos-before-window
+					pos-after-window)))))
+      (error "Cannot elide string around a position (%d) that is greater than the length (%d) of a string" position len))))
 
 (defun ce-dash-render-dash-editor (editor-buffer)
   (let* ((tree (buffer-local-value 'ce-dash-document-tree editor-buffer))
-	 (character-data-sections (ce-dash-character-data-sections tree))
-	 (candidate-sections (remove-if-not 'ce-dash-string-contains-dash
-					    character-data-sections)))
-    (if candidate-sections
-	(let ((total-dashes (reduce '+ (mapcar 'ce-dash-count-dashes-in-string
-					       character-data-sections)))
-	      (num-candidate-sections (length character-data-sections)))
+	 (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes
+						   editor-buffer))
+	 (cdata-sections (ce-dash-character-data-sections tree)))
+    (assert (= (length cdata-sections)
+	       (length cdata-dash-positions)))
+    (if (some 'identity cdata-sections)
+	(let ((total-dashes (reduce '+ (mapcar 'length cdata-sections))))
 	  (with-current-buffer editor-buffer
 	    (erase-buffer)
-	    (message "%d dashes across %d character data sections"
-		     total-dashes
-		     num-candidate-sections)
-	    (dolist (candidate-section candidate-sections)
-	      (setf candidate-section (ce-dash-nuke-newlines candidate-section))
-	      (let ((dash-position (string-match +ce-dash-dash-regexp+ candidate-section 0)))
-		(while dash-position
-		  (let ((elided-string (ce-dash-elide-string-around candidate-section dash-position)))
-		    (insert elided-string)
-		    (newline)
-		    (insert "======================================================================")
-		    (newline))
-		  (setf dash-position (string-match +ce-dash-dash-regexp+
-						    candidate-section
-						    (1+ dash-position))))))
+	    (loop
+	     for candidate-section in cdata-sections
+	     for dash-positions in cdata-dash-positions
+	     do
+	     (when dash-positions
+	       (dolist (dash-position dash-positions)
+		 (let ((elided-string (ce-dash-elide-string-around candidate-section dash-position)))
+		   (insert (ce-dash-nuke-whitespace elided-string))
+		   (newline)))))
+	    (goto-char (point-min))
 	    (set-buffer-modified-p nil)
-	    (setf buffer-read-only t)))
+	    (setf mode-name "Dash Editor")
+	    (setf buffer-read-only t)
+	    (message "Commands: n, p, SPC, RET; h for help")))
       (message "No dashes to edit."))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

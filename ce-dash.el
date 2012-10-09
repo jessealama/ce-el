@@ -38,16 +38,7 @@
 
     (define-key map (kbd "SPC") 'ce-dash-accept-dash-occurrence)
     (define-key map (kbd "RET") 'ce-dash-edit-dash-occurrence)
-    (define-key map (kbd "d") 'ce-dash-delete-character)
-    (define-key map (kbd "m") 'ce-dash-replace-with-mdash)
-    (define-key map (kbd "n") 'ce-dash-replace-with-ndash)
-    (define-key map (kbd "-") 'ce-dash-replace-with-minus)
-    (define-key map (kbd "l") 'ce-dash-insert-space-left)
-    (define-key map (kbd "r") 'ce-dash-insert-space-right)
-    (define-key map (kbd "u") 'ce-dash-undo)
-    (define-key map (kbd "c") 'ce-dash-commit-edits)
     (define-key map (kbd "?") 'describe-mode)
-    (define-key map (kbd "h") 'describe-mode)
     (define-key map (kbd "q") 'ce-dash-quit)
 
     map))

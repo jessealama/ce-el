@@ -28,6 +28,7 @@
 (defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))
 
+    (define-key map (kbd "SPC") 'ce-dash-accept-dash-occurrence)
     (define-key map (kbd "RET") 'ce-dash-edit-dash-occurrence)
     (define-key map (kbd "d") 'ce-dash-delete-character)
     (define-key map (kbd "m") 'ce-dash-replace-with-mdash)

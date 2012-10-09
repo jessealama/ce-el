@@ -16,6 +16,10 @@
 
 (defconst +ce-dash-editor-buffer-name+ "*Dash Editor*")
 
+(defvar ce-dash-document-tree nil)
+(defvar ce-dash-cdata-sections-containing-dashes nil)
+(defvar ce-dash-occurence-list nil)
+
 (defun ce-dash-inspect-string (string)
   (if (string-match +ce-dash-dash-regexp+ string)
       (ce-dash-edit-dashes string 0)
@@ -61,10 +65,6 @@ N starts from 1, not 0."
 	     (if (< num-dashes n)
 		 (ce-dash-nth-dash (rest strings) (- n num-dashes))
 	       string))))))
-
-(defvar ce-dash-document-tree nil)
-(defvar ce-dash-cdata-sections-containing-dashes nil)
-(defvar ce-dash-occurence-list nil)
 
 (defun ce-dash-update-dash-editor (dash-editor-buffer tree)
   (let* ((cdata-sections (ce-dash-character-data-sections tree))

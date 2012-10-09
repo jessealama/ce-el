@@ -193,13 +193,15 @@ N starts from 1, not 0."
 	      (destructuring-bind (cdata-section-number dash-position)
 		  dash-occurrence
 		(let ((cdata-section (nth cdata-section-number cdata-sections)))
-		  (let ((action (read-string "[e]ndash, e[m]dash, [s]ubtraction (RET to accept as is): ")))
+		  (let ((action (read-string "ASCII [h]yphen, [e]ndash, e[m]dash, [s]ubtraction sign, RET to accept as-is: ")))
 		    (macrolet ((replace-with-char (char)
 			         `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
 			      (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
 		      (let ((new-tree
 			     (cond ((string= action "")
 				    tree)
+				   ((string= action "h")
+				    (replace-with-char ?-))
 				   ((string= action "e")
 				    (replace-with-char ?–))
 				   ((string= action "m")

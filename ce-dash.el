@@ -164,7 +164,9 @@ N starts from 1, not 0."
 				 (t
 				  (message "Action '%s' not implemented yet." action)
 				  tree))))
-		      (ce-dash-update-dash-editor buf new-tree))))))
+		      (ce-dash-update-dash-editor buf new-tree)
+		      (ce-dash-render-dash-editor buf)
+		      (goto-line (1+ line-number)))))))
 	  (error "The current line number is greater than the total number of dash occurences."))))))
 
 (defun ce-dash-edit-dashes (string initial-search-position)

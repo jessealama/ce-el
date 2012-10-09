@@ -324,11 +324,11 @@ be displayed is generally two times the value of this variable."
 	 (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes
 						   editor-buffer))
 	 (cdata-sections (ce-dash-character-data-sections tree)))
-    (assert (= (length cdata-sections)
-	       (length cdata-dash-positions)))
+    (assert (= (length cdata-sections) (length cdata-dash-positions)))
     (if (some 'identity cdata-sections)
 	(let ((total-dashes (reduce '+ (mapcar 'length cdata-sections))))
 	  (with-current-buffer editor-buffer
+	    (setf buffer-read-only nil)
 	    (erase-buffer)
 	    (loop
 	     for candidate-section in cdata-sections

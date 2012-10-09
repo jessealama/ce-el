@@ -62,6 +62,10 @@ N starts from 1, not 0."
 		 (ce-dash-nth-dash (rest strings) (- n num-dashes))
 	       string))))))
 
+(defvar ce-dash-document-tree nil)
+(defvar ce-dash-cdata-sections-containing-dashes nil)
+(defvar ce-dash-occurence-list nil)
+
 (defun ce-dash-update-dash-editor (dash-editor-buffer tree)
   (let* ((cdata-sections (ce-dash-character-data-sections tree))
 	 (dash-positions (mapcar 'ce-dash-dash-positions cdata-sections)))
@@ -233,10 +237,6 @@ N starts from 1, not 0."
 	   (some 'ce-dash-some-dash-in-nxml-thing children)))
 	(t
 	 (error "Don't know how to make sense of the nXML object '%s'" nxml-thing))))
-
-(defvar ce-dash-document-tree nil)
-(defvar ce-dash-cdata-sections-containing-dashes nil)
-(defvar ce-dash-occurence-list nil)
 
 (defun ce-dash-dash-positions (string)
   (let ((positions nil)

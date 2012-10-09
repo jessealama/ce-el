@@ -186,6 +186,7 @@ N starts from 1, not 0."
 	(message "Commands: n, p, SPC, RET; h for help")))))
 
 (defun ce-dash-quit ()
+  (interactive)
   (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))
     (unless (bufferp dash-editor-buf)
       (error "Unable to find the dash-editor buffer!"))

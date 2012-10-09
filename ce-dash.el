@@ -153,20 +153,24 @@ N starts from 1, not 0."
 		  dash-occurrence
 		(let ((cdata-section (nth cdata-section-number cdata-sections)))
 		  (let ((action (read-string "[e]ndash, e[m]dash, [s]ubtraction (RET to accept as is): ")))
-		    (let ((new-tree
-			   (cond ((string= action "") tree)
-				 ((string= action "e")
-				  (let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ?–)))
-				    (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0)))
-				 ((string= action "m")
-				  (let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ?—)))
-				    (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0)))
+		    (macrolet ((replace-with-char (char)
+			         `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
+			      (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
+		      (let ((new-tree
+			     (cond ((string= action "")
+				    tree)
+				   ((string= action "e")
+				    (replace-with-char ?–))
+				   ((string= action "m")
+				    (replace-with-char ?—))
+				   ((string= action "s")
+				    (replace-with-char ?−))
 				 (t
 				  (message "Action '%s' not implemented yet." action)
 				  tree))))
 		      (ce-dash-update-dash-editor buf new-tree)
 		      (ce-dash-render-dash-editor buf)
-		      (goto-line (1+ line-number)))))))
+		      (goto-line (1+ line-number))))))))
 	  (error "The current line number is greater than the total number of dash occurences."))))))
 
 (defun ce-dash-edit-dashes (string initial-search-position)

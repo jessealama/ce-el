@@ -217,7 +217,6 @@ N starts from 1, not 0."
 	(erase-buffer)
 	(insert rendered-tree)
 	(newline) ;; force newline at end of file
-	(save-buffer)
 	(kill-buffer dash-editor-buf)
 	t))))
 

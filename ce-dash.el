@@ -85,7 +85,10 @@ N starts from 1, not 0."
 	     (reverse occurrences))))))
 
 (defun ce-dash-replace-character-at-position-with (string position character)
-  (format "%s%c%s" (substring string 0 (1- position)) character (substring string (1+ position))))
+  (format "%s%c%s"
+	  (substring string 0 position)
+	  character
+	  (substring string (1+ position))))
 
 (defun ce-dash-count-cdata-sections (nxml-thing)
   (cond ((stringp nxml-thing) 1)

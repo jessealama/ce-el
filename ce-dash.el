@@ -19,6 +19,7 @@
 (defvar ce-dash-document-tree nil)
 (defvar ce-dash-cdata-sections-containing-dashes nil)
 (defvar ce-dash-occurence-list nil)
+(defvar ce-dash-original-buffer nil)
 
 (defun ce-dash-inspect-string (string)
   (if (string-match +ce-dash-dash-regexp+ string)
@@ -67,12 +68,13 @@ N starts from 1, not 0."
 		 (ce-dash-nth-dash (rest strings) (- n num-dashes))
 	       string))))))
 
-(defun ce-dash-update-dash-editor (dash-editor-buffer tree)
+(defun ce-dash-update-dash-editor (dash-editor-buffer tree source-buffer)
   (let* ((cdata-sections (ce-dash-character-data-sections tree))
 	 (dash-positions (mapcar 'ce-dash-dash-positions cdata-sections)))
     (with-current-buffer dash-editor-buffer
       (set (make-local-variable 'ce-dash-document-tree) tree)
       (set (make-local-variable 'ce-dash-cdata-sections-containing-dashes) dash-positions)
+      (set (make-local-variable 'ce-dash-original-buffer) source-buffer)
       (set (make-local-variable 'ce-dash-occurence-list)
 	   (let (occurrences)
 	     (loop
@@ -145,7 +147,8 @@ N starts from 1, not 0."
     (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
 	  (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
 	  (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
-	  (line-number (current-line)))
+	  (line-number (current-line))
+	  (original-buffer (buffer-local-value 'ce-dash-original-buffer buf)))
       (let ((cdata-sections (ce-dash-character-data-sections tree)))
 	(assert (= (length cdata-dash-positions) (length cdata-sections)))
 	(if (<= line-number (length dash-occurrences))
@@ -169,10 +172,18 @@ N starts from 1, not 0."
 				 (t
 				  (message "Action '%s' not implemented yet." action)
 				  tree))))
-		      (ce-dash-update-dash-editor buf new-tree)
+		      (ce-dash-update-dash-editor buf new-tree original-buffer)
 		      (ce-dash-render-dash-editor buf)
-		      (goto-line (1+ line-number))))))))
+		      (goto-char (point-min))
+		      (forward-line line-number)))))))
 	  (error "The current line number is greater than the total number of dash occurences."))))))
+
+(defun ce-dash-accept-dash-occurrence ()
+  (interactive)
+  (with-dash-editor buf
+    (if (= (point) (point-max))
+	(message "No more dashes.")
+      (forward-line))))
 
 (defun ce-dash-edit-dashes (string initial-search-position)
   (let ((dash-position (string-match +ce-dash-dash-regexp+
@@ -194,8 +205,21 @@ N starts from 1, not 0."
   (interactive)
   (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))
     (unless (bufferp dash-editor-buf)
-      (error "Unable to find the dash-editor buffer!"))
-    ))
+      (error "Where did the dash editor buffer go?"))
+    (let ((tree (buffer-local-value 'ce-dash-document-tree dash-editor-buf))
+	  (source-buf (buffer-local-value 'ce-dash-original-buffer dash-editor-buf)))
+      (let ((rendered-tree (ce-xhtml-render-nxml-thing tree)))
+	(unless (buffer-live-p source-buf)
+	  (error "The buffer from which the dash editor was launched has somehow been killed; unable to replace its contents with the results of dash editing."))
+	(switch-to-buffer source-buf)
+	(when buffer-read-only
+	  (error "The buffer from which the dash editor was launched is somehow read-only; unable to replace its contents with the results of dash editing."))
+	(erase-buffer)
+	(insert rendered-tree)
+	(newline) ;; force newline at end of file
+	(save-buffer)
+	(kill-buffer dash-editor-buf)
+	t))))
 
 (defun ce-dash-string-contains-dash (string)
   (not (null (string-match-p +ce-dash-dash-regexp+ string))))
@@ -265,7 +289,8 @@ N starts from 1, not 0."
 		(error
 		 (error "Unable to parse the current buffer as XML:
 
-%s" (error-message-string nxml-parse-error))))))
+%s" (error-message-string nxml-parse-error)))))
+	(current-buffer (current-buffer)))
     (if (ce-dash-some-dash-in-nxml-thing tree)
 	(progn
 	  (when (get-buffer +ce-dash-editor-buffer-name+)
@@ -274,7 +299,7 @@ N starts from 1, not 0."
 	    (with-current-buffer dash-editor-buffer
 	      (kill-all-local-variables)
 	      (use-local-map ce-dash-editor-mode-map)
-	      (ce-dash-update-dash-editor dash-editor-buffer tree)
+	      (ce-dash-update-dash-editor dash-editor-buffer tree current-buffer)
 	      (ce-dash-render-dash-editor dash-editor-buffer))
 	    (switch-to-buffer dash-editor-buffer)))
       (message "No dashes to edit."))))

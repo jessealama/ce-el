@@ -152,7 +152,7 @@ N starts from 1, not 0."
 	      (destructuring-bind (cdata-section-number dash-position)
 		  dash-occurrence
 		(let ((cdata-section (nth cdata-section-number cdata-sections)))
-		  (let ((action (read-string "[e]ndash, e[m]dash, [s]ubtraction (RET to accept as is)")))
+		  (let ((action (read-string "[e]ndash, e[m]dash, [s]ubtraction (RET to accept as is): ")))
 		    (let ((new-tree
 			   (cond ((string= action "") tree)
 				 ((string= action "e")

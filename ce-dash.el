@@ -9,7 +9,15 @@
   (or (string= entity-str "&ndash;")
       (string= entity-str "&mdash;")))
 
-(defconst +ce-dash-dashes+ (list ?- ?– ?— ?−))
+(defconst +ce-dash-hyphen+ ?-)
+(defconst +ce-dash-endash+ ?–)
+(defconst +ce-dash-emdash+ ?—)
+(defconst +ce-dash-minus+ ?−)
+
+(defconst +ce-dash-dashes+ (list +ce-dash-hyphen+
+				 +ce-dash-endash+
+				 +ce-dash-emdash+
+				 +ce-dash-minus+))
 
 (defconst +ce-dash-dash-regexp+
   (regexp-opt (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))

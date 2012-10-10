@@ -72,21 +72,18 @@ The error was:
 	 (error nil))))
 
 (defun ce-xhtml-render-nxml-thing (thing)
-  (cond ((null thing)
-	 "")
-	((stringp thing)
+  (cond ((stringp thing)
 	 thing)
-	((consp thing)
-	 (condition-case structure-error
-	     (destructuring-bind (element attributes . children)
-		 thing
-	       (with-output-to-string
-		 (princ (ce-xhtml-render-tag element attributes))
-		 (dolist (child children)
-		   (princ (ce-xhtml-render-nxml-thing child)))
-		 (princ (ce-xhtml-render-closing-tag element))))
-	   (error
-	    (error "Unable to make sense of the nXML thing
+	((ce-xhtml-nxml-elementp thing)
+	 (destructuring-bind (element attributes . children)
+	     thing
+	   (with-output-to-string
+	     (princ (ce-xhtml-render-tag element attributes))
+	     (dolist (child children)
+	       (princ (ce-xhtml-render-nxml-thing child)))
+	     (princ (ce-xhtml-render-closing-tag element)))))
+	(t
+	 (error "Unable to render the nXML thing
 
 %s
 

@@ -22,7 +22,11 @@
 	  attribute-value-pair
 	(format "%s=\"%s\"" (ce-xhtml-render-attribute attribute) (ce-xhtml-escape-string value)))
     (error
-     (error "Unable to render the attribute-value pair '%s'" attribute-value-pair))))
+     (error "Unable to render the attribute-value pair
+
+%s
+
+because it does not have the expected shape (it is not a cons cell)." attribute-value-pair))))
 
 (defun ce-xhtml-render-tag (element attributes)
   (condition-case structure-error

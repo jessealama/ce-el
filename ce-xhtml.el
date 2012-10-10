@@ -20,7 +20,7 @@
   (condition-case nil
       (destructuring-bind (attribute . value)
 	  attribute-value-pair
-	(format "%s=\"%s\"" (ce-xhtml-render-attribute attribute) value))
+	(format "%s=\"%s\"" (ce-xhtml-render-attribute attribute) (ce-xhtml-escape-string value)))
     (error
      (error "Unable to render the attribute-value pair '%s'" attribute-value-pair))))
 

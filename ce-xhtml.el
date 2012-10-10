@@ -9,7 +9,7 @@
 	 (condition-case nil
 	     (destructuring-bind (namespace . name)
 		 attribute
-	       ;; ignore namespace
+	       ;; ignore namespace -- this ought to always be the XHTML namespace
 	       name)
 	   (error
 	    (error "The attribute '%s' does not have the expected shape of a cons cell." attribute))))

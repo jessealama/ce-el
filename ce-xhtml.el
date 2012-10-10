@@ -71,9 +71,31 @@ The error was:
 	     t)
 	 (error nil))))
 
+(defun ce-xhtml-escape-string (string)
+  "Escape ampersands and less-than symbols in STRING."
+  (with-output-to-string
+    (loop
+     with len = (length string)
+     for i from 1
+     for c across string
+     do
+     (cond ((char-equal c ?<)
+	    (princ "&lt;"))
+	   ((char-equal c ?>)
+	    (princ "&gt;"))
+	   ((char-equal c ?&)
+	    (if (<= (+ i 4) len)
+		(let ((next-four-characters (substring string i (+ i 4))))
+		  (if (string= next-four-characters "amp;")
+		      (princ "&")
+		    (princ "&amp;")))
+	      (princ "&amp;")))
+	   (t
+	    (princ (format "%c" c)))))))
+
 (defun ce-xhtml-render-nxml-thing (thing)
   (cond ((stringp thing)
-	 thing)
+	 (ce-xhtml-escape-string thing))
 	((ce-xhtml-nxml-elementp thing)
 	 (destructuring-bind (element attributes . children)
 	     thing

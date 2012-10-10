@@ -34,7 +34,11 @@ because it does not have the expected shape (it is not a cons cell)." attribute-
 	  element
 	(unless (string= (symbol-name namespace)
 			 ":http://www.w3.org/1999/xhtml")
-	  (error "Non-XHTML namespace in an nXML node: '%s'" (symbol-name namespace)))
+	  (error "Non-XHTML namespace (%s) in an nXML node
+
+%s
+
+The only namespace we expect is \"http://www.w3.org/1999/xhtml\"." (symbol-name namespace) element))
 	(with-output-to-string
 	  (princ "<")
 	  (princ name)

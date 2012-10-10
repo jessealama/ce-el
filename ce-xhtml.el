@@ -1,20 +1,36 @@
 
 (require 'cl)
 (require 'nxml-mode)
+(require 'eieio)
 
-(defun ce-xhtml-render-attribute (attribute)
-  (cond ((stringp attribute)
-	 attribute)
-	((consp attribute)
-	 (condition-case nil
-	     (destructuring-bind (namespace . name)
-		 attribute
-	       ;; ignore namespace -- this ought to always be the XHTML namespace
-	       name)
-	   (error
-	    (error "The attribute '%s' does not have the expected shape of a cons cell." attribute))))
-	(t
-	 (error "Unable to handle the attribute '%s'" attribute))))
+(defmethod ce-xhtml-render-attribute ((attribute string))
+  attribute)
+
+(defmethod ce-xhtml-render-attribute ((attribute cons))
+  (destructuring-bind (namespace . name)
+      attribute
+    (unless (string= (symbol-name namespace) ":http://www.w3.org/1999/xhtml")
+      (error "Non-XHTML namespace (%s) in an nXML node
+
+%s
+
+The only namespace we expect is \"http://www.w3.org/1999/xhtml\"." (symbol-name namespace) attribute))
+    (unless (stringp name)
+      (error "A non-string appears as the cdr of a cons cell
+
+%s ,
+
+We expect to be an nXML attribute element; the cdr should be a string." attribute))
+    name))
+
+;; If we haven't covered ce-xhtml-render-attribute by another method,
+;; then we have been given an argument that we don't handle at all.
+(defmethod ce-xhtml-render-attribute ((attribute t))
+  (error "Unable to handle the attribute
+
+%s
+
+because we do not know how to handle such objects." attribute))
 
 (defun ce-xhtml-render-attribute-and-value (attribute-value-pair)
   (condition-case nil

@@ -3,7 +3,8 @@
 (require 'nxml-mode)
 
 (defun ce-xhtml-render-attribute (attribute)
-  (cond ((stringp attribute) attribute)
+  (cond ((stringp attribute)
+	 attribute)
 	((consp attribute)
 	 (condition-case nil
 	     (destructuring-bind (namespace . name)

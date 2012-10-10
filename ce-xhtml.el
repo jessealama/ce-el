@@ -87,15 +87,7 @@ The error was:
 
 %s
 
-cas an nXML element.
-
-The error is:
-
-%s" thing (error-message-string structure-error)))))
-	(t
-	 (error "Unable to handle the nXML thing
-
-%s" thing))))
+because it is neither a string nor an nXML element." thing))))
 
 (provide 'ce-xhtml)
 

@@ -63,6 +63,14 @@ The error was:
 
 %s" element (error-message-string structure-error)))))
 
+(defun ce-xhtml-nxml-elementp (thing)
+  (and (consp thing)
+       (condition-case nil
+	   (destructuring-bind (element attributes . children)
+	       thing
+	     t)
+	 (error nil))))
+
 (defun ce-xhtml-render-nxml-thing (thing)
   (cond ((null thing)
 	 "")

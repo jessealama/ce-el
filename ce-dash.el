@@ -254,8 +254,7 @@ N starts from 1, not 0."
 	(insert string)
 	(add-text-properties (+ dash-position 1) (+ dash-position 2) (list 'face 'highlight))
 	(setf mode-name "Dash Editor")
-	(setf buffer-read-only t)
-	(message "Commands: n, p, SPC, RET; h for help")))))
+	(setf buffer-read-only t)))))
 
 (defun ce-dash-quit ()
   (interactive)
@@ -440,8 +439,7 @@ be displayed is generally two times the value of this variable."
 	    (ce-dash-previous-line) ;; ensure that we put the cursor in the right spot
 	    (set-buffer-modified-p nil)
 	    (setf mode-name "Dash Editor")
-	    (setf buffer-read-only t)
-	    (message "Commands: n, p, SPC, RET; h for help")))
+	    (setf buffer-read-only t)))
       (message "No dashes to edit."))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

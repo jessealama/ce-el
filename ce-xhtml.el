@@ -57,10 +57,7 @@ The error was:
 	(unless (string= (symbol-name namespace)
 			 ":http://www.w3.org/1999/xhtml")
 	  (error "Non-XHTML namespace in an nXML node: '%s'" (symbol-name namespace)))
-	(with-output-to-string
-	  (princ "</")
-	  (princ name)
-	  (princ ">")))
+	(format "</%s>" name))
     (error
      (error "Cannot render closing tag for '%s'.  The error was:
 

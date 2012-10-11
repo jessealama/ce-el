@@ -9,7 +9,15 @@
   (or (string= entity-str "&ndash;")
       (string= entity-str "&mdash;")))
 
-(defconst +ce-dash-dashes+ (list ?- ?– ?— ?−))
+(defconst +ce-dash-hyphen+ ?-)
+(defconst +ce-dash-endash+ ?–)
+(defconst +ce-dash-emdash+ ?—)
+(defconst +ce-dash-minus+ ?−)
+
+(defconst +ce-dash-dashes+ (list +ce-dash-hyphen+
+				 +ce-dash-endash+
+				 +ce-dash-emdash+
+				 +ce-dash-minus+))
 
 (defconst +ce-dash-dash-regexp+
   (regexp-opt (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))
@@ -22,6 +30,9 @@
 (defvar ce-dash-original-buffer nil)
 (defvar ce-dash-dealt-with nil)
 
+(defconst +ce-dash-header+
+  "SPC to accept as-is; [e]ndash, e[m]dash, [m]inus sign, [h]yphen; [q]uit and commit edits")
+
 (defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))
 
@@ -31,14 +42,24 @@
     (define-key map (kbd "<left>") 'ce-dash-go-nowhere)
     (define-key map (kbd "<right>") 'ce-dash-go-nowhere)
 
+    ;; editing
     (define-key map (kbd "SPC") 'ce-dash-accept-dash-occurrence)
-    (define-key map (kbd "RET") 'ce-dash-edit-dash-occurrence)
+
+    (define-key map (kbd "m") 'ce-dash-replace-w/-mdash)
+    (define-key map (kbd "e") 'ce-dash-replace-w/-ndash)
+    (define-key map (kbd "s") 'ce-dash-replace-w/-minus)
+    (define-key map (kbd "h") 'ce-dash-replace-w/-hyphen)
+
+    ;; help
     (define-key map (kbd "?") 'describe-mode)
+
+    ;; bailing, committing
     (define-key map (kbd "q") 'ce-dash-quit)
 
     map))
 
-(defmacro with-dash-editor (buffer &rest body)
+(defmacro ce-dash-with-dash-editor (buffer &rest body)
+  (declare (indent 1))
   (unless (symbolp buffer)
     (error "A symbol is rqeuired for a buffer name"))
   `(let ((,buffer (get-buffer +ce-dash-editor-buffer-name+)))
@@ -52,7 +73,7 @@
 
 (defun ce-dash-next-line ()
   (interactive)
-  (with-dash-editor dash-editor-buf
+  (ce-dash-with-dash-editor dash-editor-buf
     (let ((line (current-line))
 	  (dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes dash-editor-buf)))
       (let ((num-dash-occurrences (reduce '+ (mapcar 'length dash-positions))))
@@ -69,7 +90,7 @@
 
 (defun ce-dash-previous-line ()
   (interactive)
-  (with-dash-editor dash-editor-buf
+  (ce-dash-with-dash-editor dash-editor-buf
     (let ((line (current-line))
 	  (dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes dash-editor-buf)))
       (let ((num-dash-occurrences (reduce '+ (mapcar 'length dash-positions))))
@@ -172,52 +193,53 @@ N starts from 1, not 0."
 	       (append (list element attributes)
 		       (reverse new-children))))))))
 
-(defun ce-dash-edit-dash-occurrence ()
+(defmacro ce-dash-replace-w/-character (character)
+  `(ce-dash-with-dash-editor buf
+     (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
+	   (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
+	   (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
+	   (line-number (current-line))
+	   (original-buffer (buffer-local-value 'ce-dash-original-buffer buf))
+	   (dealt-with (buffer-local-value 'ce-dash-dealt-with buf)))
+       (let ((cdata-sections (ce-dash-character-data-sections tree)))
+	 (assert (= (length cdata-dash-positions) (length cdata-sections)))
+	 (when (> line-number (length dash-occurrences))
+	   (error "The current line number is greater than the total number of dash occurences."))
+	 (let ((dash-occurrence (nth (1- line-number) dash-occurrences)))
+	   (destructuring-bind (cdata-section-number dash-position)
+	       dash-occurrence
+	     (let ((cdata-section (nth cdata-section-number cdata-sections)))
+	       (macrolet ((replace-with-char (char)
+					     `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
+						(ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
+		 (let ((new-tree (replace-with-char ,character)))
+		   (unless (member line-number dealt-with)
+		     (push line-number dealt-with))
+		   (ce-dash-update-dash-editor buf new-tree original-buffer dealt-with)
+		   (ce-dash-render-dash-editor buf)
+		   (goto-char (point-min))
+		   (forward-line (1- line-number))
+		   (ce-dash-next-line))))))))))
+
+(defun ce-dash-replace-w/-ndash ()
   (interactive)
-  (with-dash-editor buf
-    (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
-	  (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
-	  (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
-	  (line-number (current-line))
-	  (original-buffer (buffer-local-value 'ce-dash-original-buffer buf))
-	  (dealt-with (buffer-local-value 'ce-dash-dealt-with buf)))
-      (let ((cdata-sections (ce-dash-character-data-sections tree)))
-	(assert (= (length cdata-dash-positions) (length cdata-sections)))
-	(if (<= line-number (length dash-occurrences))
-	    (let ((dash-occurrence (nth (1- line-number) dash-occurrences)))
-	      (destructuring-bind (cdata-section-number dash-position)
-		  dash-occurrence
-		(let ((cdata-section (nth cdata-section-number cdata-sections)))
-		  (let ((action (read-string "ASCII [h]yphen, [e]ndash, e[m]dash, [s]ubtraction sign, RET to accept as-is: ")))
-		    (macrolet ((replace-with-char (char)
-			         `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
-			      (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
-		      (let ((new-tree
-			     (cond ((string= action "")
-				    tree)
-				   ((string= action "h")
-				    (replace-with-char ?-))
-				   ((string= action "e")
-				    (replace-with-char ?–))
-				   ((string= action "m")
-				    (replace-with-char ?—))
-				   ((string= action "s")
-				    (replace-with-char ?−))
-				 (t
-				  (message "Action '%s' not implemented yet." action)
-				  tree))))
-			(unless (member line-number dealt-with)
-			  (push line-number dealt-with))
-			(ce-dash-update-dash-editor buf new-tree original-buffer dealt-with)
-			(ce-dash-render-dash-editor buf)
-			(goto-char (point-min))
-			(forward-line (1- line-number))
-			(ce-dash-next-line)))))))
-	  (error "The current line number is greater than the total number of dash occurences."))))))
+  (ce-dash-replace-w/-character +ce-dash-endash+))
+
+(defun ce-dash-replace-w/-mdash ()
+  (interactive)
+  (ce-dash-replace-w/-character +ce-dash-emdash+))
+
+(defun ce-dash-replace-w/-minus ()
+  (interactive)
+  (ce-dash-replace-w/-character +ce-dash-minus+))
+
+(defun ce-dash-replace-w/-hyphen ()
+  (interactive)
+  (ce-dash-replace-w/-character +ce-dash-hyphen+))
 
 (defun ce-dash-accept-dash-occurrence ()
   (interactive)
-  (with-dash-editor buf
+  (ce-dash-with-dash-editor buf
     (let ((line (current-line))
 	  (dealt-with (buffer-local-value 'ce-dash-dealt-with buf))
 	  (tree (buffer-local-value 'ce-dash-document-tree buf))
@@ -228,22 +250,6 @@ N starts from 1, not 0."
       (goto-char (point-min))
       (forward-line (1- line))
       (ce-dash-next-line))))
-
-(defun ce-dash-edit-dashes (string initial-search-position)
-  (let ((dash-position (string-match +ce-dash-dash-regexp+
-				     string initial-search-position)))
-    (if (null dash-position)
-	string
-      (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
-	(switch-to-buffer dash-editor-buffer)
-	(erase-buffer)
-	(kill-all-local-variables)
-	(use-local-map ce-dash-editor-mode-map)
-	(insert string)
-	(add-text-properties (+ dash-position 1) (+ dash-position 2) (list 'face 'highlight))
-	(setf mode-name "Dash Editor")
-	(setf buffer-read-only t)
-	(message "Commands: n, p, SPC, RET; h for help")))))
 
 (defun ce-dash-quit ()
   (interactive)
@@ -325,10 +331,10 @@ N starts from 1, not 0."
 
 (defun ce-dash-inspect-dashes ()
   (interactive)
-  (ce-entities-resolve-named-entities-decimally)
   (when (buffer-modified-p)
     (when (y-or-n-p "The buffer has been modified since it was last saved.  Save before continuing? ")
       (save-buffer)))
+  (ce-entities-resolve-named-entities-decimally)
   (let ((tree (condition-case nxml-parse-error
 		  (nxml-parse-file (buffer-file-name))
 		(error
@@ -403,8 +409,7 @@ be displayed is generally two times the value of this variable."
 	 (dealt-with (buffer-local-value 'ce-dash-dealt-with editor-buffer)))
     (assert (= (length cdata-sections) (length cdata-dash-positions)))
     (if (some 'identity cdata-sections)
-	(let ((total-dashes (reduce '+ (mapcar 'length cdata-sections)))
-	      (dash-occurrence-number 0))
+	(let ((dash-occurrence-number 0))
 	  (with-current-buffer editor-buffer
 	    (setf buffer-read-only nil)
 	    (erase-buffer)
@@ -427,21 +432,12 @@ be displayed is generally two times the value of this variable."
 	    (goto-char (point-min))
 	    (ce-dash-previous-line) ;; ensure that we put the cursor in the right spot
 	    (set-buffer-modified-p nil)
-	    (setf mode-name "Dash Editor")
-	    (setf buffer-read-only t)
-	    (message "Commands: n, p, SPC, RET; h for help")))
+	    (setf mode-name (format "Dash Editor [%d occurrences]" dash-occurrence-number))
+	    (setf header-line-format '(:eval (substring +ce-dash-header+
+							(min (length my-header)
+							     (window-hscroll)))))
+	    (setf buffer-read-only t)))
       (message "No dashes to edit."))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ce-dash mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define-derived-mode ce-dash-mode
-  special-mode
-  "Dashes"
-  "Major mode for editing dashes in text.
-
-\\{ce-dash-mode-map}")
 
 (provide 'ce-dash)
 

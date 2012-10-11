@@ -3,7 +3,7 @@ emacs := /Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
 
-.PHONY : ce install clean
+.PHONY : ce install clean clean-emacs-backups clean-compiled-files clean-generated-dependencies
 
 project-prefix := ce
 
@@ -65,9 +65,15 @@ install: $(elcs)
 uninstall:
 	rm -Rf $(install-dir)
 
-clean:
+clean: clean-emacs-backups clean-compiled-files clean-generated-dependencies
+
+clean-emacs-backups:
 	rm -f $(emacs-backups)
+
+clean-compiled-files:
 	rm -f $(elcs)
+
+clean-generated-dependencies:
 	rm -f $(el-deps)
 
 -include $(el-deps)

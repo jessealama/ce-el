@@ -53,7 +53,7 @@ all: $(elcs)
                   --directory '.' \
                   --funcall batch-byte-compile $*.el
 
-install: $(elcs)
+install: $(elcs) $(els)
 	install --directory $(install-dir)
 	install --mode 644 --target-directory $(install-dir) $(els)
 	install --mode 644 --target-directory $(install-dir) $(elcs)

@@ -384,10 +384,10 @@ N starts from 1, not 0."
 
 (defun ce-dash-inspect-dashes ()
   (interactive)
-  (ce-entities-resolve-named-entities-decimally)
   (when (buffer-modified-p)
     (when (y-or-n-p "The buffer has been modified since it was last saved.  Save before continuing? ")
       (save-buffer)))
+  (ce-entities-resolve-named-entities-decimally)
   (let ((tree (condition-case nxml-parse-error
 		  (nxml-parse-file (buffer-file-name))
 		(error

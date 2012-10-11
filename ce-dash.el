@@ -70,7 +70,7 @@
 
 (defun ce-dash-next-line ()
   (interactive)
-  (with-dash-editor dash-editor-buf
+  (ce-dash-with-dash-editor dash-editor-buf
     (let ((line (current-line))
 	  (dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes dash-editor-buf)))
       (let ((num-dash-occurrences (reduce '+ (mapcar 'length dash-positions))))
@@ -87,7 +87,7 @@
 
 (defun ce-dash-previous-line ()
   (interactive)
-  (with-dash-editor dash-editor-buf
+  (ce-dash-with-dash-editor dash-editor-buf
     (let ((line (current-line))
 	  (dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes dash-editor-buf)))
       (let ((num-dash-occurrences (reduce '+ (mapcar 'length dash-positions))))
@@ -190,9 +190,50 @@ N starts from 1, not 0."
 	       (append (list element attributes)
 		       (reverse new-children))))))))
 
+(defun ce-dash-replace-with-ndash ()
+  (interactive)
+  (ce-dash-with-dash-editor buf
+    (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
+	  (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
+	  (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
+	  (line-number (current-line))
+	  (original-buffer (buffer-local-value 'ce-dash-original-buffer buf))
+	  (dealt-with (buffer-local-value 'ce-dash-dealt-with buf)))
+      (let ((cdata-sections (ce-dash-character-data-sections tree)))
+	(assert (= (length cdata-dash-positions) (length cdata-sections)))
+	(if (<= line-number (length dash-occurrences))
+	    (let ((dash-occurrence (nth (1- line-number) dash-occurrences)))
+	      (destructuring-bind (cdata-section-number dash-position)
+		  dash-occurrence
+		(let ((cdata-section (nth cdata-section-number cdata-sections)))
+		  (let ((action (read-string "[e]ndash, e[m]dash, [s]ubtraction (RET to accept as is): ")))
+		    (macrolet ((replace-with-char (char)
+			         `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
+			      (ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
+		      (let ((new-tree
+			     (cond ((string= action "")
+				    tree)
+				   ((string= action "e")
+				    (replace-with-char ? ))
+				   ((string= action "m")
+				    (replace-with-char ? ))
+				   ((string= action "s")
+				    (replace-with-char ? ))
+				 (t
+				  (message "Action '%s' not implemented yet." action)
+				  tree))))
+			(unless (member line-number dealt-with)
+			  (push line-number dealt-with))
+			(ce-dash-update-dash-editor buf new-tree original-buffer dealt-with)
+			(ce-dash-render-dash-editor buf)
+			(goto-char (point-min))
+			(forward-line (1- line-number))
+			(ce-dash-next-line)))))))
+	  (error "The current line number is greater than the total number of dash occurences."))))))
+
 (defun ce-dash-edit-dash-occurrence ()
   (interactive)
-  (with-dash-editor buf
+  (ce-dash-with-dash-editor buf
     (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
 	  (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
 	  (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
@@ -233,7 +274,7 @@ N starts from 1, not 0."
 
 (defun ce-dash-accept-dash-occurrence ()
   (interactive)
-  (with-dash-editor buf
+  (ce-dash-with-dash-editor buf
     (let ((line (current-line))
 	  (dealt-with (buffer-local-value 'ce-dash-dealt-with buf))
 	  (tree (buffer-local-value 'ce-dash-document-tree buf))

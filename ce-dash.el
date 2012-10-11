@@ -289,21 +289,6 @@ N starts from 1, not 0."
       (forward-line (1- line))
       (ce-dash-next-line))))
 
-(defun ce-dash-edit-dashes (string initial-search-position)
-  (let ((dash-position (string-match +ce-dash-dash-regexp+
-				     string initial-search-position)))
-    (if (null dash-position)
-	string
-      (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
-	(switch-to-buffer dash-editor-buffer)
-	(erase-buffer)
-	(kill-all-local-variables)
-	(use-local-map ce-dash-editor-mode-map)
-	(insert string)
-	(add-text-properties (+ dash-position 1) (+ dash-position 2) (list 'face 'highlight))
-	(setf mode-name "Dash Editor")
-	(setf buffer-read-only t)))))
-
 (defun ce-dash-quit ()
   (interactive)
   (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))

@@ -1,4 +1,3 @@
-install-dir := $(HOME)/share/emacs/site-lisp/ce
 emacs := /Applications/Emacs.app/Contents/MacOS/Emacs
 
 unexport EMACSLOADPATH # evil emacs!
@@ -28,6 +27,10 @@ pls := $(addsuffix .pl,$(perl-scripts))
 
 files := Makefile .gitignore $(els) $(pls)
 emacs-backups := $(addsuffix ~,$(files))
+
+empty :=
+install-root = $(if $(HOME),$(HOME),$(empty))
+install-dir = $(install-root)/share/emacs/site-lisp/sep
 
 all: $(elcs)
 

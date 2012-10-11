@@ -22,11 +22,6 @@
 (defvar ce-dash-original-buffer nil)
 (defvar ce-dash-dealt-with nil)
 
-(defun ce-dash-inspect-string (string)
-  (if (string-match +ce-dash-dash-regexp+ string)
-      (ce-dash-edit-dashes string 0)
-    string))
-
 (defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))
 

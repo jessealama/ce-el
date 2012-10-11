@@ -462,8 +462,7 @@ be displayed is generally two times the value of this variable."
 	 (dealt-with (buffer-local-value 'ce-dash-dealt-with editor-buffer)))
     (assert (= (length cdata-sections) (length cdata-dash-positions)))
     (if (some 'identity cdata-sections)
-	(let ((total-dashes (reduce '+ (mapcar 'length cdata-sections)))
-	      (dash-occurrence-number 0))
+	(let ((dash-occurrence-number 0))
 	  (with-current-buffer editor-buffer
 	    (setf buffer-read-only nil)
 	    (erase-buffer)

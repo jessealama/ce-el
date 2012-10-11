@@ -30,6 +30,9 @@
 (defvar ce-dash-original-buffer nil)
 (defvar ce-dash-dealt-with nil)
 
+(defconst +ce-dash-header+
+  "SPC to accept as-is; [e]ndash, e[m]dash, [m]inus sign, [h]yphen; [q]uit and commit edits")
+
 (defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))
 
@@ -214,11 +217,11 @@ N starts from 1, not 0."
 			     (cond ((string= action "")
 				    tree)
 				   ((string= action "e")
-				    (replace-with-char ? ))
+				    (replace-with-char ?–))
 				   ((string= action "m")
-				    (replace-with-char ? ))
+				    (replace-with-char ?—))
 				   ((string= action "s")
-				    (replace-with-char ? ))
+				    (replace-with-char ?−))
 				 (t
 				  (message "Action '%s' not implemented yet." action)
 				  tree))))
@@ -483,7 +486,10 @@ be displayed is generally two times the value of this variable."
 	    (goto-char (point-min))
 	    (ce-dash-previous-line) ;; ensure that we put the cursor in the right spot
 	    (set-buffer-modified-p nil)
-	    (setf mode-name "Dash Editor")
+	    (setf mode-name (format "Dash Editor [%d occurrences]" dash-occurrence-number))
+	    (setf header-line-format '(:eval (substring +ce-dash-header+
+							(min (length my-header)
+							     (window-hscroll)))))
 	    (setf buffer-read-only t)))
       (message "No dashes to edit."))))
 

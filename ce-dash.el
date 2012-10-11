@@ -445,17 +445,6 @@ be displayed is generally two times the value of this variable."
 	    (setf buffer-read-only t)))
       (message "No dashes to edit."))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ce-dash mode
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define-derived-mode ce-dash-mode
-  special-mode
-  "Dashes"
-  "Major mode for editing dashes in text.
-
-\\{ce-dash-mode-map}")
-
 (provide 'ce-dash)
 
 

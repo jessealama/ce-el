@@ -55,7 +55,8 @@
 
     map))
 
-(defmacro with-dash-editor (buffer &rest body)
+(defmacro ce-dash-with-dash-editor (buffer &rest body)
+  (declare (indent 1))
   (unless (symbolp buffer)
     (error "A symbol is rqeuired for a buffer name"))
   `(let ((,buffer (get-buffer +ce-dash-editor-buffer-name+)))

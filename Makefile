@@ -62,8 +62,13 @@ install: $(elcs) $(els)
 	@echo "In your Emacs initialization file, add"
 	@echo
 	@echo "  (add-to-list 'load-path \"$(install-dir)\")"
+	@echo "  (require 'ce)"
 	@echo
 	@echo "so that SEP copyeditor mode is loaded whenever you start Emacs."
+	@echo "The functionality is located in the 'SEP' menu, which ought to be"
+	@echo "visible in your menu bar if the (require 'ce) form was evaluated"
+	@echo "without error."
+	@echo
 
 uninstall:
 	rm -Rf $(install-dir)

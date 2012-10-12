@@ -424,8 +424,9 @@ be displayed is generally two times the value of this variable."
 		 (incf dash-occurrence-number)
 		 (let ((elided-string (ce-dash-elide-string-around candidate-section dash-position)))
 		   (if (member dash-occurrence-number dealt-with)
-		       (insert "[X]" " " (ce-dash-nuke-whitespace elided-string))
-		     (insert "[ ]" " " (ce-dash-nuke-whitespace elided-string)))
+		       (insert "[X]")
+		     (insert "[ ]"))
+		   (insert " " (ce-dash-nuke-whitespace elided-string))
 		   (newline)))))
 
 	    ;; kill the final newline

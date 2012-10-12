@@ -54,9 +54,9 @@ all: $(elcs)
                   --funcall batch-byte-compile $*.el
 
 install: $(elcs) $(els)
-	install --directory $(install-dir)
-	install --mode 644 --target-directory $(install-dir) $(els)
-	install --mode 644 --target-directory $(install-dir) $(elcs)
+	mkdir -p $(install-dir)
+	for el in $(els); do cp $$el $(install-dir); done
+	for elc in $(elcs); do cp $$elc $(install-dir); done
 	@echo
 	@echo "Don't forget to add $(install-dir) to your Emacs load path!"
 	@echo "In your Emacs initialization file, add"

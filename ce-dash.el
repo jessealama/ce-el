@@ -263,7 +263,9 @@ N starts from 1, not 0."
 	  (error "The buffer from which the dash editor was launched has somehow been killed; unable to replace its contents with the results of dash editing."))
 	(switch-to-buffer source-buf)
 	(when buffer-read-only
-	  (error "The buffer from which the dash editor was launched is somehow read-only; unable to replace its contents with the results of dash editing."))
+	  (error "The buffer from which the dash editor was launched is somehow read-only now; we are unable to replace its contents with the results of dash editing."))
+	(when (buffer-modified-p)
+	  (error "The buffer from which the dash editor was launched has been modified since we started to edit dashes.  Refusing to overwrite the new contents; sorry."))
 	(erase-buffer)
 	(insert rendered-tree)
 	(newline) ;; force newline at end of file

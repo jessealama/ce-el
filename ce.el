@@ -126,6 +126,9 @@ Encyclopedia of Philosophy."
 	   ["Check XHTML entities"
 	    (call-interactively 'ce-validate-entities)
 	    (fboundp 'ce-validate-entities)])
+	 ["Inspect dashes"
+	  (call-interactively 'ce-dash-inspect-dashes)
+	  (fboundp 'ce-dash-inspect-dashes)]
 	 "-"
          ["Customize CE mode"
           (customize-group 'ce)

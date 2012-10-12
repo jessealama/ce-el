@@ -44,6 +44,7 @@
 
     ;; editing
     (define-key map (kbd "SPC") 'ce-dash-accept-dash-occurrence)
+
     (define-key map (kbd "m") 'ce-dash-replace-w/-mdash)
     (define-key map (kbd "e") 'ce-dash-replace-w/-ndash)
     (define-key map (kbd "s") 'ce-dash-replace-w/-minus)

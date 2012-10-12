@@ -94,11 +94,10 @@ If cs-digitize changes, then this function may need to be changed."
       "")))
 
 (defun ce-dash-nuke-whitespace (string)
-  (ce-dash-squeeze-spaces (substitute ?\s
-				      ?\t
-				      (substitute ?\s
-						  ?\n
-						  (ce-dash-kill-initial-whitespace string)))))
+  (let ((no-initial-whitespace (ce-dash-kill-initial-whitespace string)))
+    (let ((no-newlines (substitute ?\s ?\n no-initial-whitespace)))
+      (let ((no-tabs (substitute ?\s ?\t no-newlines)))
+	(ce-dash-squeeze-spaces no-tabs)))))
 
 (provide 'ce-utils)
 

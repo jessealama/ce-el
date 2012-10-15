@@ -87,7 +87,7 @@ corresponding file was found."
 	    (dolist (potential-violator-tag ce-unadorned-potential-violator-tags)
 	      (let ((opening-form (ce-unadorned-opening-form potential-violator-tag))
 		    (closing-form (ce-unadorned-closing-form potential-violator-tag)))
-		(beg-of-buffer)
+		(goto-char (point-min))
 		(while (re-search-forward closing-form nil t)
 		  (save-excursion
 		    (re-search-forward "[^[:space:]]") ;; find the next non-whitespace character
@@ -110,7 +110,7 @@ corresponding file was found."
       (let ((opening-form (ce-unadorned-opening-form potential-violator-tag))
 	    (closing-form (ce-unadorned-closing-form potential-violator-tag)))
 	(save-excursion
-	  (beg-of-buffer)
+	  (goto-char (point-min))
 	  (while (re-search-forward closing-form nil t)
 	    (save-excursion
 	      (re-search-forward "[^[:space:]]") ;; find the next non-whitespace character

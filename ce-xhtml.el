@@ -1,6 +1,7 @@
 
-(require 'cl)
-(require 'nxml-mode)
+(eval-when-compile
+  (require 'cl)
+  (require 'nxml-mode))
 
 (defun ce-xhtml-render-attribute (attribute)
   (cond ((stringp attribute)

@@ -20,9 +20,9 @@
 
 ;;; Code:
 
-(require 'cl)
-
-(require 'ce-entries)
+(eval-when-compile
+  (require 'cl)
+  (require 'ce-entries))
 
 (defcustom ce-unadorned-fixed-site-directory
   "/tmp/ce"

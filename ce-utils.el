@@ -1,8 +1,12 @@
 
-(require 'cl)
-(require 'nxml-mode)
-(require 'ce-macros)
-(require 'eieio)
+(eval-when-compile
+  (require 'cl)
+  (require 'nxml-mode)
+  (require 'ce-macros))
+
+(declare-function some "cl-seq.el")
+(declare-function subseq "cl-extra.el")
+(declare-function substitute "cl-seq.el")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sequences

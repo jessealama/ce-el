@@ -1,8 +1,9 @@
 
 ;; Entries and their locations
 
-(require 'cl)
-(require 'ce-macros)
+(eval-when-compile
+  (require 'cl)
+  (require 'ce-macros))
 
 (defcustom ce-entries-directory
   "/usr/local/etc/httpd/htdocs/entries"

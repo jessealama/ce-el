@@ -350,22 +350,24 @@ N starts from 1, not 0."
   (let ((tree (condition-case nxml-parse-error
 		  (nxml-parse-file (buffer-file-name))
 		(error
-		 (error "Unable to parse the current buffer as XML:
+		 (message "Unable to parse the current buffer as XML:
 
-%s" (error-message-string nxml-parse-error)))))
+%s" (error-message-string nxml-parse-error))
+		 nil)))
 	(current-buffer (current-buffer)))
-    (cond ((ce-dash-some-dash-in-nxml-thing tree)
-	   (when (get-buffer +ce-dash-editor-buffer-name+)
-	     (kill-buffer (get-buffer +ce-dash-editor-buffer-name+)))
-	   (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
-	     (with-current-buffer dash-editor-buffer
-	       (kill-all-local-variables)
-	       (use-local-map ce-dash-editor-mode-map)
-	       (ce-dash-update-dash-editor dash-editor-buffer tree current-buffer nil)
-	       (ce-dash-render-dash-editor dash-editor-buffer))
-	     (switch-to-buffer dash-editor-buffer)))
-	  (t
-	   (message "No dashes to edit.")))))
+    (when tree
+      (cond ((ce-dash-some-dash-in-nxml-thing tree)
+	     (when (get-buffer +ce-dash-editor-buffer-name+)
+	       (kill-buffer (get-buffer +ce-dash-editor-buffer-name+)))
+	     (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
+	       (with-current-buffer dash-editor-buffer
+		 (kill-all-local-variables)
+		 (use-local-map ce-dash-editor-mode-map)
+		 (ce-dash-update-dash-editor dash-editor-buffer tree current-buffer nil)
+		 (ce-dash-render-dash-editor dash-editor-buffer))
+	       (switch-to-buffer dash-editor-buffer)))
+	    (t
+	     (message "No dashes to edit."))))))
 
 (defcustom *ce-dash-preview-window-padding* 25
   "The number of characters to be displayed before and after an occurrence of a dash.

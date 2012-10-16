@@ -346,28 +346,34 @@ N starts from 1, not 0."
   (when (buffer-modified-p)
     (when (y-or-n-p "The buffer has been modified since it was last saved.  Save before continuing? ")
       (save-buffer)))
-  (ce-entities-resolve-named-entities-decimally)
-  (let ((tree (condition-case nxml-parse-error
-		  (nxml-parse-file (buffer-file-name))
-		(error
-		 (message "Unable to parse the current buffer as XML:
+  (let ((temp-file (make-temp-file "dash-editor-"))
+	(current-contents (buffer-string))
+	(current-buffer (current-buffer))
+	(current-file (buffer-file-name)))
+    (with-temp-file temp-file
+      (insert current-contents)
+      (ce-entities-resolve-named-entities-decimally))
+    (let ((tree (condition-case nxml-parse-error
+		    (nxml-parse-file temp-file)
+		  (error
+		   (message "Unable to parse the current buffer as XML:
 
 %s" (error-message-string nxml-parse-error))
-		 nil)))
-	(current-buffer (current-buffer)))
-    (when tree
-      (cond ((ce-dash-some-dash-in-nxml-thing tree)
-	     (when (get-buffer +ce-dash-editor-buffer-name+)
-	       (kill-buffer (get-buffer +ce-dash-editor-buffer-name+)))
-	     (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
-	       (with-current-buffer dash-editor-buffer
-		 (kill-all-local-variables)
-		 (use-local-map ce-dash-editor-mode-map)
-		 (ce-dash-update-dash-editor dash-editor-buffer tree current-buffer nil)
-		 (ce-dash-render-dash-editor dash-editor-buffer))
-	       (switch-to-buffer dash-editor-buffer)))
-	    (t
-	     (message "No dashes to edit."))))))
+		   nil))))
+      (when tree
+	(cond ((ce-dash-some-dash-in-nxml-thing tree)
+	       (when (get-buffer +ce-dash-editor-buffer-name+)
+		 (kill-buffer (get-buffer +ce-dash-editor-buffer-name+)))
+	       (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
+		 (with-current-buffer dash-editor-buffer
+		   (kill-all-local-variables)
+		   (use-local-map ce-dash-editor-mode-map)
+		   (ce-dash-update-dash-editor dash-editor-buffer tree current-buffer nil)
+		   (ce-dash-render-dash-editor dash-editor-buffer))
+		 (switch-to-buffer dash-editor-buffer)))
+	      (t
+	       (message "No dashes to edit.")))))
+    (delete-file temp-file)))
 
 (defcustom *ce-dash-preview-window-padding* 25
   "The number of characters to be displayed before and after an occurrence of a dash.

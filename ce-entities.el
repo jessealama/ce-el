@@ -323,7 +323,7 @@ strip it."
 	(ce-entities-known-symbol entity-name))))
 
 (defun ce-entities-resolve-named-entities-decimally ()
-  "Replace all named XHTML entites by their decimal character reference equivalents."
+  "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)
   (ensure-nxml-mode)
   (foreach-xml-token

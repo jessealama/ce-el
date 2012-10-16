@@ -449,7 +449,7 @@ be displayed is generally two times the value of this variable."
 	    (set-buffer-modified-p nil)
 	    (setf mode-name (format "Dash Editor [%d occurrences]" dash-occurrence-number))
 	    (setf header-line-format '(:eval (substring +ce-dash-header+
-							(min (length my-header)
+							(min (length +ce-dash-header+)
 							     (window-hscroll)))))
 	    (setf buffer-read-only t)))
       (message "No dashes to edit."))))

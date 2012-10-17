@@ -129,10 +129,10 @@ N starts from 1, not 0."
 		 (ce-dash-nth-dash (rest strings) (- n num-dashes))
 	       string))))))
 
-(defun ce-dash-update-dash-editor (dash-editor-buffer tree source-buffer dealt-with)
-  (let* ((cdata-sections (ce-dash-character-data-sections tree))
-	 (dash-positions (mapcar 'ce-dash-dash-positions cdata-sections)))
-    (with-current-buffer dash-editor-buffer
+(defun ce-dash-update-dash-editor (tree source-buffer dealt-with)
+  (ce-dash-with-dash-editor dash-editor-buffer
+    (let* ((cdata-sections (ce-dash-character-data-sections tree))
+	   (dash-positions (mapcar 'ce-dash-dash-positions cdata-sections)))
       (set (make-local-variable 'ce-dash-document-tree) tree)
       (set (make-local-variable 'ce-dash-cdata-sections-containing-dashes) dash-positions)
       (set (make-local-variable 'ce-dash-original-buffer) source-buffer)
@@ -225,7 +225,7 @@ N starts from 1, not 0."
 		 (let ((new-tree (replace-with-char ,character)))
 		   (unless (member line-number dealt-with)
 		     (push line-number dealt-with))
-		   (ce-dash-update-dash-editor buf new-tree original-buffer dealt-with)
+		   (ce-dash-update-dash-editor new-tree original-buffer dealt-with)
 		   (ce-dash-render-dash-editor buf)
 		   (goto-char (point-min))
 		   (forward-line (1- line-number))
@@ -255,7 +255,7 @@ N starts from 1, not 0."
 	  (tree (buffer-local-value 'ce-dash-document-tree buf))
 	  (source-buf (buffer-local-value 'ce-dash-original-buffer buf)))
       (pushnew line dealt-with :test '=)
-      (ce-dash-update-dash-editor buf tree source-buf dealt-with)
+      (ce-dash-update-dash-editor tree source-buf dealt-with)
       (ce-dash-render-dash-editor buf)
       (goto-char (point-min))
       (forward-line (1- line))
@@ -368,7 +368,7 @@ N starts from 1, not 0."
 		 (with-current-buffer dash-editor-buffer
 		   (kill-all-local-variables)
 		   (use-local-map ce-dash-editor-mode-map)
-		   (ce-dash-update-dash-editor dash-editor-buffer tree current-buffer nil)
+		   (ce-dash-update-dash-editor tree current-buffer nil)
 		   (ce-dash-render-dash-editor dash-editor-buffer))
 		 (switch-to-buffer dash-editor-buffer)))
 	      (t

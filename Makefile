@@ -17,6 +17,7 @@ elisp-files := $(project-prefix)-entries \
                $(project-prefix)-utils \
                $(project-prefix)-entities \
                $(project-prefix)-xhtml \
+               $(project-prefix)-requires \
                $(project-prefix)
 perl-scripts := validate
 

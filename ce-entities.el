@@ -354,6 +354,12 @@ strip it."
 	       (setf end (point))))
 	 (error "The string '%s' appears not to be an entity." data))))))
 
+(defun ce-entities-name-unicode-characters (string)
+  (with-temp-buffer
+    (insert string)
+    (ce-entities-name-numeric-entities)
+    (buffer-string)))
+
 (provide 'ce-entities)
 
 ;; Local Variables:

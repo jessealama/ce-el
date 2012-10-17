@@ -36,10 +36,10 @@ install-dir = $(install-root)/share/emacs/site-lisp/sep
 all: $(elcs)
 
 %.deps: %.el ce-requires.elc
-	@set -e; \
+	set -e; \
         rm -f $@; \
         /bin/echo -n "$*.el : " > $@; \
-        $(emacs) --batch --no-site-file --no-site-file --no-window-system --load ce-requires.el --eval '(batch-require-forms-in-file "$*.el")' | grep "^$(project-prefix)-" | sed -e 's/$$/.elc/' | tr '\n' ' ' >> $@;
+        $(emacs) --batch --no-site-file --no-site-file --no-window-system --load ce-requires.el --eval '(setq max-lisp-eval-depth 1000)' --eval '(batch-require-forms-in-file "$*.el")' | grep "^$(project-prefix)-" | sed -e 's/$$/.elc/' | tr '\n' ' ' >> $@;
 
 %.elc: %.el
 	$(emacs) --no-window-system \

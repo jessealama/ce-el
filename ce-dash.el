@@ -89,14 +89,11 @@
       (let ((num-dash-occurrences (reduce '+ (mapcar 'length dash-positions))))
 	(cond ((<= line num-dash-occurrences)
 	       (forward-line 1)
-	       (beginning-of-line)
-	       ;; to get to the 'X' or ' ' in '[X]' or '[ ]'
-	       (forward-char 1))
+	       (beginning-of-line))
 	      ((> line num-dash-occurrences)
 	       (goto-char (point-min))
 	       (forward-line (1- num-dash-occurrences))
-	       (beginning-of-line)
-	       (forward-char 1)))))))
+	       (beginning-of-line)))))))
 
 (defun ce-dash-previous-line ()
   (interactive)
@@ -106,13 +103,10 @@
       (let ((num-dash-occurrences (reduce '+ (mapcar 'length dash-positions))))
 	(cond ((<= line num-dash-occurrences)
 	       (forward-line -1)
-	       (beginning-of-line)
-	       ;; to get to the 'X' or ' ' in '[X]' or '[ ]'
-	       (forward-char 1))
+	       (beginning-of-line))
 	      ((> line num-dash-occurrences)
 	       (goto-char (point-min))
-	       (forward-line (1- num-dash-occurrences))
-	       (forward-char 1)))))))
+	       (forward-line (1- num-dash-occurrences))))))))
 
 (defun ce-dash-nth-dash (strings n)
   "Given a list STRINGS of strings, return the string that contains that dash number N.
@@ -440,10 +434,13 @@ be displayed is generally two times the value of this variable."
 	     (when dash-positions
 	       (dolist (dash-position dash-positions)
 		 (incf dash-occurrence-number)
-		 (let ((elided-string (ce-dash-elide-string-around candidate-section dash-position)))
-		   (if (member dash-occurrence-number dealt-with)
-		       (insert "[X]")
-		     (insert "[ ]"))
+		 (let ((elided-string (ce-dash-elide-string-around candidate-section dash-position))
+		       (dash (aref candidate-section dash-position)))
+		   (insert "[" (cond ((char-equal dash +ce-dash-endash+) "e")
+				     ((char-equal dash +ce-dash-emdash+) "m")
+				     ((char-equal dash +ce-dash-minus+) "s")
+				     ((char-equal dash +ce-dash-hyphen+) "h")
+				     (t "?")) "]")
 		   (insert " " (ce-dash-nuke-whitespace elided-string))
 		   (newline)))))
 

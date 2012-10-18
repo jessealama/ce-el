@@ -26,7 +26,7 @@ el-deps := $(addsuffix .deps,$(elisp-files))
 elcs := $(addsuffix .elc,$(elisp-files))
 pls := $(addsuffix .pl,$(perl-scripts))
 
-files := Makefile .gitignore $(els) $(pls) README.mkdn
+files := Makefile .gitignore $(els) $(pls) README.mkdn todo.org
 emacs-backups := $(addsuffix ~,$(files))
 
 empty :=

@@ -355,10 +355,15 @@ strip it."
 	 (error "The string '%s' appears not to be an entity." data))))))
 
 (defun ce-entities-name-unicode-characters (string)
-  (with-temp-buffer
-    (insert string)
-    (ce-entities-name-numeric-entities)
-    (buffer-string)))
+  (with-output-to-string
+    (loop
+     for c across string
+     for decimal-string = (format "%d" c)
+     for entity = (gethash decimal-string *name-for-entity*)
+     do
+     (princ (if entity
+		(format "&%s;" entity)
+	      (format "%c" c))))))
 
 (provide 'ce-entities)
 

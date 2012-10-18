@@ -21,7 +21,7 @@
   (condition-case nil
       (destructuring-bind (attribute . value)
 	  attribute-value-pair
-	(format "%s=\"%s\"" (ce-xhtml-render-attribute attribute) (ce-xhtml-escape-string value)))
+	(format "%s=\"%s\"" (ce-xhtml-render-attribute attribute) (ce-entities-name-unicode-characters (ce-xhtml-escape-string value))))
     (error
      (error "Unable to render the attribute-value pair
 
@@ -105,7 +105,7 @@ The error was:
 
 (defun ce-xhtml-render-nxml-thing (thing)
   (cond ((stringp thing)
-	 (ce-xhtml-escape-string thing))
+	 (ce-entities-name-unicode-characters (ce-xhtml-escape-string thing)))
 	((ce-xhtml-nxml-elementp thing)
 	 (destructuring-bind (element attributes . children)
 	     thing

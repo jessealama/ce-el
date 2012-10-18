@@ -41,7 +41,7 @@
 (defvar ce-dash-dealt-with nil)
 
 (defconst +ce-dash-header+
-  "SPC to accept; [e]ndash, e[m]dash, [m]inus sign, [h]yphen; [q]uit and commit")
+  "[e]ndash, e[m]dash, [s]ubtraction, [h]yphen; q to quit and commit edits")
 
 (defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))

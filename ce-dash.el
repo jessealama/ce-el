@@ -116,14 +116,13 @@ N starts from 1, not 0."
 		 (ce-dash-nth-dash (rest strings) (- n num-dashes))
 	       string))))))
 
-(defun ce-dash-update-dash-editor (tree source-buffer dealt-with)
+(defun ce-dash-update-dash-editor (tree source-buffer)
   (ce-dash-with-dash-editor dash-editor-buffer
     (let* ((cdata-sections (ce-dash-character-data-sections tree))
 	   (dash-positions (mapcar 'ce-dash-dash-positions cdata-sections)))
       (set (make-local-variable 'ce-dash-document-tree) tree)
       (set (make-local-variable 'ce-dash-cdata-sections-containing-dashes) dash-positions)
       (set (make-local-variable 'ce-dash-original-buffer) source-buffer)
-      (set (make-local-variable 'ce-dash-dealt-with) dealt-with)
       (set (make-local-variable 'ce-dash-occurence-list)
 	   (let (occurrences)
 	     (loop
@@ -196,8 +195,7 @@ N starts from 1, not 0."
 	   (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
 	   (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
 	   (line-number (current-line))
-	   (original-buffer (buffer-local-value 'ce-dash-original-buffer buf))
-	   (dealt-with (buffer-local-value 'ce-dash-dealt-with buf)))
+	   (original-buffer (buffer-local-value 'ce-dash-original-buffer buf)))
        (let ((cdata-sections (ce-dash-character-data-sections tree)))
 	 (assert (= (length cdata-dash-positions) (length cdata-sections)))
 	 (when (> line-number (length dash-occurrences))
@@ -210,9 +208,7 @@ N starts from 1, not 0."
 					     `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
 						(ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
 		 (let ((new-tree (replace-with-char ,character)))
-		   (unless (member line-number dealt-with)
-		     (push line-number dealt-with))
-		   (ce-dash-update-dash-editor new-tree original-buffer dealt-with)
+		   (ce-dash-update-dash-editor new-tree original-buffer)
 		   (ce-dash-render-dash-editor buf)
 		   (goto-char (point-min))
 		   (forward-line (1- line-number))
@@ -238,11 +234,9 @@ N starts from 1, not 0."
   (interactive)
   (ce-dash-with-dash-editor buf
     (let ((line (current-line))
-	  (dealt-with (buffer-local-value 'ce-dash-dealt-with buf))
 	  (tree (buffer-local-value 'ce-dash-document-tree buf))
 	  (source-buf (buffer-local-value 'ce-dash-original-buffer buf)))
-      (pushnew line dealt-with :test '=)
-      (ce-dash-update-dash-editor tree source-buf dealt-with)
+      (ce-dash-update-dash-editor tree source-buf)
       (ce-dash-render-dash-editor buf)
       (goto-char (point-min))
       (forward-line (1- line))
@@ -355,7 +349,7 @@ N starts from 1, not 0."
 		 (with-current-buffer dash-editor-buffer
 		   (kill-all-local-variables)
 		   (use-local-map ce-dash-editor-mode-map)
-		   (ce-dash-update-dash-editor tree current-buffer nil)
+		   (ce-dash-update-dash-editor tree current-buffer)
 		   (ce-dash-render-dash-editor dash-editor-buffer))
 		 (switch-to-buffer dash-editor-buffer)))
 	      (t

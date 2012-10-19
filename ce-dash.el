@@ -1,19 +1,9 @@
 
-(eval-when-compile
-  (require 'cl)
-  (require 'nxml-parse)
-  (require 'ce-xhtml)
-  (require 'ce-entities)
-  (require 'ce-utils))
-
-;;; Informing the Emacs Lisp compiler that some Common Lisp functions,
-;;; available through the cl package, are suitably defined.  The
-;;; compiler generates warings even though the cl package is required
-;;; at compile time.  Sigh.  I really don't see why using the cl
-;;; package needs to be so annoying.
-(declare-function reduce "cl-seq.el")
-(declare-function some "cl-extra.el")
-(declare-function member* "cl-seq.el")
+(require 'cl)
+(require 'nxml-parse)
+(require 'ce-xhtml)
+(require 'ce-entities)
+(require 'ce-utils)
 
 (defun ce-dash-is-dash-entity (entity-str)
   (or (string= entity-str "&ndash;")

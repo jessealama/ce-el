@@ -447,6 +447,38 @@ be displayed is generally two times the value of this variable."
 	    (setf buffer-read-only t)))
       (message "No dashes to edit."))))
 
+(defconst +ce-dash-number-chars+ (list ?0 ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
+
+(defun ce-dash-maybe-fix-dash-occurrence (string dash-position)
+  "Try to fix the dash in STRING at DASH-POSITION (start counting
+at 0).  Returns two values: a string with the fix applied (if any
+fix was applicable), and a character that was substituted into
+DASH-POSITION.  If no character was inserted, the second value is
+nil."
+  (when (< dash-position 0)
+    (error "The dash-position (%d) is less than zero." dash-position))
+  (let ((len (length string)))
+    (when (> (+ dash-position 1) len)
+      (error "The dash-position (%d) is greater than the length (%d) of the given string." dash-position len))
+    (let ((dash (aref string dash-position)))
+      (cond ((char-equal dash ?-)
+	     (if (< (+ dash-position 2) len)
+		 (if (zerop dash-position)
+		     (values string nil)
+		   (let ((preceding-char (aref string (1- dash-position)))
+			 (following-char (aref string (1+ dash-position))))
+		     (if (and (find preceding-char +ce-dash-number-chars+)
+			      (find following-char +ce-dash-number-chars+))
+			 (values (format "%s %s"
+					 (substring string 0 dash-position)
+					 (substring string (1+ dash-position)))
+				 ? )
+		       (values string nil))))
+	       (values string nil)))
+	    (t
+	     ;; don't know what to do; make no changes
+	     (values string nil))))))
+
 (provide 'ce-dash)
 
 

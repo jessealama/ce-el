@@ -28,10 +28,9 @@
 (defvar ce-dash-cdata-sections-containing-dashes nil)
 (defvar ce-dash-occurence-list nil)
 (defvar ce-dash-original-buffer nil)
-(defvar ce-dash-dealt-with nil)
 
 (defconst +ce-dash-header+
-  "[e]ndash, e[m]dash, [s]ubtraction, [h]yphen; q to quit and commit edits")
+  "{*} = automatically fixed; [e]ndash, e[m]dash, [s]ubtraction, [h]yphen; q to quit")
 
 (defconst ce-dash-editor-mode-map
   (let ((map (make-keymap)))

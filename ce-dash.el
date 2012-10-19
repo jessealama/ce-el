@@ -479,10 +479,10 @@ nil."
 			 (following-char (aref string (1+ dash-position))))
 		     (if (and (find preceding-char +ce-dash-number-chars+)
 			      (find following-char +ce-dash-number-chars+))
-			 (values (format "%s %s"
+			 (values (format "%s–%s"
 					 (substring string 0 dash-position)
 					 (substring string (1+ dash-position)))
-				 ? )
+				 ?–)
 		       (values string nil))))
 	       (values string nil)))
 	    (t

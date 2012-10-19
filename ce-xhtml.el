@@ -122,6 +122,23 @@ The error was:
 
 because it is neither a string nor an nXML element." thing))))
 
+(defun ce-xhtml-map-cdata-sections (nxml-thing function)
+  (cond ((stringp nxml-thing)
+	 (funcall function nxml-thing))
+	((ce-xhtml-nxml-elementp nxml-thing)
+	 (destructuring-bind (element attributes . children)
+	     nxml-thing
+	   (append (list element attributes)
+		   (mapcar (lambda (child)
+			     (ce-xhtml-map-cdata-sections child function))
+			   children))))
+	(t
+	 (error "Unable to render the nXML thing
+
+%s
+
+because it is neither a string nor an nXML element." nxml-thing))))
+
 (provide 'ce-xhtml)
 
 ;; Local Variables:

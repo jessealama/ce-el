@@ -406,8 +406,7 @@ be displayed is generally two times the value of this variable."
   (let* ((tree (buffer-local-value 'ce-dash-document-tree editor-buffer))
 	 (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes
 						   editor-buffer))
-	 (cdata-sections (ce-dash-character-data-sections tree))
-	 (dealt-with (buffer-local-value 'ce-dash-dealt-with editor-buffer)))
+	 (cdata-sections (ce-dash-character-data-sections tree)))
     (assert (= (length cdata-sections) (length cdata-dash-positions)))
     (if (some 'identity cdata-sections)
 	(let ((dash-occurrence-number 0))

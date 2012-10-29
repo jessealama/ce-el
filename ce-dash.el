@@ -455,6 +455,25 @@ be displayed is generally two times the value of this variable."
 
 (defconst +ce-dash-number-chars+ (list ?0 ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
 
+(defun ce-dash-numeric-range-needs-fixing (string position)
+  (let ((dash (aref string position))
+	(len (length string)))
+    (when (char-equal dash ?-)
+      (when (< (+ position 2) len)
+	(unless (zerop position)
+	  (let ((preceding-char (aref string (1- position)))
+		(following-char (aref string (1+ position))))
+	    (and (find preceding-char +ce-dash-number-chars+)
+		 (find following-char +ce-dash-number-chars+))))))))
+
+(defun ce-dash-fix-numeric-range (string position)
+  (format "%s–%s"
+	  (substring string 0 position)
+	  (substring string (1+ position))))
+
+(defconst +ce-dash-predicates-and-fixers+
+  (list (cons 'ce-dash-numeric-range-needs-fixing 'ce-dash-fix-numeric-range)))
+
 (defun ce-dash-maybe-fix-dash-occurrence (string dash-position)
   "Try to fix the dash in STRING at DASH-POSITION (start counting
 at 0).  Returns two values: a string with the fix applied (if any
@@ -466,24 +485,19 @@ nil."
   (let ((len (length string)))
     (when (> (+ dash-position 1) len)
       (error "The dash-position (%d) is greater than the length (%d) of the given string." dash-position len))
-    (let ((dash (aref string dash-position)))
-      (cond ((char-equal dash ?-)
-	     (if (< (+ dash-position 2) len)
-		 (if (zerop dash-position)
-		     (values string nil)
-		   (let ((preceding-char (aref string (1- dash-position)))
-			 (following-char (aref string (1+ dash-position))))
-		     (if (and (find preceding-char +ce-dash-number-chars+)
-			      (find following-char +ce-dash-number-chars+))
-			 (values (format "%s–%s"
-					 (substring string 0 dash-position)
-					 (substring string (1+ dash-position)))
-				 ?–)
-		       (values string nil))))
-	       (values string nil)))
-	    (t
-	     ;; don't know what to do; make no changes
-	     (values string nil))))))
+    (let ((applicable-predicate nil)
+	  (fixer-function nil)
+	  (fixer-found? nil))
+      (if (some (lambda (predicate-and-fixer)
+		  (destructuring-bind (predicate . fixer)
+		      predicate-and-fixer
+		    (when (funcall predicate string dash-position)
+		      (setf applicable-predicate predicate
+			    fixer-function fixer)
+		      t)))
+		+ce-dash-predicates-and-fixers+)
+	  (values (funcall fixer-function string dash-position) t)
+	  (values string nil)))))
 
 (provide 'ce-dash)
 

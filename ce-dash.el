@@ -19,6 +19,8 @@
 				 +ce-dash-emdash+
 				 +ce-dash-minus+))
 
+(defconst +ce-dash-whitespace-chars+ (list ?\s ?\n ?\t))
+
 (defconst +ce-dash-dash-regexp+
   (regexp-opt (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))
 
@@ -322,6 +324,40 @@ N starts from 1, not 0."
       (setf position (string-match +ce-dash-dash-regexp+ string (1+ position))))
     (reverse positions)))
 
+(defun ce-dash-dash-occurrences (string)
+  (let ((occurrences nil)
+	(len (length string))
+	(i 0))
+    (while (< i len)
+      (let ((c (aref string i)))
+	(if (member c +ce-dash-dashes+)
+	  (let ((dash-begin i)
+		(dash-end i))
+
+	    ;; check for whitespace before this dash
+	    (when (and (> dash-begin 0)
+		       (member (aref string (1- dash-begin)) +ce-dash-whitespace-chars+))
+	      (decf dash-begin))
+
+	    ;; keep grabbing dashes until we either reach the end of
+	    ;; the string or encounter a non-dash
+	    (unless (= (1+ i) len)
+	      (let ((j (1+ i)))
+		(while (and (< j len)
+			    (member (aref string j) +ce-dash-dashes+))
+		  (incf j))
+		(setf dash-end (1- j))))
+
+	    ;; check for whitespace at the end of this dash
+	    (when (and (< (1+ dash-end) len)
+		       (member (aref string (1+ dash-end)) +ce-dash-whitespace-chars+))
+	      (incf dash-end))
+
+	    (push (cons dash-begin dash-end) occurrences)
+	    (setf i (1+ dash-end)))
+	(incf i))))
+    (reverse occurrences)))
+
 (defun ce-dash-inspect-dashes ()
   (interactive)
   (when (buffer-modified-p)
@@ -343,15 +379,7 @@ N starts from 1, not 0."
 		   nil))))
       (when tree
 	(cond ((ce-dash-some-dash-in-nxml-thing tree)
-	       (when (get-buffer +ce-dash-editor-buffer-name+)
-		 (kill-buffer (get-buffer +ce-dash-editor-buffer-name+)))
-	       (let ((dash-editor-buffer (get-buffer-create +ce-dash-editor-buffer-name+)))
-		 (with-current-buffer dash-editor-buffer
-		   (kill-all-local-variables)
-		   (use-local-map ce-dash-editor-mode-map)
-		   (ce-dash-update-dash-editor tree current-buffer)
-		   (ce-dash-render-dash-editor dash-editor-buffer))
-		 (switch-to-buffer dash-editor-buffer)))
+	       )
 	      (t
 	       (message "No dashes to edit.")))))
     (delete-file temp-file)))

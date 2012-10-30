@@ -24,6 +24,12 @@
 (defconst +ce-dash-dash-regexp+
   (regexp-opt (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))
 
+(defun ce-dash-is-dash-character (c)
+  (member c +ce-dash-dashes+))
+
+(defun ce-dash-is-whitespace-character (c)
+  (member c +ce-dash-whitespace-chars+))
+
 (defconst +ce-dash-editor-buffer-name+ "*Dash Editor*")
 
 (defvar ce-dash-document-tree nil)

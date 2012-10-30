@@ -330,39 +330,86 @@ N starts from 1, not 0."
       (setf position (string-match +ce-dash-dash-regexp+ string (1+ position))))
     (reverse positions)))
 
-(defun ce-dash-dash-occurrences (string)
-  (let ((occurrences nil)
-	(len (length string))
-	(i 0))
-    (while (< i len)
-      (let ((c (aref string i)))
-	(if (member c +ce-dash-dashes+)
-	  (let ((dash-begin i)
-		(dash-end i))
+(defun ce-dash-position-of-dash (string)
+  (string-match +ce-dash-dash-regexp+ string))
 
-	    ;; check for whitespace before this dash
-	    (when (and (> dash-begin 0)
-		       (member (aref string (1- dash-begin)) +ce-dash-whitespace-chars+))
-	      (decf dash-begin))
+(defun ce-dash-next-dash-occurrence (string)
+  (let ((len (length string))
+	(position (ce-dash-position-of-dash string)))
+    (when position
+      ;; there is a dash character.  Now look around it, grabbing
+      ;; whitespace and more dash characters until we reach either the
+      ;; beginning of the string, the end of the string, or a
+      ;; non-space non-dash character
 
-	    ;; keep grabbing dashes until we either reach the end of
-	    ;; the string or encounter a non-dash
-	    (unless (= (1+ i) len)
-	      (let ((j (1+ i)))
-		(while (and (< j len)
-			    (member (aref string j) +ce-dash-dashes+))
-		  (incf j))
-		(setf dash-end (1- j))))
+      (let ((dash-begin position)
+	    (dash-end position))
 
-	    ;; check for whitespace at the end of this dash
-	    (when (and (< (1+ dash-end) len)
-		       (member (aref string (1+ dash-end)) +ce-dash-whitespace-chars+))
-	      (incf dash-end))
+	;; check for whitespace before this dash
+	(when (and (> dash-begin 0)
+		   (ce-dash-is-dash-character (aref string (1- dash-begin))))
+	  (decf dash-begin))
 
-	    (push (cons dash-begin dash-end) occurrences)
-	    (setf i (1+ dash-end)))
-	(incf i))))
-    (reverse occurrences)))
+	;; keep grabbing dashes until we either reach the end of
+	;; the string or encounter a non-dash
+	(unless (= (1+ position) len)
+	  (let ((j (1+ position)))
+	    (while (and (< j len)
+			(ce-dash-is-dash-character (aref string j)))
+	      (incf j))
+	    (setf dash-end (1- j))))
+
+	;; check for whitespace at the end of this dash
+	(when (and (< (1+ dash-end) len)
+		   (ce-dash-is-whitespace-character (aref string (1+ dash-end))))
+	  (incf dash-end))
+
+	(cons dash-begin dash-end)))))
+
+(defun ce-dash-next-dash-in-nxml-tree (tree)
+  (cond ((consp tree)
+	 (let ((element nil)
+	       (attributes nil)
+	       (children nil))
+	   (condition-case nil
+	       (destructuring-bind (local-element local-attributes . local-children)
+		   tree
+		 (setf element local-element
+		       attributes local-attributes
+		       children local-children))
+	     (error
+	      (error "Unable to make sense of the nXML node '%s'" tree)))
+	   (let ((i 0)
+		 (address nil))
+	     (while (and (< i (length children))
+			 (not address))
+	       (let ((child (nth i children)))
+		 (if (stringp child)
+		     (when (ce-dash-string-contains-dash child)
+		       (setf address (list (1+ i))))
+		   (let ((next-dash-in-child (ce-dash-next-dash-in-nxml-tree child)))
+		     (when next-dash-in-child
+		       (setf address (append next-dash-in-child (list i)))))))
+	       (incf i))
+	     address)))
+	(t
+	 (error "Don't know how to make sense of the nXML object '%s'" tree))))
+
+(defun ce-dash-node-with-address (nodes address)
+  (if address
+      (let ((first-address-component (first address))
+	    (remaining-address (rest address)))
+	(assert (integerp first-address-component))
+	(assert (> first-address-component 0))
+	(let ((num-nodes (length nodes)))
+	  (assert (<= first-address-component num-nodes))
+	  (let ((node (nth (1- first-address-component) nodes)))
+	    (if (stringp node)
+		(if remaining-address
+		    (error "The child at position %d of the current nXML tree is a string, but the address we were asked to inspect %s presumes that this child is a cons cell, not a string." first-address-component address)
+		  node)
+	      (ce-dash-node-with-address node remaining-address)))))
+    (error "NIL is not an appropriate address.")))
 
 (defun ce-dash-inspect-dashes ()
   (interactive)
@@ -384,10 +431,13 @@ N starts from 1, not 0."
 %s" (error-message-string nxml-parse-error))
 		   nil))))
       (when tree
-	(cond ((ce-dash-some-dash-in-nxml-thing tree)
-	       )
-	      (t
-	       (message "No dashes to edit.")))))
+	(let ((next-dash (ce-dash-next-dash-in-nxml-tree tree)))
+	  (if next-dash
+	      (progn
+		(assert (= (first next-dash) 1))
+		(let ((thing-at-address (ce-dash-node-with-address (list tree) next-dash)))
+		  (message "Next dash has address %s; its content is: '%s'" next-dash thing-at-address)))
+	    (message "No dashes to edit.")))))
     (delete-file temp-file)))
 
 (defcustom *ce-dash-preview-window-padding* 25

@@ -445,8 +445,7 @@ N starts from 1, not 0."
 	(let ((next-dash (ce-dash-next-dash-in-nxml-tree tree)))
 	  (if next-dash
 	      (progn
-		(assert (= (first next-dash) 1))
-		(let ((thing-at-address (ce-dash-node-with-address (list tree) next-dash)))
+		(let ((thing-at-address (ce-dash-node-with-address tree next-dash)))
 		  (message "Next dash has address %s; its content is: '%s'" next-dash thing-at-address)))
 	    (message "No dashes to edit.")))))
     (delete-file temp-file)))

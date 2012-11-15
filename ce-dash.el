@@ -379,37 +379,48 @@ N starts from 1, not 0."
 		       children local-children))
 	     (error
 	      (error "Unable to make sense of the nXML node '%s'" tree)))
-	   (let ((i 0)
+	   (let ((i 1)
 		 (address nil))
-	     (while (and (< i (length children))
+	     (while (and (<= i (length children))
 			 (not address))
-	       (let ((child (nth i children)))
+	       (let ((child (nth (1- i) children)))
 		 (if (stringp child)
 		     (when (ce-dash-string-contains-dash child)
-		       (setf address (list (1+ i))))
+		       (setf address (list i)))
 		   (let ((next-dash-in-child (ce-dash-next-dash-in-nxml-tree child)))
 		     (when next-dash-in-child
-		       (setf address (append next-dash-in-child (list i)))))))
+		       (setf address (cons i next-dash-in-child))))))
 	       (incf i))
 	     address)))
 	(t
 	 (error "Don't know how to make sense of the nXML object '%s'" tree))))
 
-(defun ce-dash-node-with-address (nodes address)
+(defun ce-dash-node-with-address (node address)
   (if address
       (let ((first-address-component (first address))
 	    (remaining-address (rest address)))
 	(assert (integerp first-address-component))
 	(assert (> first-address-component 0))
-	(let ((num-nodes (length nodes)))
-	  (assert (<= first-address-component num-nodes))
-	  (let ((node (nth (1- first-address-component) nodes)))
-	    (if (stringp node)
-		(if remaining-address
-		    (error "The child at position %d of the current nXML tree is a string, but the address we were asked to inspect %s presumes that this child is a cons cell, not a string." first-address-component address)
-		  node)
-	      (ce-dash-node-with-address node remaining-address)))))
-    (error "NIL is not an appropriate address.")))
+	(if (stringp node)
+	    (if remaining-address
+		(error "The child at position %d of the current nXML tree is a string, but the address we were asked to inspect %s presumes that this child is a cons cell, not a string." first-address-component address)
+	      node)
+	  (let ((element nil)
+		(attributes nil)
+		(children nil))
+	    (condition-case nil
+		(destructuring-bind (local-element local-attributes . local-children)
+		    node
+		  (setf element local-element
+			attributes local-attributes
+			children local-children))
+	      (error
+	       (error "Unable to make sense of the nXML node '%s'" tree)))
+	    (let ((num-children (length children)))
+	  (assert (<= first-address-component num-children))
+	  (let ((node (nth (1- first-address-component) children)))
+	    (ce-dash-node-with-address node remaining-address))))))
+    node))
 
 (defun ce-dash-inspect-dashes ()
   (interactive)

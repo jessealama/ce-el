@@ -46,6 +46,17 @@
       (let ((no-tabs (substitute ?\s ?\t no-newlines)))
 	(ce-dash-squeeze-spaces no-tabs)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Lists
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun first-n (list n)
+  (loop
+   for i from 1 upto n
+   for elt in list
+   collect elt into answer
+   finally (return answer)))
+
 (provide 'ce-utils)
 
 ;; Local Variables:

@@ -415,12 +415,20 @@ N starts from 1, not 0."
 			attributes local-attributes
 			children local-children))
 	      (error
-	       (error "Unable to make sense of the nXML node '%s'" tree)))
+	       (error "Unable to make sense of the nXML node '%s'" node)))
 	    (let ((num-children (length children)))
 	  (assert (<= first-address-component num-children))
 	  (let ((node (nth (1- first-address-component) children)))
 	    (ce-dash-node-with-address node remaining-address))))))
     node))
+
+(defun ce-dash-inspect-dashes-in-string (string)
+  (let ((occurrence (ce-dash-next-dash-occurrence string)))
+    (message "The first dash occurrence in %s is %s" string occurrence))
+  string)
+
+(defun ce-dash-next-dash-in-nxml-tree-after (tree address)
+  )
 
 (defun ce-dash-inspect-dashes ()
   (interactive)
@@ -442,12 +450,16 @@ N starts from 1, not 0."
 %s" (error-message-string nxml-parse-error))
 		   nil))))
       (when tree
-	(let ((next-dash (ce-dash-next-dash-in-nxml-tree tree)))
-	  (if next-dash
-	      (progn
-		(let ((thing-at-address (ce-dash-node-with-address tree next-dash)))
-		  (message "Next dash has address %s; its content is: '%s'" next-dash thing-at-address)))
-	    (message "No dashes to edit.")))))
+	(let ((next-dash-cdata-address (ce-dash-next-dash-in-nxml-tree tree)))
+	  (while next-dash-cdata-address
+	    (let ((thing-at-address (ce-dash-node-with-address tree
+							       next-dash-cdata-address)))
+	      (let ((edited (ce-dash-inspect-dashes-in-string thing-at-address)))
+		(setf tree (ce-xhtml-replace-thing-at-address tree next-dash-cdata-address
+							      edited))))
+	    (setf next-dash-cdata-address
+		  (ce-dash-next-dash-in-nxml-tree-after tree
+							next-dash-cdata-address))))))
     (delete-file temp-file)))
 
 (defcustom *ce-dash-preview-window-padding* 25

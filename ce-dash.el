@@ -397,40 +397,26 @@ N starts from 1, not 0."
 	(t
 	 (error "Don't know how to make sense of the nXML object '%s'" tree))))
 
-(defun ce-dash-node-with-address (node address)
-  (if address
-      (let ((first-address-component (first address))
-	    (remaining-address (rest address)))
-	(assert (integerp first-address-component))
-	(assert (> first-address-component 0))
-	(if (stringp node)
-	    (if remaining-address
-		(error "The child at position %d of the current nXML tree is a string, but the address we were asked to inspect %s presumes that this child is a cons cell, not a string." first-address-component address)
-	      node)
-	  (let ((element nil)
-		(attributes nil)
-		(children nil))
-	    (condition-case nil
-		(destructuring-bind (local-element local-attributes . local-children)
-		    node
-		  (setf element local-element
-			attributes local-attributes
-			children local-children))
-	      (error
-	       (error "Unable to make sense of the nXML node '%s'" node)))
-	    (let ((num-children (length children)))
-	  (assert (<= first-address-component num-children))
-	  (let ((node (nth (1- first-address-component) children)))
-	    (ce-dash-node-with-address node remaining-address))))))
-    node))
-
 (defun ce-dash-inspect-dashes-in-string (string)
   (let ((occurrence (ce-dash-next-dash-occurrence string)))
     (message "The first dash occurrence in %s is %s" string occurrence))
-  string)
+  (format "fuck: %s" string))
 
 (defun ce-dash-next-dash-in-nxml-tree-after (tree address)
-  )
+  "The address is the next CDATA section of TREE after ADDRESS
+  that contains a dash.  NIL if there is no such address."
+  (let ((leaf-number (ce-xhtml-leaf-number-of-leaf-address tree address))
+	(num-leaves (ce-xhtml-count-leaves tree))
+	(next-leaf-number nil))
+    (loop
+     for i from (1+ leaf-number) upto num-leaves
+     do
+     (let ((leaf (ce-xhtml-nth-leaf tree i)))
+       (when (ce-dash-string-contains-dash leaf)
+	 (setf next-leaf-number i)
+	 (return))))
+    (when next-leaf-number
+      (ce-xhtml-address-of-leaf-number tree next-leaf-number))))
 
 (defun ce-dash-inspect-dashes ()
   (interactive)
@@ -454,10 +440,11 @@ N starts from 1, not 0."
       (when tree
 	(let ((next-dash-cdata-address (ce-dash-next-dash-in-nxml-tree tree)))
 	  (while next-dash-cdata-address
-	    (let ((thing-at-address (ce-dash-node-with-address tree
-							       next-dash-cdata-address)))
+	    (let ((thing-at-address (ce-xhtml-node-with-address tree
+								next-dash-cdata-address)))
 	      (let ((edited (ce-dash-inspect-dashes-in-string thing-at-address)))
-		(setf tree (ce-xhtml-replace-thing-at-address tree next-dash-cdata-address
+		(setf tree (ce-xhtml-replace-thing-at-address tree
+							      next-dash-cdata-address
 							      edited))))
 	    (setf next-dash-cdata-address
 		  (ce-dash-next-dash-in-nxml-tree-after tree

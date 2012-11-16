@@ -2,7 +2,8 @@
 (eval-when-compile
   (require 'cl)
   (require 'nxml-mode)
-  (require 'ce-entities))
+  (require 'ce-entities)
+  (require 'ce-utils))
 
 (defun ce-xhtml-render-attribute (attribute)
   (cond ((stringp attribute)
@@ -165,11 +166,173 @@ because it is neither a string nor an nXML element." nxml-thing))))
 	(when (< child-number 1)
 	  (error "The first component of the current address is less than 1."))
 	(let ((previous-children (first-n children (1- child-number)))
+	      (child (nth (1- child-number) children))
 	      (following-children (nthcdr child-number children)))
 	  (append (list element attributes)
 		  previous-children
-		  (ce-xhtml-replace-thing-at-address child (rest address) thing)
+		  (list (ce-xhtml-replace-thing-at-address child (rest address) thing))
 		  following-children))))))
+
+(defun ce-xhtml-count-leaves (nxml-thing)
+  (if (stringp nxml-thing)
+      1
+    (let ((element nil)
+	  (attributes nil)
+	  (children nil))
+      (condition-case nil
+	  (destructuring-bind (local-element local-attributes . local-children)
+	      nxml-thing
+	    (setf element local-element
+		  attributes local-attributes
+		  children local-children))
+	(error
+	 (error "Unable to make sense of the nXML node '%s'" nxml-thing)))
+      (let ((string-children (remove-if-not 'stringp children))
+	    (element-children (remove-if 'stringp children)))
+	(+ (length string-children)
+	   (reduce '+ (mapcar 'ce-xhtml-count-leaves element-children)))))))
+
+(defun ce-xhtml-nth-leaf (nxml-tree n)
+  "In a depth-first enumeration of the leaves of NXML-TREE, what
+  is leaf N?  We start counting at 1, not 0."
+  (when (< n 1)
+    (error "Illegal value '%d'; we cannot find the leaf with that index.  (We start counting at 1, not 0.)" n))
+  (if (stringp nxml-tree)
+      (if (= n 1)
+	  nxml-tree
+	(error "A string nXML node has zero children, so we cannot compute leaf number %d.  The string we are looking at is%c%c%s%c" n ?\n ?\n nxml-tree ?\n))
+    (let ((element nil)
+	  (attributes nil)
+	  (children nil))
+      (condition-case nil
+	  (destructuring-bind (local-element local-attributes . local-children)
+	      nxml-tree
+	    (setf element local-element
+		  attributes local-attributes
+		  children local-children))
+	(error
+	 (error "Unable to make sense of the nXML node '%s'" nxml-tree)))
+      (ce-xhtml-nth-leaf-under-nodes children n))))
+
+(defun ce-xhtml-nth-leaf-under-nodes (nodes n)
+  "In a depth-first enumeration of the list of nXML nodes NODES, what is leaf N?
+
+We start counting at 1, not 0."
+  (when (< n 1)
+    (error "Illegal value '%d'; we cannot find the leaf with that index.  (We start counting from 1, not 0.)" n))
+  (when (null nodes)
+    (error "The list of nodes must be non-empty, and we were asked to compute node number #%d under this list of nodes." n))
+  (let ((node (first nodes)))
+    (let ((num-leaves (ce-xhtml-count-leaves node)))
+      (if (< num-leaves n)
+	  (ce-xhtml-nth-leaf-under-nodes (rest nodes) (- n num-leaves))
+	(ce-xhtml-nth-leaf node n)))))
+
+(defun ce-xhtml-leaf-number-of-leaf-address (tree address &optional encountered)
+  "Assuming that ADDRESS is the address of a leaf of the nXML
+  tree TREE, what is the index of that leaf in a depth-first
+  enumeration of the leaves of TREE?
+
+We start counting at 1, not 0."
+  (when (null encountered)
+    (setf encountered 0))
+  (when (null address)
+    (error "A null address is not permitted."))
+  (when (null tree)
+    (error "A null tree is not permitted."))
+  (when (stringp tree)
+    (error "We assume we are dealing with trees, not with strings."))
+  (let ((first-address-component (first address)))
+    (let ((element nil)
+	  (attributes nil)
+	  (children nil))
+      (condition-case nil
+	  (destructuring-bind (local-element local-attributes . local-children)
+	      tree
+	    (setf element local-element
+		  attributes local-attributes
+		  children local-children))
+	(error
+	 (error "Unable to make sense of the nXML node '%s'" tree)))
+      (let ((earlier-children (first-n children (1- first-address-component)))
+	    (child (nth (1- first-address-component) children)))
+	(let ((earlier-leaves (remove-if-not 'stringp earlier-children))
+	      (earlier-elements (remove-if 'stringp earlier-children)))
+	  (let ((earlier-leaf-count (+ (length earlier-leaves)
+				       (reduce '+ (mapcar 'ce-xhtml-count-leaves
+							  earlier-elements)))))
+	    (if (rest address)
+		(ce-xhtml-leaf-number-of-leaf-address child
+						      (rest address)
+						      (+ encountered earlier-leaf-count))
+	      (1+ (+ earlier-leaf-count encountered)))))))))
+
+(defun ce-xhtml-node-with-address (node address)
+  (if address
+      (let ((first-address-component (first address))
+	    (remaining-address (rest address)))
+	(assert (integerp first-address-component))
+	(assert (> first-address-component 0))
+	(if (stringp node)
+	    (if remaining-address
+		(error "The child at position %d of the current nXML tree is a string, but the address we were asked to inspect %s presumes that this child is a cons cell, not a string." first-address-component address)
+	      node)
+	  (let ((element nil)
+		(attributes nil)
+		(children nil))
+	    (condition-case nil
+		(destructuring-bind (local-element local-attributes . local-children)
+		    node
+		  (setf element local-element
+			attributes local-attributes
+			children local-children))
+	      (error
+	       (error "Unable to make sense of the nXML node '%s'" node)))
+	    (let ((num-children (length children)))
+	  (assert (<= first-address-component num-children))
+	  (let ((node (nth (1- first-address-component) children)))
+	    (ce-xhtml-node-with-address node remaining-address))))))
+    node))
+
+(defun ce-xhtml-address-of-leaf-number-1 (tree leaf-number address-so-far)
+  (unless (integerp leaf-number)
+    (error "We cannot find leaf number '%s' because that is not an integer." leaf-number))
+  (when (< leaf-number 0)
+    (error "We cannot find leaf number '%d', because that is less than zero.  (We start counting at 1, not 0.)" leaf-number))
+  (if (stringp tree)
+      (if (= leaf-number 1)
+	  address-so-far
+	(error "We have arrived at a leaf (%s), but the leaf-number to inspect (%d) is not equal to 1." tree leaf-number))
+    (let ((element nil)
+	  (attributes nil)
+	  (children nil))
+      (condition-case nil
+	  (destructuring-bind (local-element local-attributes . local-children)
+	      tree
+	    (setf element local-element
+		  attributes local-attributes
+		  children local-children))
+	(error
+	 (error "Unable to make sense of the nXML node '%s'" tree)))
+      (when (null children)
+	(error "We have arrived at a node that has no children, but this is impossible."))
+      (let ((leaves-so-far 0)
+	    (child-number 0)
+	    (child (first children)))
+	(while (< leaves-so-far leaf-number)
+	  (incf leaves-so-far (if (stringp child) 1 (ce-xhtml-count-leaves child)))
+	  (incf child-number)
+	  (setf child (nth child-number children)))
+	(setf child (nth (1- child-number) children))
+	(decf leaves-so-far (ce-xhtml-count-leaves child))
+	(if (= leaves-so-far leaf-number)
+	    (cons child-number address-so-far)
+	  (ce-xhtml-address-of-leaf-number-1 child
+					     (- leaf-number leaves-so-far)
+					     (cons child-number address-so-far)))))))
+
+(defun ce-xhtml-address-of-leaf-number (tree leaf-number)
+  (reverse (ce-xhtml-address-of-leaf-number-1 tree leaf-number nil)))
 
 (provide 'ce-xhtml)
 

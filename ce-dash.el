@@ -68,7 +68,7 @@
 (defmacro ce-dash-with-dash-editor (buffer &rest body)
   (declare (indent 1))
   (unless (symbolp buffer)
-    (error "A symbol is rqeuired for a buffer name"))
+    (error "A symbol is required for a buffer name"))
   `(let ((,buffer (get-buffer +ce-dash-editor-buffer-name+)))
      (unless (bufferp ,buffer)
        (error "The dash editor buffer could not be found!"))

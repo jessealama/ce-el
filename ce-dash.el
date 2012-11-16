@@ -334,6 +334,8 @@ N starts from 1, not 0."
   (string-match +ce-dash-dash-regexp+ string))
 
 (defun ce-dash-next-dash-occurrence (string)
+  (unless (stringp string)
+    (error "The argument of ce-dash-next-dash-occurrence should be a string."))
   (let ((len (length string))
 	(position (ce-dash-position-of-dash string)))
     (when position

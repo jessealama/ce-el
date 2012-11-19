@@ -489,7 +489,6 @@ be displayed is generally two times the value of this variable."
   (destructuring-bind (dash-begin . dash-end)
       occurrence
     (let ((fragment (substring string dash-begin (1+ dash-end))))
-      (message "this is '%s'" fragment)
       (or (string-match "^[[:space:]]+---*[[:space:]]*$" fragment)
 	  (string-match "^---*[[:space:]]+$" fragment)))))
 

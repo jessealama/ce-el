@@ -372,6 +372,16 @@ N starts from 1, not 0."
 
 	(cons dash-begin dash-end)))))
 
+(defun ce-dash-occurrences-in-string (string)
+  (let ((occurrence (ce-dash-next-dash-occurrence string))
+	(occurrences nil))
+    (while occurrence
+      (push occurrence occurrences)
+      (destructuring-bind (begin . end)
+	  occurrence
+	(setf occurrence (ce-dash-next-dash-occurrence string (1+ end)))))
+    (reverse occurrences)))
+
 (defun ce-dash-next-dash-in-nxml-tree (tree)
   (cond ((consp tree)
 	 (let ((element nil)

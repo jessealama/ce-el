@@ -405,18 +405,12 @@ N starts from 1, not 0."
 (defun ce-dash-next-dash-in-nxml-tree-after (tree address)
   "The address is the next CDATA section of TREE after ADDRESS
   that contains a dash.  NIL if there is no such address."
-  (let ((leaf-number (ce-xhtml-leaf-number-of-leaf-address tree address))
-	(num-leaves (ce-xhtml-count-leaves tree))
-	(next-leaf-number nil))
-    (loop
-     for i from (1+ leaf-number) upto num-leaves
-     do
-     (let ((leaf (ce-xhtml-nth-leaf tree i)))
-       (when (ce-dash-string-contains-dash leaf)
-	 (setf next-leaf-number i)
-	 (return))))
-    (when next-leaf-number
-      (ce-xhtml-address-of-leaf-number tree next-leaf-number))))
+  (let ((leaf-number (ce-xhtml-leaf-number-of-leaf-address tree address)))
+    (let ((index (ce-xhtml-index-of-first-leaf-satisfying tree
+							  'ce-dash-string-contains-dash
+							  (1+ leaf-number))))
+      (when index
+	(ce-xhtml-address-of-leaf-number tree index)))))
 
 (defun ce-dash-inspect-dashes ()
   (interactive)

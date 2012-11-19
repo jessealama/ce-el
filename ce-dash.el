@@ -197,59 +197,6 @@ N starts from 1, not 0."
 	       (append (list element attributes)
 		       (reverse new-children))))))))
 
-(defmacro ce-dash-replace-w/-character (character)
-  `(ce-dash-with-dash-editor buf
-     (let ((tree (buffer-local-value 'ce-dash-document-tree buf))
-	   (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes buf))
-	   (dash-occurrences (buffer-local-value 'ce-dash-occurence-list buf))
-	   (line-number (current-line))
-	   (original-buffer (buffer-local-value 'ce-dash-original-buffer buf)))
-       (let ((cdata-sections (ce-dash-character-data-sections tree)))
-	 (assert (= (length cdata-dash-positions) (length cdata-sections)))
-	 (when (> line-number (length dash-occurrences))
-	   (error "The current line number is greater than the total number of dash occurences."))
-	 (let ((dash-occurrence (nth (1- line-number) dash-occurrences)))
-	   (destructuring-bind (cdata-section-number dash-position)
-	       dash-occurrence
-	     (let ((cdata-section (nth cdata-section-number cdata-sections)))
-	       (macrolet ((replace-with-char (char)
-					     `(let ((new-cdata-section (ce-dash-replace-character-at-position-with cdata-section dash-position ,char)))
-						(ce-dash-replace-nth-cdata-section tree (1+ cdata-section-number) new-cdata-section 0))))
-		 (let ((new-tree (replace-with-char ,character)))
-		   (ce-dash-update-dash-editor new-tree original-buffer)
-		   (ce-dash-render-dash-editor buf)
-		   (goto-char (point-min))
-		   (forward-line (1- line-number))
-		   (ce-dash-next-line))))))))))
-
-(defun ce-dash-replace-w/-ndash ()
-  (interactive)
-  (ce-dash-replace-w/-character +ce-dash-endash+))
-
-(defun ce-dash-replace-w/-mdash ()
-  (interactive)
-  (ce-dash-replace-w/-character +ce-dash-emdash+))
-
-(defun ce-dash-replace-w/-minus ()
-  (interactive)
-  (ce-dash-replace-w/-character +ce-dash-minus+))
-
-(defun ce-dash-replace-w/-hyphen ()
-  (interactive)
-  (ce-dash-replace-w/-character +ce-dash-hyphen+))
-
-(defun ce-dash-accept-dash-occurrence ()
-  (interactive)
-  (ce-dash-with-dash-editor buf
-    (let ((line (current-line))
-	  (tree (buffer-local-value 'ce-dash-document-tree buf))
-	  (source-buf (buffer-local-value 'ce-dash-original-buffer buf)))
-      (ce-dash-update-dash-editor tree source-buf)
-      (ce-dash-render-dash-editor buf)
-      (goto-char (point-min))
-      (forward-line (1- line))
-      (ce-dash-next-line))))
-
 (defun ce-dash-quit ()
   (interactive)
   (let ((dash-editor-buf (get-buffer +ce-dash-editor-buffer-name+)))
@@ -520,57 +467,6 @@ be displayed is generally two times the value of this variable."
 					pos-before-window
 					pos-after-window)))))
       (error "Cannot elide string around a position (%d) that is greater than the length (%d) of a string" position len))))
-
-(defun ce-dash-render-dash-editor (editor-buffer)
-  (let* ((tree (buffer-local-value 'ce-dash-document-tree editor-buffer))
-	 (cdata-dash-positions (buffer-local-value 'ce-dash-cdata-sections-containing-dashes
-						   editor-buffer))
-	 (cdata-sections (ce-dash-character-data-sections tree)))
-    (assert (= (length cdata-sections) (length cdata-dash-positions)))
-    (if (some 'identity cdata-sections)
-	(let ((dash-occurrence-number 0))
-	  (with-current-buffer editor-buffer
-	    (setf buffer-read-only nil)
-	    (erase-buffer)
-	    (loop
-	     for candidate-section in cdata-sections
-	     for dash-positions in cdata-dash-positions
-	     do
-	     (when dash-positions
-	       (dolist (dash-position dash-positions)
-		 (incf dash-occurrence-number)
-		 (multiple-value-bind (fixed replacement-char)
-		     (ce-dash-maybe-fix-dash-occurrence candidate-section dash-position)
-		   (if replacement-char
-		       (let ((elided (ce-dash-elide-string-around fixed dash-position)))
-			 (insert "{" (cond ((char-equal replacement-char +ce-dash-endash+) "e")
-					   ((char-equal replacement-char +ce-dash-emdash+) "m")
-					   ((char-equal replacement-char +ce-dash-minus+) "s")
-					   ((char-equal replacement-char +ce-dash-hyphen+) "h")
-					   (t "?")) "}")
-			 (insert " " (ce-dash-nuke-whitespace elided)))
-		     (let ((elided (ce-dash-elide-string-around candidate-section dash-position))
-			   (dash (aref candidate-section dash-position)))
-		       (insert "[" (cond ((char-equal dash +ce-dash-endash+) "e")
-					 ((char-equal dash +ce-dash-emdash+) "m")
-					 ((char-equal dash +ce-dash-minus+) "s")
-					 ((char-equal dash +ce-dash-hyphen+) "h")
-					 (t "?")) "]")
-		       (insert " " (ce-dash-nuke-whitespace elided)))))
-		 (newline))))
-
-	    ;; kill the final newline
-	    (delete-char -1)
-
-	    (goto-char (point-min))
-	    (ce-dash-previous-line) ;; ensure that we put the cursor in the right spot
-	    (set-buffer-modified-p nil)
-	    (setf mode-name (format "Dash Editor [%d occurrences]" dash-occurrence-number))
-	    (setf header-line-format '(:eval (substring +ce-dash-header+
-							(min (length +ce-dash-header+)
-							     (window-hscroll)))))
-	    (setf buffer-read-only t)))
-      (message "No dashes to edit."))))
 
 (defconst +ce-dash-number-chars+ (list ?0 ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
 

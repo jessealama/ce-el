@@ -5,6 +5,10 @@
   (require 'ce-entities)
   (require 'ce-utils))
 
+(declare-function remove-if "cl-seq.el")
+(declare-function remove-if-not "cl-seq.el")
+(declare-function reduce "cl-seq.el")
+
 (defun ce-xhtml-render-attribute (attribute)
   (cond ((stringp attribute)
 	 attribute)

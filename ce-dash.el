@@ -353,7 +353,7 @@ N starts from 1, not 0."
 
 	;; check for whitespace before this dash
 	(when (and (> dash-begin 0)
-		   (ce-dash-is-dash-character (aref string (1- dash-begin))))
+		   (ce-dash-is-whitespace-character (aref string (1- dash-begin))))
 	  (decf dash-begin))
 
 	;; keep grabbing dashes until we either reach the end of

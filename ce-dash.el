@@ -621,26 +621,48 @@ be displayed is generally two times the value of this variable."
   (list (cons 'ce-dash-numeric-range-needs-fixing 'ce-dash-fix-numeric-range)
 	(cons 'ce-dash-multiple-hyphens+space 'ce-dash-mdash-it)))
 
+(defun ce-dash-applicable-dash-fixers (string occurrence)
+  (remove-if 'null
+	     (mapcar (lambda (predicate-and-fixer)
+		       (when (funcall (car predicate-and-fixer) string occurrence)
+			 (cdr predicate-and-fixer)))
+		     +ce-dash-predicates-and-fixers+)))
+
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns
 two values: the fixed string (which may be string= to STRING, if
 no edits were available) and the index in the fixed string after
 which no edits took place."
-  (let ((applicable-predicate nil)
-	(fixer-function nil)
-	(fixer-found? nil))
-    (if (some (lambda (predicate-and-fixer)
-		(destructuring-bind (predicate . fixer)
-		    predicate-and-fixer
-		  (when (funcall predicate string occurrence)
-		    (setf applicable-predicate predicate
-			  fixer-function fixer)
-		    t)))
-	      +ce-dash-predicates-and-fixers+)
-	(funcall fixer-function string occurrence)
+  (let ((fixers (ce-dash-applicable-dash-fixers string occurrence)))
+    (if fixers
+	(if (rest fixers)
+	    (destructuring-bind (dash-begin . dash-end)
+		occurrence
+	      (values (ce-dash-mark-ambiguous-occurrence string occurrence)
+		      dash-end))
+	  (let ((fixer (first fixers)))
+	    (funcall fixer string occurrence)))
       (destructuring-bind (dash-begin . dash-end)
 	  occurrence
-	(values string dash-end)))))
+	(values (ce-dash-mark-unknown-occurrence string occurrence) dash-end)))))
+
+(defun ce-dash-mark-ambiguous-occurrence (string occurrence)
+  "Indicate that the region of STRING delimited by the dash
+occurrence OCCURRENCE could be fixed by more than one dash-fixing
+function."
+  (destructuring-bind (begin . end)
+      occurrence
+    (add-text-properties begin (1+ end) (list 'face 'comment) string)
+    string))
+
+(defun ce-dash-mark-unknown-occurrence (string occurrence)
+  "Indicate that the region of STRING delimited by the dash
+occurrence OCCURRENCE requires manual fixing because no automatic
+dash-fixing function could be applied."
+  (destructuring-bind (begin . end)
+      occurrence
+    (add-text-properties begin (1+ end) (list 'face 'highlight) string)
+    string))
 
 (provide 'ce-dash)
 

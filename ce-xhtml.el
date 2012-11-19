@@ -1,9 +1,8 @@
 
-(eval-when-compile
-  (require 'cl)
-  (require 'nxml-mode)
-  (require 'ce-entities)
-  (require 'ce-utils))
+(require 'cl)
+(require 'nxml-mode)
+(require 'ce-entities)
+(require 'ce-utils)
 
 (declare-function remove-if "cl-seq.el")
 (declare-function remove-if-not "cl-seq.el")

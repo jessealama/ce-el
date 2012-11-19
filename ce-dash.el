@@ -412,10 +412,20 @@ N starts from 1, not 0."
 	 (error "Don't know how to make sense of the nXML object '%s'" tree))))
 
 (defun ce-dash-inspect-dashes-in-string (string)
-  (let ((edited-string (copy-seq string)))
-    (let ((occurrences (ce-dash-occurrences-in-string edited-string)))
-      (dolist (occurrence occurrences edited-string)
-	(setf edited-string (ce-dash-fix-dash-occurrence string occurrence))))))
+  (let ((occurrence (ce-dash-next-dash-occurrence string)))
+    (if occurrence
+	(destructuring-bind (dash-begin . dash-end)
+	    occurrence
+	  (let ((end dash-end)
+		(edited-string (copy-seq string)))
+	    (while occurrence
+	      (multiple-value-bind (new-string end-of-edit)
+		  (ce-dash-fix-dash-occurrence edited-string occurrence)
+		(setf edited-string new-string
+		      end (1+ end-of-edit))
+		(setf occurrence (ce-dash-next-dash-occurrence edited-string end))))
+	    edited-string))
+      string)))
 
 (defun ce-dash-next-dash-in-nxml-tree-after (tree address)
   "The address is the next CDATA section of TREE after ADDRESS
@@ -582,9 +592,11 @@ be displayed is generally two times the value of this variable."
 (defun ce-dash-fix-numeric-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
       occurrence
-    (format "%s–%s"
-	    (substring string 0 dash-begin)
-	    (substring string (1+ dash-begin)))))
+    (values
+     (format "%s–%s"
+	     (substring string 0 dash-begin)
+	     (substring string (1+ dash-begin)))
+     dash-end)))
 
 (defun ce-dash-multiple-hyphens+space (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -599,18 +611,21 @@ be displayed is generally two times the value of this variable."
       occurrence
     (let ((fragment (substring string dash-begin (1+ dash-end))))
       (message "this is '%s'" fragment)
-      (format "%s—%s"
-	      (substring string 0 dash-begin)
-	      (substring string (1+ dash-end))))))
+      (values
+       (format "%s—%s"
+	       (substring string 0 dash-begin)
+	       (substring string (1+ dash-end)))
+       (+ dash-begin 2)))))
 
 (defconst +ce-dash-predicates-and-fixers+
   (list (cons 'ce-dash-numeric-range-needs-fixing 'ce-dash-fix-numeric-range)
 	(cons 'ce-dash-multiple-hyphens+space 'ce-dash-mdash-it)))
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
-  "Try to fix the dash occurrence OCCURRENCE of STRING.  If no
-automatic fix function is available, offer a way of manually
-fixing the occurrence."
+  "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns
+two values: the fixed string (which may be string= to STRING, if
+no edits were available) and the index in the fixed string after
+which no edits took place."
   (let ((applicable-predicate nil)
 	(fixer-function nil)
 	(fixer-found? nil))
@@ -623,9 +638,9 @@ fixing the occurrence."
 		    t)))
 	      +ce-dash-predicates-and-fixers+)
 	(funcall fixer-function string occurrence)
-      (progn
-	(message "We should offer a way for you to manually fix the dash occurrence %s of %s." occurrence string)
-	string))))
+      (destructuring-bind (dash-begin . dash-end)
+	  occurrence
+	(values string dash-end)))))
 
 (provide 'ce-dash)
 

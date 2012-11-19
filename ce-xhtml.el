@@ -334,6 +334,36 @@ We start counting at 1, not 0."
 (defun ce-xhtml-address-of-leaf-number (tree leaf-number)
   (reverse (ce-xhtml-address-of-leaf-number-1 tree leaf-number nil)))
 
+(defun ce-xhtml-first-leaf-satisfying (tree predicate &optional start end)
+  (let ((num-leaves (ce-xhtml-count-leaves tree)))
+    (when (null start)
+      (setf start 1))
+    (when (null end)
+      (setf end num-leaves))
+    (loop
+     for i from start upto end
+     for leaf = (ce-xhtml-nth-leaf tree i)
+     do
+     (when (funcall predicate leaf)
+       (return leaf))
+     finally
+     (return nil))))
+
+(defun ce-xhtml-index-of-first-leaf-satisfying (tree predicate &optional start end)
+  (let ((num-leaves (ce-xhtml-count-leaves tree)))
+    (when (null start)
+      (setf start 1))
+    (when (null end)
+      (setf end num-leaves))
+    (loop
+     for i from start upto end
+     for leaf = (ce-xhtml-nth-leaf tree i)
+     do
+     (when (funcall predicate leaf)
+       (return i))
+     finally
+     (return nil))))
+
 (provide 'ce-xhtml)
 
 ;; Local Variables:

@@ -330,14 +330,18 @@ N starts from 1, not 0."
       (setf position (string-match +ce-dash-dash-regexp+ string (1+ position))))
     (reverse positions)))
 
-(defun ce-dash-position-of-dash (string)
-  (string-match +ce-dash-dash-regexp+ string))
+(defun ce-dash-position-of-dash (string &optional begin)
+  (when (null begin)
+    (setf begin 0))
+  (string-match +ce-dash-dash-regexp+ string begin))
 
-(defun ce-dash-next-dash-occurrence (string)
+(defun ce-dash-next-dash-occurrence (string &optional begin)
   (unless (stringp string)
     (error "The argument of ce-dash-next-dash-occurrence should be a string."))
+  (when (null begin)
+    (setf begin 0))
   (let ((len (length string))
-	(position (ce-dash-position-of-dash string)))
+	(position (ce-dash-position-of-dash string begin)))
     (when position
       ;; there is a dash character.  Now look around it, grabbing
       ;; whitespace and more dash characters until we reach either the
@@ -398,9 +402,23 @@ N starts from 1, not 0."
 	 (error "Don't know how to make sense of the nXML object '%s'" tree))))
 
 (defun ce-dash-inspect-dashes-in-string (string)
-  (let ((occurrence (ce-dash-next-dash-occurrence string)))
-    (message "The first dash occurrence in %s is %s" string occurrence))
-  (format "fuck: %s" string))
+  (let ((edited-string (copy-seq string)))
+    (let ((occurrence (ce-dash-next-dash-occurrence edited-string 0)))
+      (while occurrence
+	(destructuring-bind (begin . end)
+	    occurrence
+	  (if (= begin end)
+	      (multiple-value-bind (fixed-string edit)
+		  (ce-dash-maybe-fix-dash-occurrence edited-string begin)
+		(if edit
+		    (message "An edit was applied: %s" edit)
+		  (message "No edit was applied.  Moving on..."))
+		(setf edited-string fixed-string
+		      occurrence (ce-dash-next-dash-occurrence edited-string (1+ begin))))
+	    (progn
+	      (message "Don't know how to fix the dash occurrence whose range is (%d,%d).  Skipping..." begin end)
+	      (setf occurrence (ce-dash-next-dash-occurrence edited-string (1+ end))))))))
+    edited-string))
 
 (defun ce-dash-next-dash-in-nxml-tree-after (tree address)
   "The address is the next CDATA section of TREE after ADDRESS
@@ -417,10 +435,11 @@ N starts from 1, not 0."
   (when (buffer-modified-p)
     (when (y-or-n-p "The buffer has been modified since it was last saved.  Save before continuing? ")
       (save-buffer)))
-  (let ((temp-file (make-temp-file "dash-editor-"))
-	(current-contents (buffer-string))
-	(current-buffer (current-buffer))
-	(current-file (buffer-file-name)))
+  (let* ((temp-file (make-temp-file "dash-editor-"))
+	 (current-contents (buffer-string))
+	 (current-buffer (current-buffer))
+	 (current-file (buffer-file-name))
+	 (new-contents current-contents))
     (with-temp-file temp-file
       (insert current-contents)
       (ce-entities-resolve-named-entities-decimally))
@@ -442,8 +461,11 @@ N starts from 1, not 0."
 							      edited))))
 	    (setf next-dash-cdata-address
 		  (ce-dash-next-dash-in-nxml-tree-after tree
-							next-dash-cdata-address))))))
-    (delete-file temp-file)))
+							next-dash-cdata-address))))
+	(setf new-contents (ce-xhtml-render-nxml-thing tree))))
+    (delete-file temp-file)
+    (erase-buffer)
+    (insert new-contents)))
 
 (defcustom *ce-dash-preview-window-padding* 25
   "The number of characters to be displayed before and after an occurrence of a dash.

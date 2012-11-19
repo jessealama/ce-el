@@ -405,18 +405,9 @@ N starts from 1, not 0."
 %s" (error-message-string nxml-parse-error))
 		   nil))))
       (when tree
-	(let ((next-dash-cdata-address (ce-dash-next-dash-in-nxml-tree tree)))
-	  (while next-dash-cdata-address
-	    (let ((thing-at-address (ce-xhtml-node-with-address tree
-								next-dash-cdata-address)))
-	      (let ((edited (ce-dash-inspect-dashes-in-string thing-at-address)))
-		(setf tree (ce-xhtml-replace-thing-at-address tree
-							      next-dash-cdata-address
-							      edited))))
-	    (setf next-dash-cdata-address
-		  (ce-dash-next-dash-in-nxml-tree-after tree
-							next-dash-cdata-address))))
-	(setf new-contents (ce-xhtml-render-nxml-thing tree))))
+	(let ((new-tree (ce-xhtml-map-cdata-sections tree
+						     'ce-dash-inspect-dashes-in-string)))
+	  (setf new-contents (ce-xhtml-render-nxml-thing new-tree)))))
     (delete-file temp-file)
     (erase-buffer)
     (insert new-contents)

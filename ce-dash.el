@@ -393,7 +393,8 @@ N starts from 1, not 0."
 	 (current-contents (buffer-string))
 	 (current-buffer (current-buffer))
 	 (current-file (buffer-file-name))
-	 (new-contents current-contents))
+	 (new-contents current-contents)
+	 (point (point)))
     (with-temp-file temp-file
       (insert current-contents)
       (ce-entities-resolve-named-entities-decimally))
@@ -411,6 +412,7 @@ N starts from 1, not 0."
     (delete-file temp-file)
     (erase-buffer)
     (insert new-contents)
+    (goto-char point)
     t))
 
 (defcustom *ce-dash-preview-window-padding* 25

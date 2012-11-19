@@ -496,12 +496,10 @@ be displayed is generally two times the value of this variable."
   (destructuring-bind (dash-begin . dash-end)
       occurrence
     (let ((fragment (substring string dash-begin (1+ dash-end))))
-      (message "this is '%s'" fragment)
-      (values
-       (format "%s—%s"
-	       (substring string 0 dash-begin)
-	       (substring string (1+ dash-end)))
-       (+ dash-begin 2)))))
+      (values (format "%s—%s"
+		      (substring string 0 dash-begin)
+		      (substring string (1+ dash-end)))
+	      (+ dash-begin 2)))))
 
 (defconst +ce-dash-predicates-and-fixers+
   (list (cons 'ce-dash-numeric-range-needs-fixing 'ce-dash-fix-numeric-range)

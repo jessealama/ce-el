@@ -62,7 +62,7 @@
 	    (dash-end position))
 
 	;; check for whitespace before this dash
-	(when (and (> dash-begin 0)
+	(while (and (> dash-begin 0)
 		   (ce-dash-is-whitespace-character (aref string (1- dash-begin))))
 	  (decf dash-begin))
 
@@ -76,8 +76,8 @@
 	    (setf dash-end (1- j))))
 
 	;; check for whitespace at the end of this dash
-	(when (and (< (1+ dash-end) len)
-		   (ce-dash-is-whitespace-character (aref string (1+ dash-end))))
+	(while (and (< (1+ dash-end) len)
+		    (ce-dash-is-whitespace-character (aref string (1+ dash-end))))
 	  (incf dash-end))
 
 	(cons dash-begin dash-end)))))

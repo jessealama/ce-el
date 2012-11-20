@@ -175,22 +175,14 @@ be displayed is generally two times the value of this variable."
 					pos-after-window)))))
       (error "Cannot elide string around a position (%d) that is greater than the length (%d) of a string" position len))))
 
-(defconst +ce-dash-number-chars+ (list ?0 ?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
-
 (defun ce-dash-numeric-range-needs-fixing (string occurrence)
-  (destructuring-bind (dash-begin . dash-end)
-      occurrence
-    (when (= dash-begin dash-end)
-      (let ((position dash-begin))
-	(let ((dash (aref string position))
-	      (len (length string)))
-	  (when (char-equal dash ?-)
-	    (when (< (+ position 2) len)
-	      (unless (zerop position)
-		(let ((preceding-char (aref string (1- position)))
-		      (following-char (aref string (1+ position))))
-		  (and (find preceding-char +ce-dash-number-chars+)
-		       (find following-char +ce-dash-number-chars+)))))))))))
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
+	    (string-match "^[[:digit:]].+[[:digit:]]$" window)))))))
 
 (defun ce-dash-fix-numeric-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)

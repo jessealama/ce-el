@@ -40,13 +40,6 @@ But writing '(goto-char (point-min))' is the kind of
 speaking-in-code that I dislike so much.  Whence this macro."
   `(goto-char (point-min)))
 
-(defmacro current-line ()
-  "The current line number."
-  `(+ (count-lines 1 (point))
-      (if (zerop (current-column))
-	  1
-	0)))
-
 (defmacro keep-evaluating (&rest body)
   (let ((condition-case-forms
 	 (mapcar #'(lambda (form)

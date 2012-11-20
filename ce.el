@@ -45,17 +45,17 @@
 
 ;;; Our own splitoff packages
 
-(require 'ce-macros) ;; needs to come first among the splitoff
-                     ;; packages to ensure that any uses of macros are
-                     ;; properly expanded
-;(require 'ce-unadorned)
-(require 'ce-entries)
-(require 'ce-validate)
-(require 'ce-quotes)
-(require 'ce-spell)
-(require 'ce-xhtml)
-(require 'ce-dash)
-(require 'ce-entities)
+(eval-when-compile
+  (defconst +ce-packages+
+    (list 'ce-macros
+	  'ce-entries
+	  'ce-quotes
+	  'ce-spell
+	  'ce-xhtml
+	  'ce-dash
+	  'ce-entities))
+  (dolist (package +ce-packages+)
+    (require package)))
 
 ;;; User variables and customization
 

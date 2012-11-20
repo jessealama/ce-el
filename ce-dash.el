@@ -43,7 +43,9 @@
 (defun ce-dash-position-of-dash (string &optional begin)
   (when (null begin)
     (setf begin 0))
-  (string-match +ce-dash-dash-regexp+ string begin))
+  (let ((len (length string)))
+    (when (< (1+ begin) len)
+      (string-match +ce-dash-dash-regexp+ string begin))))
 
 (defun ce-dash-next-dash-occurrence (string &optional begin)
   (unless (stringp string)

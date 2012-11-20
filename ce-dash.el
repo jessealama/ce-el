@@ -197,6 +197,30 @@ be displayed is generally two times the value of this variable."
        (format "%s%c–%c%s" before-digit digit-before-dash digit-after-dash after-digit)
        dash-end))))
 
+(defun ce-dash-looks-like-a-minus (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	(if (zerop dash-begin)
+	    (let ((window (substring string 0 (+ dash-end 2))))
+	      (message "minus window: '%s'" window)
+	      (string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
+	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
+	    (message "minus window: '%s'" window)
+	    (string-match "^[^[:digit:]].+[[:digit:]]$" window)))))))
+
+(defun ce-dash-make-a-minus (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (values (if (zerop dash-begin)
+		  (format "−%s" (substring string (1+ dash-end)))
+		(format "%s−%s"
+			(substring string 0 (1+ dash-begin))
+			(substring string (1+ dash-end))))
+	      dash-end))))
+
 (defun ce-dash-multiple-hyphens+space (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
       occurrence
@@ -215,7 +239,8 @@ be displayed is generally two times the value of this variable."
 
 (defconst +ce-dash-predicates-and-fixers+
   (list (cons 'ce-dash-numeric-range-needs-fixing 'ce-dash-fix-numeric-range)
-	(cons 'ce-dash-multiple-hyphens+space 'ce-dash-mdash-it)))
+	(cons 'ce-dash-multiple-hyphens+space 'ce-dash-mdash-it)
+	(cons 'ce-dash-looks-like-a-minus 'ce-dash-make-a-minus)))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)
   (remove-if 'null

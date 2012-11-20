@@ -189,11 +189,13 @@ be displayed is generally two times the value of this variable."
 (defun ce-dash-fix-numeric-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
       occurrence
-    (values
-     (format "%s–%s"
-	     (substring string 0 dash-begin)
-	     (substring string (1+ dash-begin)))
-     dash-end)))
+    (let ((before-digit (substring string 0 (- dash-begin 1)))
+	  (digit-before-dash (aref string (- dash-begin 1)))
+	  (digit-after-dash (aref string (1+ dash-end)))
+	  (after-digit (substring string (+ dash-end 2))))
+      (values
+       (format "%s%c–%c%s" before-digit digit-before-dash digit-after-dash after-digit)
+       dash-end))))
 
 (defun ce-dash-multiple-hyphens+space (string occurrence)
   (destructuring-bind (dash-begin . dash-end)

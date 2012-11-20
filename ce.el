@@ -149,6 +149,14 @@ Encyclopedia of Philosophy."
   ;; do stuff here
   (message "Initializing CE-mode...done."))
 
+(defun ce-reload (&optional recompile)
+  (interactive)
+  (dolist (package +ce-packages+ t)
+    (let ((package-el (format "%s.el" package)))
+      (if recompile
+	  (byte-compile-file package-el t)
+	(load-file package-el)))))
+
 (define-minor-mode ce-mode
   "SEP copyediting utilities"
   :lighter " CE"

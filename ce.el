@@ -145,9 +145,8 @@ Encyclopedia of Philosophy."
 (define-key ce-mode-map (kbd "C-x r RET") 'ce-quote-fix-resume)
 
 (defun ce-initialize ()
-  (interactive)
   (message "Initializing CE-mode...")
-  (ce-refresh-published-entries)
+  ;; do stuff here
   (message "Initializing CE-mode...done."))
 
 (define-minor-mode ce-mode

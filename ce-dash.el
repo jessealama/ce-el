@@ -1,5 +1,6 @@
 
 (require 'cl)
+(require 'eieio)
 (require 'nxml-parse)
 (require 'ce-xhtml)
 (require 'ce-entities)
@@ -234,17 +235,45 @@ be displayed is generally two times the value of this variable."
 		      (substring string (1+ dash-end)))
 	      (+ dash-begin 2)))))
 
-(defconst +ce-dash-predicates-and-fixers+
-  (list (cons 'ce-dash-numeric-range-needs-fixing 'ce-dash-fix-numeric-range)
-	(cons 'ce-dash-multiple-hyphens+space 'ce-dash-mdash-it)
-	(cons 'ce-dash-looks-like-a-minus 'ce-dash-make-a-minus)))
+(defclass dash-fixer ()
+  ((test
+    :initarg :test)
+   (fixer
+    :initarg :fixer)
+   (name
+    :initarg :name
+    :type string)))
+
+(defconst +ce-dash-numeric-range-fixer+
+  (dash-fixer
+   "Numeric range"
+   :test 'ce-dash-numeric-range-needs-fixing
+   :fixer 'ce-dash-fix-numeric-range
+   :name "Numeric range"))
+
+(defconst +ce-dash-emdash-fixer+
+  (dash-fixer
+   "Emdash"
+   :test 'ce-dash-multiple-hyphens+space
+   :fixer 'ce-dash-mdash-it
+   :name "Emdash"))
+
+(defconst +ce-dash-minus-sign-fixer+
+  (dash-fixer
+   "Minus"
+   :test 'ce-dash-looks-like-a-minus
+   :fixer 'ce-dash-make-a-minus
+   :name "Minus"))
+
+(defconst +ce-dash-fixers+
+  (list +ce-dash-numeric-range-fixer+
+	+ce-dash-emdash-fixer+
+	+ce-dash-minus-sign-fixer+))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)
-  (remove-if 'null
-	     (mapcar (lambda (predicate-and-fixer)
-		       (when (funcall (car predicate-and-fixer) string occurrence)
-			 (cdr predicate-and-fixer)))
-		     +ce-dash-predicates-and-fixers+)))
+  (remove-if-not (lambda (dash-fixer)
+		   (funcall (oref dash-fixer test) string occurrence))
+		 +ce-dash-fixers+))
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns
@@ -254,15 +283,24 @@ which no edits took place."
   (let ((fixers (ce-dash-applicable-dash-fixers string occurrence)))
     (if fixers
 	(if (rest fixers)
-	    (destructuring-bind (dash-begin . dash-end)
-		occurrence
-	      (values (ce-dash-mark-ambiguous-occurrence string occurrence)
-		      dash-end))
-	  (let ((fixer (first fixers)))
-	    (funcall fixer string occurrence)))
+	    (let ((names (mapcar (lambda (fixer) (oref fixer name)) fixers)))
+	      (let ((prompt (with-output-to-string
+			      (loop
+			       for i from 1 upto (length names)
+			       for name in names
+			       do
+			       (princ (format "[%d] %s" i name))
+			       (terpri)))))
+		(let ((response (read-from-minibuffer prompt)))
+		  (let ((n (string-to-number response)))
+		    (let ((dash-fixer (nth (1- n) fixers)))
+		      (funcall (oref dash-fixer fixer) string occurrence))))))
+	  (let ((dash-fixer (first fixers)))
+	    (funcall (oref dash-fixer fixer) string occurrence)))
       (destructuring-bind (dash-begin . dash-end)
 	  occurrence
-	(values (ce-dash-mark-unknown-occurrence string occurrence) dash-end)))))
+	(values (ce-dash-mark-unknown-occurrence string occurrence)
+		dash-end)))))
 
 (defun ce-dash-mark-ambiguous-occurrence (string occurrence)
   "Indicate that the region of STRING delimited by the dash

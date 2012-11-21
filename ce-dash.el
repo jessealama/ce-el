@@ -206,18 +206,28 @@ be displayed is generally two times the value of this variable."
 	      (string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
 	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
 	    (message "minus window: '%s'" window)
-	    (string-match "^[^[:digit:]].+[[:digit:]]$" window)))))))
+	    (or (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
+		(string-match "^[^[:space:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window))))))))
 
 (defun ce-dash-make-a-minus (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (values (if (zerop dash-begin)
-		  (format "−%s" (substring string (1+ dash-end)))
-		(format "%s−%s"
-			(substring string 0 (1+ dash-begin))
-			(substring string (1+ dash-end))))
-	      dash-end))))
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (if (zerop dash-begin)
+	(values (format "−%s" (substring string (1+ dash-end)))
+		dash-end)
+      (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
+	(cond ((string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
+	       (values (format "%s−%s"
+			       (substring string 0 dash-begin)
+			       (substring string (1+ dash-end)))
+		       dash-end))
+	      ((string-match "^[^[:space:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
+	       (values (format "%s −%s"
+			       (substring string 0 dash-begin)
+			       (substring string (1+ dash-end)))
+		       dash-end))
+	      (t
+	       (values string dash-end)))))))
 
 (defun ce-dash-multiple-hyphens+space (string occurrence)
   (destructuring-bind (dash-begin . dash-end)

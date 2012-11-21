@@ -5,10 +5,6 @@
 (require 'ce-entities)
 (require 'ce-utils)
 
-(defun ce-dash-is-dash-entity (entity-str)
-  (or (string= entity-str "&ndash;")
-      (string= entity-str "&mdash;")))
-
 (defconst +ce-dash-hyphen+ ?-)
 (defconst +ce-dash-endash+ ?–)
 (defconst +ce-dash-emdash+ ?—)

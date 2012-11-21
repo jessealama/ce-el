@@ -22,7 +22,8 @@
 (defconst +ce-dash-whitespace-chars+ (list ?\s ?\n ?\t))
 
 (defconst +ce-dash-dash-regexp+
-  (regexp-opt (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))
+  (let ((dashes-as-strings (mapcar (lambda (char) (format "%c" char)) +ce-dash-dashes+)))
+    (regexp-opt dashes-as-strings)))
 
 (defun ce-dash-is-dash-character (c)
   (member c +ce-dash-dashes+))

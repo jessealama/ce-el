@@ -296,11 +296,14 @@ which no edits took place."
 	    (let ((names (mapcar (lambda (fixer) (oref fixer name)) fixers)))
 	      (let ((prompt (with-output-to-string
 			      (loop
-			       for i from 1 upto (length names)
+			       with num-names = (length names)
+			       for i from 1 upto num-names
 			       for name in names
 			       do
 			       (princ (format "[%d] %s" i name))
-			       (terpri)))))
+			       (if (< i num-names)
+				   (princ "; ")
+				 (princ ": "))))))
 		(let ((response (read-from-minibuffer prompt)))
 		  (let ((n (string-to-number response)))
 		    (let ((dash-fixer (nth (1- n) fixers)))

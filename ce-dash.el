@@ -137,15 +137,35 @@ window width is wide: the overall length of the preview string to
 be displayed is generally two times the value of this variable."
   :group 'ce)
 
-(defun ce-dash-highlight-string-at-position (string position)
-  (let ((new-string (copy-seq string)))
-    (add-text-properties position (1+ position) (list 'face 'highlight) new-string)
-    new-string))
-
 (defun ce-dash-highlight-string-region (string begin end)
-  (let ((new-string (copy-seq string)))
-    (add-text-properties begin (1+ end) (list 'face 'highlight) new-string)
-    new-string))
+  (let ((adjusted-begin begin)
+	(adjusted-end end))
+    (let ((rendered (with-output-to-string
+		      (loop
+		       for i from 0
+		       for c across string
+		       do
+		       (when (= i adjusted-begin)
+			 (princ "==> "))
+		       (when (= i adjusted-end)
+			 (princ " <=="))
+		       (cond ((char-equal c ?\n)
+			      (princ "\\n")
+			      (when (< i adjusted-begin)
+				(incf adjusted-begin)
+				(incf adjusted-end)))
+			     ((char-equal c ?\t)
+			      (princ "\\t")
+			      (when (< i adjusted-begin)
+				(incf adjusted-begin)
+				(incf adjusted-end)))
+			     (t
+			      (princ (format "%c" c))))))))
+      (add-text-properties adjusted-begin
+			   (1+ adjusted-end)
+			   (list 'face 'highlight)
+			   rendered)
+      rendered)))
 
 (defun ce-dash-prepend-^-sigil (string)
   (let ((new-string (format "^%s" string)))
@@ -157,28 +177,6 @@ be displayed is generally two times the value of this variable."
 	 (len (length new-string)))
     (add-text-properties (- len 2) (- len 1) (list 'face 'trailing-whitespace) new-string)
     new-string))
-
-(defun ce-dash-elide-string-around (string position)
-  (let ((len (length string)))
-    (if (and (< position len)
-	     (<= 0 position))
-	(let* ((highlighted-string (ce-dash-highlight-string-at-position string position))
-	       (string-window-padding *ce-dash-preview-window-padding*)
-	       (pos-before-window (- position string-window-padding))
-	       (pos-after-window (+ position string-window-padding)))
-	  (if (< position string-window-padding)
-	      (if (< len (* string-window-padding 2))
-		  (ce-dash-append-$-sigil (ce-dash-prepend-^-sigil highlighted-string))
-		(ce-dash-prepend-^-sigil (format "%s…" (substring highlighted-string
-								  0
-								  pos-after-window))))
-	    (if (> pos-after-window len)
-		(ce-dash-append-$-sigil (format "…%s" (substring highlighted-string
-								 pos-before-window)))
-	      (format "…%s…" (substring highlighted-string
-					pos-before-window
-					pos-after-window)))))
-      (error "Cannot elide string around a position (%d) that is greater than the length (%d) of a string" position len))))
 
 (defun ce-dash-numeric-range-needs-fixing (string occurrence)
   (let ((len (length string)))
@@ -286,27 +284,27 @@ be displayed is generally two times the value of this variable."
   (destructuring-bind (dash-begin . dash-end)
       occurrence
     (let ((len (length string)))
-      (if (and (< dash-end len)
+      (unless (and (< dash-end len)
 	       (<= 0 dash-begin))
-	  (let* ((highlighted-string (ce-dash-highlight-string-region string
-								      dash-begin
-								      dash-end))
-		 (string-window-padding *ce-dash-preview-window-padding*)
-		 (pos-before-window (- dash-begin string-window-padding))
-		 (pos-after-window (+ dash-end string-window-padding)))
-	    (if (< dash-begin string-window-padding)
-		(if (< len (* string-window-padding 2))
-		    (ce-dash-append-$-sigil (ce-dash-prepend-^-sigil highlighted-string))
-		  (ce-dash-prepend-^-sigil (format "%s…" (substring highlighted-string
-								    0
-								    pos-after-window))))
-	      (if (> pos-after-window len)
-		  (ce-dash-append-$-sigil (format "…%s" (substring highlighted-string
-								   pos-before-window)))
-		(format "…%s…" (substring highlighted-string
-					  pos-before-window
-					  pos-after-window)))))
-	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len)))))
+	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len))
+      (let* ((highlighted-string (ce-dash-highlight-string-region string
+								  dash-begin
+								  dash-end))
+	     (string-window-padding *ce-dash-preview-window-padding*)
+	     (pos-before-window (- dash-begin string-window-padding))
+	     (pos-after-window (+ dash-end string-window-padding)))
+	(if (< dash-begin string-window-padding)
+	    (if (< len (* string-window-padding 2))
+		(ce-dash-append-$-sigil (ce-dash-prepend-^-sigil highlighted-string))
+	      (ce-dash-prepend-^-sigil (format "%s…" (substring highlighted-string
+								0
+								pos-after-window))))
+	  (if (> pos-after-window len)
+	      (ce-dash-append-$-sigil (format "…%s" (substring highlighted-string
+							       pos-before-window)))
+	    (format "…%s…" (substring highlighted-string
+				      pos-before-window
+				      pos-after-window))))))))
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns

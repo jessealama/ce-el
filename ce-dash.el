@@ -142,6 +142,11 @@ be displayed is generally two times the value of this variable."
     (add-text-properties position (1+ position) (list 'face 'highlight) new-string)
     new-string))
 
+(defun ce-dash-highlight-string-region (string begin end)
+  (let ((new-string (copy-seq string)))
+    (add-text-properties begin (1+ end) (list 'face 'highlight) new-string)
+    new-string))
+
 (defun ce-dash-prepend-^-sigil (string)
   (let ((new-string (format "^%s" string)))
     (add-text-properties 0 1 (list 'face 'trailing-whitespace) new-string)
@@ -283,6 +288,32 @@ be displayed is generally two times the value of this variable."
 		   (funcall (oref dash-fixer test) string occurrence))
 		 +ce-dash-fixers+))
 
+(defun ce-dash-elide-around-occurrence (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((len (length string)))
+      (if (and (< dash-end len)
+	       (<= 0 dash-begin))
+	  (let* ((highlighted-string (ce-dash-highlight-string-region string
+								      dash-begin
+								      dash-end))
+		 (string-window-padding *ce-dash-preview-window-padding*)
+		 (pos-before-window (- dash-begin string-window-padding))
+		 (pos-after-window (+ dash-end string-window-padding)))
+	    (if (< dash-begin string-window-padding)
+		(if (< len (* string-window-padding 2))
+		    (ce-dash-append-$-sigil (ce-dash-prepend-^-sigil highlighted-string))
+		  (ce-dash-prepend-^-sigil (format "%s…" (substring highlighted-string
+								    0
+								    pos-after-window))))
+	      (if (> pos-after-window len)
+		  (ce-dash-append-$-sigil (format "…%s" (substring highlighted-string
+								   pos-before-window)))
+		(format "…%s…" (substring highlighted-string
+					  pos-before-window
+					  pos-after-window)))))
+	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len)))))
+
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns
 two values: the fixed string (which may be string= to STRING, if
@@ -294,6 +325,9 @@ which no edits took place."
 	    (let ((names (mapcar (lambda (fixer) (oref fixer name)) fixers)))
 	      (let ((prompt (with-output-to-string
 			      (loop
+			       initially
+			       (princ (ce-dash-elide-around-occurrence string occurrence))
+			       (terpri)
 			       with num-names = (length names)
 			       for i from 1 upto num-names
 			       for name in names

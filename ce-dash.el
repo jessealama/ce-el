@@ -88,13 +88,13 @@
 	(destructuring-bind (dash-begin . dash-end)
 	    occurrence
 	  (let ((end dash-end)
-		(edited-string (copy-seq string)))
+		(edited-string (copy-seq string))
+		(len (length string)))
 	    (while occurrence
-	      (multiple-value-bind (new-string end-of-edit)
-		  (ce-dash-fix-dash-occurrence edited-string occurrence)
+	      (let ((new-string (ce-dash-fix-dash-occurrence edited-string occurrence)))
 		(setf edited-string new-string
-		      end (1+ end-of-edit))
-		(setf occurrence (ce-dash-next-dash-occurrence edited-string end))))
+		      end (or (mismatch edited-string new-string) len))
+		(setf occurrence (ce-dash-next-dash-occurrence edited-string (1+ end)))))
 	    edited-string))
       string)))
 
@@ -196,9 +196,7 @@ be displayed is generally two times the value of this variable."
 	  (digit-before-dash (aref string (- dash-begin 1)))
 	  (digit-after-dash (aref string (1+ dash-end)))
 	  (after-digit (substring string (+ dash-end 2))))
-      (values
-       (format "%s%c–%c%s" before-digit digit-before-dash digit-after-dash after-digit)
-       dash-end))))
+      (format "%s%c–%c%s" before-digit digit-before-dash digit-after-dash after-digit))))
 
 (defun ce-dash-looks-like-a-minus (string occurrence)
   (let ((len (length string)))
@@ -216,21 +214,18 @@ be displayed is generally two times the value of this variable."
   (destructuring-bind (dash-begin . dash-end)
       occurrence
     (if (zerop dash-begin)
-	(values (format "−%s" (substring string (1+ dash-end)))
-		dash-end)
+	(format "−%s" (substring string (1+ dash-end)))
       (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
 	(cond ((string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
-	       (values (format "%s−%s"
-			       (substring string 0 dash-begin)
-			       (substring string (1+ dash-end)))
-		       dash-end))
+	       (format "%s−%s"
+		       (substring string 0 dash-begin)
+		       (substring string (1+ dash-end))))
 	      ((string-match "^[^[:space:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
-	       (values (format "%s −%s"
-			       (substring string 0 dash-begin)
-			       (substring string (1+ dash-end)))
-		       dash-end))
+	       (format "%s −%s"
+		       (substring string 0 dash-begin)
+		       (substring string (1+ dash-end))))
 	      (t
-	       (values string dash-end)))))))
+	       string))))))
 
 (defun ce-dash-multiple-hyphens+space (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -243,10 +238,9 @@ be displayed is generally two times the value of this variable."
   (destructuring-bind (dash-begin . dash-end)
       occurrence
     (let ((fragment (substring string dash-begin (1+ dash-end))))
-      (values (format "%s—%s"
-		      (substring string 0 dash-begin)
-		      (substring string (1+ dash-end)))
-	      (+ dash-begin 2)))))
+      (format "%s—%s"
+	      (substring string 0 dash-begin)
+	      (substring string (1+ dash-end))))))
 
 (defclass dash-fixer ()
   ((test
@@ -316,9 +310,7 @@ be displayed is generally two times the value of this variable."
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns
-two values: the fixed string (which may be string= to STRING, if
-no edits were available) and the index in the fixed string after
-which no edits took place."
+an edited copy of STRING."
   (let ((fixers (ce-dash-applicable-dash-fixers string occurrence)))
     (if fixers
 	(if (rest fixers)
@@ -342,10 +334,7 @@ which no edits took place."
 		      (funcall (oref dash-fixer fixer) string occurrence))))))
 	  (let ((dash-fixer (first fixers)))
 	    (funcall (oref dash-fixer fixer) string occurrence)))
-      (destructuring-bind (dash-begin . dash-end)
-	  occurrence
-	(values (ce-dash-mark-unknown-occurrence string occurrence)
-		dash-end)))))
+      string)))
 
 (defun ce-dash-mark-ambiguous-occurrence (string occurrence)
   "Indicate that the region of STRING delimited by the dash

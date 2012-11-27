@@ -145,7 +145,7 @@ be displayed is generally two times the value of this variable."
 		       for i from 0
 		       for c across string
 		       do
-		       (when (= i adjusted-begin)
+		       (when (= (1+ i) adjusted-begin)
 			 (princ "==> "))
 		       (when (= i adjusted-end)
 			 (princ " <=="))

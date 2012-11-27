@@ -332,13 +332,18 @@ an edited copy of STRING."
 			     for name in names
 			     do
 			     (princ (format "(%d) %s" i name))
-			     (if (< i num-names)
-				 (princ "; ")
-			       (princ ": "))))))
+			     (when (= i 1) (princ " (default)"))
+			     (cond ((< i num-names)
+				    (princ "; "))
+				   (t
+				    (princ "; [E]dit (RET for default): ")))))))
 	      (let ((response (read-from-minibuffer prompt)))
-		(let ((n (string-to-number response)))
-		  (let ((dash-fixer (nth (1- n) fixers)))
-		    (funcall (oref dash-fixer fixer) string occurrence))))))
+		(if (or (string= response "e")
+			(string= response "E"))
+		    (read-from-minibuffer "" string)
+		    (let ((n (string-to-number response)))
+		      (let ((dash-fixer (nth (1- n) fixers)))
+			(funcall (oref dash-fixer fixer) string occurrence)))))))
 	(let ((dash-fixer (first fixers)))
 	  (funcall (oref dash-fixer fixer) string occurrence))))))
 

@@ -212,7 +212,6 @@ be displayed is generally two times the value of this variable."
 	    (let ((window (substring string 0 (+ dash-end 2))))
 	      (string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
 	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
-	    (message "minus window: '%s'" window)
 	    (or (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
 		(string-match "^[^[:space:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window))))))))
 

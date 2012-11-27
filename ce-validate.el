@@ -6,15 +6,14 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl)
-  (require 'nxml-mode)
-  (require 'rng-valid)
-  
-  ;; Our stuff
-  (require 'ce-macros)
-  (require 'ce-utils)
-  (require 'ce-entities))
+(require 'cl)
+(require 'nxml-mode)
+(require 'rng-valid)
+
+;; Our stuff
+(require 'ce-macros)
+(require 'ce-utils)
+(require 'ce-entities)
 
 (declare-function rng-validate-mode "rng-valid.el")
 

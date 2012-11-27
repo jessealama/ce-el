@@ -6,6 +6,56 @@
 (require 'ce-entities)
 (require 'ce-utils)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Articulated strings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass articulated-string ()
+  ((source
+    :type string
+    :initform ""
+    :initarg :source)))
+
+(defmethod ce-dash-highlight-articulated-string-region ((as articulated-string)
+							begin end)
+  (let* ((string (oref as source))
+	 (len (length string)))
+    (with-output-to-string
+      (loop
+       for i from 0
+       for c across string
+       do
+       (when (= i begin)
+	 (princ "==> "))
+       (cond ((char-equal c ?\n)
+	      (princ "[newline]"))
+	     ((char-equal c ?\t)
+	      (princ "[tab]"))
+	     ((char-equal c ?\s)
+	      (princ "[space]"))
+	     ((char-equal c ?-)
+	      (princ "[hyphen]"))
+	     ((char-equal c ?–)
+	      (princ "[endash]"))
+	     ((char-equal c ?—)
+	      (princ "[emdash]"))
+	     ((char-equal c ?−)
+	      (princ "[minus]"))
+	     ((char-equal c ?[)
+	      (princ "[left-square-bracket"))
+	     ((char-equal c ?])
+	     (princ "[right-square-bracket]"))
+	     (t
+	      (princ (format "[%c]" c))))
+       (when (< (1+ i) len)
+	 (princ " "))
+       (when (= i end)
+	 (princ "<== "))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Dealing with dashes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defconst +ce-dash-hyphen+ ?-)
 (defconst +ce-dash-endash+ ?–)
 (defconst +ce-dash-emdash+ ?—)
@@ -364,52 +414,6 @@ dash-fixing function could be applied."
       occurrence
     (add-text-properties begin (1+ end) (list 'face 'highlight) string)
     string))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Articulated strings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass articulated-string ()
-  ((source
-    :type string
-    :initform ""
-    :initarg :source)))
-
-(defmethod ce-dash-highlight-articulated-string-region ((as articulated-string)
-							begin end)
-  (let* ((string (oref as source))
-	 (len (length string)))
-    (with-output-to-string
-      (loop
-       for i from 0
-       for c across string
-       do
-       (when (= i begin)
-	 (princ "==> "))
-       (cond ((char-equal c ?\n)
-	      (princ "[newline]"))
-	     ((char-equal c ?\t)
-	      (princ "[tab]"))
-	     ((char-equal c ?\s)
-	      (princ "[space]"))
-	     ((char-equal c ?-)
-	      (princ "[hyphen]"))
-	     ((char-equal c ?–)
-	      (princ "[endash]"))
-	     ((char-equal c ?—)
-	      (princ "[emdash]"))
-	     ((char-equal c ?−)
-	      (princ "[minus]"))
-	     ((char-equal c ?[)
-	      (princ "[left-square-bracket"))
-	     ((char-equal c ?])
-	     (princ "[right-square-bracket]"))
-	     (t
-	      (princ (format "[%c]" c))))
-       (when (< (1+ i) len)
-	 (princ " "))
-       (when (= i end)
-	 (princ "<== "))))))
 
 (provide 'ce-dash)
 

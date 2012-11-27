@@ -92,9 +92,16 @@
 		(len (length string)))
 	    (while occurrence
 	      (let ((new-string (ce-dash-fix-dash-occurrence edited-string occurrence)))
-		(setf edited-string new-string
-		      end (or (mismatch edited-string new-string) len))
-		(setf occurrence (ce-dash-next-dash-occurrence edited-string (1+ end)))))
+		(cond ((stringp new-string)
+		       (setf edited-string new-string
+			     end (min (or (mismatch edited-string new-string) len)
+				      end))
+		       (setf occurrence (ce-dash-next-dash-occurrence edited-string
+								      (1+ end))))
+		      ((null new-string) ;; no edit was made
+		       (incf end)
+		       (setf occurrence (ce-dash-next-dash-occurrence edited-string
+								      (1+ end)))))))
 	    edited-string))
       string)))
 
@@ -205,6 +212,7 @@ be displayed is generally two times the value of this variable."
 	    (let ((window (substring string 0 (+ dash-end 2))))
 	      (string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
 	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
+	    (message "minus window: '%s'" window)
 	    (or (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)
 		(string-match "^[^[:space:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window))))))))
 
@@ -311,30 +319,29 @@ be displayed is generally two times the value of this variable."
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns
 an edited copy of STRING."
   (let ((fixers (ce-dash-applicable-dash-fixers string occurrence)))
-    (if fixers
-	(if (rest fixers)
-	    (let ((names (mapcar (lambda (fixer) (oref fixer name)) fixers)))
-	      (let ((prompt (with-output-to-string
-			      (loop
-			       initially
-			       (princ (ce-dash-elide-around-occurrence string occurrence))
-			       (terpri)
-			       (terpri)
-			       with num-names = (length names)
-			       for i from 1 upto num-names
-			       for name in names
-			       do
-			       (princ (format "(%d) %s" i name))
-			       (if (< i num-names)
-				   (princ "; ")
-				 (princ ": "))))))
-		(let ((response (read-from-minibuffer prompt)))
-		  (let ((n (string-to-number response)))
-		    (let ((dash-fixer (nth (1- n) fixers)))
-		      (funcall (oref dash-fixer fixer) string occurrence))))))
-	  (let ((dash-fixer (first fixers)))
-	    (funcall (oref dash-fixer fixer) string occurrence)))
-      string)))
+    (when fixers
+      (if (rest fixers)
+	  (let ((names (mapcar (lambda (fixer) (oref fixer name)) fixers)))
+	    (let ((prompt (with-output-to-string
+			    (loop
+			     initially
+			     (princ (ce-dash-elide-around-occurrence string occurrence))
+			     (terpri)
+			     (terpri)
+			     with num-names = (length names)
+			     for i from 1 upto num-names
+			     for name in names
+			     do
+			     (princ (format "(%d) %s" i name))
+			     (if (< i num-names)
+				 (princ "; ")
+			       (princ ": "))))))
+	      (let ((response (read-from-minibuffer prompt)))
+		(let ((n (string-to-number response)))
+		  (let ((dash-fixer (nth (1- n) fixers)))
+		    (funcall (oref dash-fixer fixer) string occurrence))))))
+	(let ((dash-fixer (first fixers)))
+	  (funcall (oref dash-fixer fixer) string occurrence))))))
 
 (defun ce-dash-mark-ambiguous-occurrence (string occurrence)
   "Indicate that the region of STRING delimited by the dash

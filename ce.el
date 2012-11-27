@@ -45,21 +45,23 @@
 
 ;;; Our own splitoff packages
 
-(eval-when-compile
-  (defconst +ce-packages+
-    (list 'ce-macros
-	  'ce-entries
-	  'ce-quotes
-	  'ce-spell
-	  'ce-xhtml
-	  'ce-dash
-	  'ce-validate
-	  'ce-entities)))
+(defconst +ce-packages+
+  (list 'ce-macros
+	'ce-entries
+	'ce-quotes
+	'ce-spell
+	'ce-xhtml
+	'ce-dash
+	'ce-validate
+	'ce-entities))
 
-(eval-when-compile
-  (dolist (package +ce-packages+)
-    (require package)))
+(dolist (package +ce-packages+)
+  (require package))
 
+(declare-function ce-validate "ce-validate.el")
+(declare-function keep-evaluating "ce-macros.el")
+(declare-function ce-quote-fix-quotes "ce-quotes.el")
+(declare-function ce-spell-check "ce-spell.el")
 
 ;;; User variables and customization
 

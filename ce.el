@@ -147,7 +147,8 @@ Encyclopedia of Philosophy."
 
 (defun ce-initialize ()
   (message "Initializing CE-mode...")
-  ;; do stuff here
+  (dolist (package +ce-packages+)
+    (require package))
   (message "Initializing CE-mode...done."))
 
 (defun ce-reload (&optional recompile)

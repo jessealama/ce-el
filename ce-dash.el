@@ -287,9 +287,10 @@ be displayed is generally two times the value of this variable."
       (unless (and (< dash-end len)
 	       (<= 0 dash-begin))
 	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len))
-      (let* ((highlighted-string (ce-dash-highlight-string-region string
-								  dash-begin
-								  dash-end))
+      (let* ((as (articulated-string "as" :source string))
+	     (highlighted-string (ce-dash-highlight-articulated-string-region as
+									      dash-begin
+									      dash-end))
 	     (string-window-padding *ce-dash-preview-window-padding*)
 	     (pos-before-window (- dash-begin string-window-padding))
 	     (pos-after-window (+ dash-end string-window-padding)))
@@ -318,11 +319,12 @@ an edited copy of STRING."
 			       initially
 			       (princ (ce-dash-elide-around-occurrence string occurrence))
 			       (terpri)
+			       (terpri)
 			       with num-names = (length names)
 			       for i from 1 upto num-names
 			       for name in names
 			       do
-			       (princ (format "[%d] %s" i name))
+			       (princ (format "(%d) %s" i name))
 			       (if (< i num-names)
 				   (princ "; ")
 				 (princ ": "))))))
@@ -351,6 +353,48 @@ dash-fixing function could be applied."
       occurrence
     (add-text-properties begin (1+ end) (list 'face 'highlight) string)
     string))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Articulated strings
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defclass articulated-string ()
+  ((source
+    :type string
+    :initform ""
+    :initarg :source)))
+
+(defmethod ce-dash-highlight-articulated-string-region ((as articulated-string)
+							begin end)
+  (let* ((string (oref as source))
+	 (len (length string)))
+    (with-output-to-string
+      (loop
+       for i from 0
+       for c across string
+       do
+       (when (= i begin)
+	 (princ "==> "))
+       (cond ((char-equal c ?\n)
+	      (princ "[newline]"))
+	     ((char-equal c ?\t)
+	      (princ "[tab]"))
+	     ((char-equal c ?\s)
+	      (princ "[space]"))
+	     ((char-equal c ?-)
+	      (princ "[hyphen]"))
+	     ((char-equal c ?–)
+	      (princ "[endash]"))
+	     ((char-equal c ?—)
+	      (princ "[emdash]"))
+	     ((char-equal c ?−)
+	      (princ "[minus]"))
+	     (t
+	      (princ (format "[%c]" c))))
+       (when (< (1+ i) len)
+	 (princ " "))
+       (when (= i end)
+	 (princ "<== "))))))
 
 (provide 'ce-dash)
 

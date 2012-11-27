@@ -389,6 +389,10 @@ dash-fixing function could be applied."
 	      (princ "[emdash]"))
 	     ((char-equal c ?−)
 	      (princ "[minus]"))
+	     ((char-equal c ?[)
+	      (princ "[left-square-bracket"))
+	     ((char-equal c ?])
+	     (princ "[right-square-bracket]"))
 	     (t
 	      (princ (format "[%c]" c))))
        (when (< (1+ i) len)

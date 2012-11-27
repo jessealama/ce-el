@@ -53,6 +53,7 @@
 	  'ce-spell
 	  'ce-xhtml
 	  'ce-dash
+	  'ce-validate
 	  'ce-entities))
   (dolist (package +ce-packages+)
     (require package)))

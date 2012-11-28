@@ -150,7 +150,7 @@
 	  (let ((end dash-end)
 		(edited-string (copy-seq string))
 		(len (length string))
-		(num-dashes (ce-dash-count-dashes-in-string string))
+		(num-dashes (ce-dash-count-dash-occurrences-in-string string))
 		(i 0))
 	    (while (and occurrence (< i num-dashes))
 	      (let ((new-string (ce-dash-fix-dash-occurrence edited-string occurrence)))

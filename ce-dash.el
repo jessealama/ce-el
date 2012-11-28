@@ -88,9 +88,6 @@
 (defun ce-dash-string-contains-dash (string)
   (not (null (string-match-p +ce-dash-dash-regexp+ string))))
 
-(defun ce-dash-count-dashes-in-string (string)
-  (count-matches +ce-dash-dash-regexp+ string))
-
 (defun ce-dash-position-of-dash (string &optional begin)
   (when (null begin)
     (setf begin 0))
@@ -134,6 +131,16 @@
 	  (incf dash-end))
 
 	(cons dash-begin dash-end)))))
+
+(defun ce-dash-count-dash-occurrences-in-string (string)
+  (let ((occurrence (ce-dash-next-dash-occurrence string))
+	(count 0))
+    (while occurrence
+      (incf count)
+      (destructuring-bind (dash-begin . dash-end)
+	  occurrence
+	(setf occurrence (ce-dash-next-dash-occurrence string (1+ dash-end)))))
+    count))
 
 (defun ce-dash-inspect-dashes-in-string (string)
   (let ((occurrence (ce-dash-next-dash-occurrence string)))

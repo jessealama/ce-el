@@ -88,6 +88,9 @@
 (defun ce-dash-string-contains-dash (string)
   (not (null (string-match-p +ce-dash-dash-regexp+ string))))
 
+(defun ce-dash-count-dashes-in-string (string)
+  (count-matches +ce-dash-dash-regexp+ string))
+
 (defun ce-dash-position-of-dash (string &optional begin)
   (when (null begin)
     (setf begin 0))

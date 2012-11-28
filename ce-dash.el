@@ -142,8 +142,10 @@
 	    occurrence
 	  (let ((end dash-end)
 		(edited-string (copy-seq string))
-		(len (length string)))
-	    (while occurrence
+		(len (length string))
+		(num-dashes (ce-dash-count-dashes-in-string string))
+		(i 0))
+	    (while (and occurrence (< i num-dashes))
 	      (let ((new-string (ce-dash-fix-dash-occurrence edited-string occurrence)))
 		(cond ((stringp new-string)
 		       (setf edited-string new-string
@@ -154,7 +156,8 @@
 		      ((null new-string) ;; no edit was made
 		       (incf end)
 		       (setf occurrence (ce-dash-next-dash-occurrence edited-string
-								      (1+ end)))))))
+								      (1+ end))))))
+	      (incf i))
 	    edited-string))
       string)))
 

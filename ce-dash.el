@@ -145,9 +145,9 @@
 		(cond ((stringp new-string)
 		       (setf edited-string new-string
 			     end (min (or (mismatch edited-string new-string) len)
-				      end))
+				      (1+ end)))
 		       (setf occurrence (ce-dash-next-dash-occurrence edited-string
-								      (1+ end))))
+								      end)))
 		      ((null new-string) ;; no edit was made
 		       (incf end)
 		       (setf occurrence (ce-dash-next-dash-occurrence edited-string

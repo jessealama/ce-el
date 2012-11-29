@@ -197,6 +197,7 @@
     (erase-buffer)
     (insert new-contents)
     (goto-char point)
+    (message "All dashes have been inspected.")
     t))
 
 (defcustom *ce-dash-preview-window-padding* 25

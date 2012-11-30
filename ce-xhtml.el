@@ -121,18 +121,20 @@ The error was:
 		 element
 	       (when (string= name "html")
 		 (princ +xhtml-1.0-transitional-doctype+)
-		 (terpri)))
-	     (with-output-to-string
+		 (terpri))
 	       (princ "<")
-	       (princ name)
-	       (dolist (attribute attributes)
-		 (princ " ")
-		 (princ (ce-xhtml-render-attribute-and-value attribute)))
-	       (princ ">"))
-	     (princ (ce-xhtml-render-tag element attributes))
-	     (dolist (child children)
-	       (princ (ce-xhtml-render-nxml-thing child)))
-	     (princ (ce-xhtml-render-closing-tag element)))))
+	       (princ name))
+	     (dolist (attribute attributes)
+	       (princ " ")
+	       (princ (ce-xhtml-render-attribute-and-value attribute)))
+	     (cond (children
+		    (princ ">")
+		    ;; (princ (ce-xhtml-render-tag element attributes))
+		    (dolist (child children)
+		      (princ (ce-xhtml-render-nxml-thing child)))
+		    (princ (ce-xhtml-render-closing-tag element)))
+		   (t
+		    (princ "/>"))))))
 	(t
 	 (error "Unable to render the nXML thing
 

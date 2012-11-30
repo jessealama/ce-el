@@ -117,6 +117,18 @@ The error was:
 	 (destructuring-bind (element attributes . children)
 	     thing
 	   (with-output-to-string
+	     (destructuring-bind (namespace . name)
+		 element
+	       (when (string= name "html")
+		 (princ +xhtml-1.0-transitional-doctype+)
+		 (terpri)))
+	     (with-output-to-string
+	       (princ "<")
+	       (princ name)
+	       (dolist (attribute attributes)
+		 (princ " ")
+		 (princ (ce-xhtml-render-attribute-and-value attribute)))
+	       (princ ">"))
 	     (princ (ce-xhtml-render-tag element attributes))
 	     (dolist (child children)
 	       (princ (ce-xhtml-render-nxml-thing child)))

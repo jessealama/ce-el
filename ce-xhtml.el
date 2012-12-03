@@ -383,6 +383,21 @@ We start counting at 1, not 0."
      finally
      (return nil))))
 
+(defun ce-xhtml-comments-as-paragraphs ()
+  "Replace all named XHTML entities by their decimal character reference equivalents."
+  (interactive)
+  (ensure-nxml-mode)
+  (foreach-xml-token
+   (when (eq current-xml-token 'comment)
+     (let ((data (buffer-substring-no-properties begin end)))
+       (cond ((string-match "^<!--\\\(.*\\\)-->$" data)
+	      (let ((comment (match-string-no-properties 1 data)))
+		(delete-region begin end)
+		(insert (format "<p class=\"comment\">%s</p>" comment))
+		(setf end (point))))
+	     (t
+	      (error "We found a comment that does not match our comment regular expression.")))))))
+
 (provide 'ce-xhtml)
 
 ;; Local Variables:

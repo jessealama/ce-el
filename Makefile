@@ -69,15 +69,9 @@ install: $(elcs) $(els)
 uninstall:
 	rm -Rf $(install-dir)
 
-clean: clean-emacs-backups clean-compiled-files clean-generated-dependencies
-
-clean-emacs-backups:
+clean:
 	rm -f $(emacs-backups)
-
-clean-compiled-files:
 	rm -f $(elcs)
-
-clean-generated-dependencies:
 	rm -f $(el-deps)
 
 -include $(el-deps)

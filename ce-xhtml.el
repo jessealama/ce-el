@@ -124,17 +124,24 @@ The error was:
 		 (terpri))
 	       (princ "<")
 	       (princ name))
-	     (dolist (attribute attributes)
-	       (princ " ")
-	       (princ (ce-xhtml-render-attribute-and-value attribute)))
-	     (cond (children
-		    (princ ">")
-		    ;; (princ (ce-xhtml-render-tag element attributes))
-		    (dolist (child children)
-		      (princ (ce-xhtml-render-nxml-thing child)))
-		    (princ (ce-xhtml-render-closing-tag element)))
+	     (cond ((and (string= name "p")
+			 (find (cons "class" "comment") attributes :test 'eql)
+			 children
+			 (stringp (first children))
+			 (not (rest children)))
+		    (princ (format "<!--%s-->" (first children))))
 		   (t
-		    (princ "/>"))))))
+		    (dolist (attribute attributes)
+		      (princ " ")
+		      (princ (ce-xhtml-render-attribute-and-value attribute)))
+		    (cond (children
+			   (princ ">")
+			   ;; (princ (ce-xhtml-render-tag element attributes))
+			   (dolist (child children)
+			     (princ (ce-xhtml-render-nxml-thing child)))
+			   (princ (ce-xhtml-render-closing-tag element)))
+			  (t
+			   (princ "/>"))))))))
 	(t
 	 (error "Unable to render the nXML thing
 

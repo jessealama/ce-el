@@ -181,7 +181,8 @@
 	 (point (point)))
     (with-temp-file temp-file
       (insert current-contents)
-      (ce-entities-resolve-named-entities-decimally))
+      (ce-entities-resolve-named-entities-decimally)
+      (ce-xhtml-comments-as-paragraphs))
     (let ((tree (condition-case nxml-parse-error
 		    (nxml-parse-file temp-file)
 		  (error

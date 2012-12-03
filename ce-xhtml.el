@@ -124,7 +124,7 @@ The error was:
 		 (terpri))
 	       (princ "<")
 	       (princ name))
-	     (cond ((and (string= name "p")
+	     (cond ((and (string= (cdr element) "p")
 			 (find (cons "class" "comment") attributes :test 'eql)
 			 children
 			 (stringp (first children))

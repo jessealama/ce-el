@@ -312,6 +312,88 @@ be displayed is generally two times the value of this variable."
 	      (substring string 0 dash-begin)
 	      (substring string (1+ dash-end))))))
 
+(defgeneric ce-dash-word-before (string position))
+
+(defmethod ce-dash-word-before :around (string position)
+  (unless (stringp string)
+    (error "First argument of ce-dash-word-before should be a string."))
+  (let ((len (length string)))
+    (cond ((zerop len)
+	   (error "Cannot look for words inside the empty string."))
+	  ((integerp position)
+	   (error "Second argument of ce-dash-word-before should be a number."))
+	  ((< position 0)
+	   (error "Second argument of ce-dash-word-before should not be negative."))
+	  ((> (1+ position) len)
+	   (error "Second argument (%d) of ce-dash-word-before exceeds the length of the string%c%c%s%c" position ?\n ?\n string ?\n))
+	  (t
+	   (call-next-method)))))
+
+(defmethod ce-dash-word-before (string position)
+  (let ((up-to-position (substring string 0 (1+ position))))
+    (let ((no-newlines (substitute ?\  ?\n up-to-position)))
+      (cond ((string-match "^[[:alnum:]]+$" no-newlines)
+	   no-newlines)
+	  ((string-match "[^[:alnum:]]\\([[:alnum:]]+\\)$" no-newlines)
+	   (match-string-no-properties 1 no-newlines))
+	  (t
+	   (error "Unable to find a word in%c%c%s%c%cprior to position %d." ?\n ?\n string ?\n ?\n position))))))
+
+(defun ce-dash-exists-word-after (string position)
+  (not (entirely-whitespace (substring string 0 position))))
+
+(defun ce-dash-exists-word-before (string position)
+  (not (entirely-whitespace (substring string position))))
+
+(defgeneric ce-dash-word-after (string position))
+
+(defmethod ce-dash-word-after :around (string position)
+  (unless (stringp string)
+    (error "First argument of ce-dash-word-after should be a string."))
+  (let ((len (length string)))
+    (cond ((zerop len)
+	   (error "Cannot look for words inside the empty string."))
+	  ((integerp position)
+	   (error "Second argument of ce-dash-word-after should be a number."))
+	  ((< position 0)
+	   (error "Second argument of ce-dash-word-after should not be negative."))
+	  ((> (1+ position) len)
+	   (error "Second argument (%d) of ce-dash-word-after exceeds the length of the string%c%c%s%c" position ?\n ?\n string ?\n))
+	  ((= (1+ position) len)
+	   (error "Second argument (%d) of ce-dash-word-after is equal to the length of the string%c%c%s%c" position ?\n ?\n string ?\n))
+	  (t
+	   (call-next-method)))))
+
+(defmethod ce-dash-word-after (string position)
+  (let ((after-position (substring string (1+ position))))
+    (let ((no-newlines (substitute ?\ ?\n after-position)))
+      (when (string-match "^[[:space:]]*$" no-newlines)
+	(error "The string%c%c%s%c%c after position %d is nothing but whitespace." ?\n ?\n string ?\n ?\n position))
+      (cond ((string-match "^[[:alnum:]]+$" no-newlines)
+	     no-newlines)
+	    (t
+	     (string-match "\\([[:alnum:]]+\\)[[:space:]]" no-newlines)
+	     (match-string-no-properties 1 no-newlines))))))
+
+(defun ce-dash-roman-numeral-p (string)
+  (unless (stringp string)
+    (error "Only strings can be Roman numerals."))
+  (or (string-match "^[ivlxcm]+$" string)
+      (string-match "^[IVLXCM]+$" string)))
+
+(defun ce-dash-roman-numeral-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((len (length string)))
+      (when (< (1+ dash-end) len)
+	(when (> dash-begin 0)
+	  (when (ce-dash-exists-word-after string (1+ dash-end))
+	    (when (ce-dash-exists-word-before string (1- dash-end))
+	      (let ((previous-word (ce-dash-word-before string (1- dash-begin)))
+		    (next-word (ce-dash-word-after string (1+ dash-end))))
+		(and (ce-dash-roman-numeral-p previous-word)
+		     (ce-dash-roman-numeral-p next-word))))))))))
+
 (defclass dash-fixer ()
   ((test
     :initarg :test)

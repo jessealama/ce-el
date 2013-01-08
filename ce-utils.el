@@ -46,6 +46,9 @@
       (let ((no-tabs (substitute ?\s ?\t no-newlines)))
 	(ce-dash-squeeze-spaces no-tabs)))))
 
+(defun entirely-whitespace (string)
+  (not (null (string-match "^[[:space:]]*$" string))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lists
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

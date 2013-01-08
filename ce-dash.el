@@ -159,7 +159,7 @@
 			     end (min (or (mismatch edited-string new-string) len)
 				      (1+ end)))
 		       (setf occurrence (ce-dash-next-dash-occurrence edited-string
-								      end)))
+								      (1+ end))))
 		      ((null new-string) ;; no edit was made
 		       (incf end)
 		       (setf occurrence (ce-dash-next-dash-occurrence edited-string

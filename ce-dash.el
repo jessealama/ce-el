@@ -424,10 +424,18 @@ be displayed is generally two times the value of this variable."
    :fixer 'ce-dash-make-a-minus
    :name "Minus"))
 
+(defconst +ce-dash-roman-numeral-range-fixer+
+  (dash-fixer
+   "Roman numeral range"
+   :test 'ce-dash-roman-numeral-range
+   :fixer 'ce-dash-fix-numeric-range
+   :name "Roman numeral range"))
+
 (defconst +ce-dash-fixers+
   (list +ce-dash-numeric-range-fixer+
 	+ce-dash-emdash-fixer+
-	+ce-dash-minus-sign-fixer+))
+	+ce-dash-minus-sign-fixer+
+	+ce-dash-roman-numeral-range-fixer+))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)
   (remove-if-not (lambda (dash-fixer)

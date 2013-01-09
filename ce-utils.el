@@ -49,6 +49,23 @@
 (defun entirely-whitespace (string)
   (not (null (string-match "^[[:space:]]*$" string))))
 
+(defun position-of-substring-in-string (string substring)
+  (let ((substring-len (length substring)))
+    (loop
+     for i from 0 upto (1- (length string))
+     for window = (substring string i (+ i substring-len))
+     when (string= window substring) do (return i)
+     finally (return nil))))
+
+(defun position-of-substring-in-string-from-end (string substring)
+  (let ((substring-len (length substring))
+	(len (length string)))
+    (loop
+     for i from (1- len) downto 0
+     for window = (substring string i (min len (+ i substring-len)))
+     when (string= window substring) do (return i)
+     finally (return nil))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lists
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

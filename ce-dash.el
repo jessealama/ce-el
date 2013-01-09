@@ -371,9 +371,10 @@ be displayed is generally two times the value of this variable."
 	(error "The string%c%c%s%c%c after position %d is nothing but whitespace." ?\n ?\n string ?\n ?\n position))
       (cond ((string-match "^[[:alnum:]]+$" no-newlines)
 	     no-newlines)
+	    ((string-match "\\([[:alnum:]]+\\)[^[:alnum:]]" no-newlines)
+	     (match-string-no-properties 1 no-newlines))
 	    (t
-	     (string-match "\\([[:alnum:]]+\\)[[:space:]]" no-newlines)
-	     (match-string-no-properties 1 no-newlines))))))
+	     (error "Unable to find the word in%c%c%s%c%cafter position %d." ?\n ?\n string ?\n ?\n position))))))
 
 (defun ce-dash-roman-numeral-p (string)
   (unless (stringp string)

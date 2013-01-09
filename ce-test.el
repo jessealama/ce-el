@@ -10,7 +10,7 @@
   "Friedrich Ludwig Gottlob Frege (1848–1925) was a German")
 
 (defun test-dashes (to-inspect answer)
-  (should (string= (ce-dash-inspect-dashes-in-string to-inspect) answer)))
+  (should (null (mismatch (ce-dash-inspect-dashes-in-string to-inspect) answer))))
 
 (ert-deftest endash-test-1 ()
   (test-dashes "Friedrich Ludwig Gottlob Frege (1848 - 1925) was a German"

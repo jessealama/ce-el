@@ -390,7 +390,7 @@ be displayed is generally two times the value of this variable."
 	(when (> dash-begin 0)
 	  (when (ce-dash-exists-word-after string (1+ dash-end))
 	    (when (ce-dash-exists-word-before string (1- dash-end))
-	      (let ((previous-word (ce-dash-word-before string (1- dash-begin)))
+	      (let ((previous-word (ce-dash-word-before string dash-begin))
 		    (next-word (ce-dash-word-after string dash-end)))
 		(and (ce-dash-roman-numeral-p previous-word)
 		     (ce-dash-roman-numeral-p next-word))))))))))

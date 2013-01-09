@@ -21,19 +21,19 @@
 	       +test-answer-1+))
 
 (ert-deftest endash-test-3 ()
-  (test-dashes "Friedrich Ludwig Gottlob Frege (1848 &ndash; 1925) was a German"
+  (test-dashes "Friedrich Ludwig Gottlob Frege (1848 – 1925) was a German"
 	       +test-answer-1+))
 
 (ert-deftest endash-test-4 ()
-  (test-dashes "Friedrich Ludwig Gottlob Frege (1848&ndash;1925) was a German"
+  (test-dashes "Friedrich Ludwig Gottlob Frege (1848–1925) was a German"
 	       +test-answer-1+))
 
 (ert-deftest endash-test-5 ()
-  (test-dashes "Friedrich Ludwig Gottlob Frege (1848 &mdash; 1925) was a German"
+  (test-dashes "Friedrich Ludwig Gottlob Frege (1848 — 1925) was a German"
 	       +test-answer-1+))
 
 (ert-deftest endash-test-6 ()
-  (test-dashes "Friedrich Ludwig Gottlob Frege (1848&mdash;1925) was a German"
+  (test-dashes "Friedrich Ludwig Gottlob Frege (1848—1925) was a German"
 	       +test-answer-1+))
 
 (ert-deftest endash-test-7 ()
@@ -86,27 +86,27 @@
 	       +test-answer-2+))
 
 (ert-deftest emdash-test-5 ()
-  (test-dashes "mathematician, logician, and philosopher &ndash; who worked at the University"
+  (test-dashes "mathematician, logician, and philosopher – who worked at the University"
 	       +test-answer-2+))
 
 (ert-deftest emdash-test-6 ()
-  (test-dashes "mathematician, logician, and philosopher&ndash;who worked at the University"
+  (test-dashes "mathematician, logician, and philosopher–who worked at the University"
 	       +test-answer-2+))
 
 (ert-deftest emdash-test-7 ()
-  (test-dashes "mathematician, logician, and philosopher&mdash;who worked at the University"
+  (test-dashes "mathematician, logician, and philosopher—who worked at the University"
 	       +test-answer-2+))
 
 ;; dashes and whitespace
 
 (ert-deftest whitespace-test-1 ()
   (test-dashes "Another type of emdash to test is in the context of a paragraph.  In
-particular, there are cases with emdashes set at the end of a line &mdash;
+particular, there are cases with emdashes set at the end of a line —
 in which case there is a hard return."
 	       "Another type of emdash to test is in the context of a paragraph.  In
 particular, there are cases with emdashes set at the end of a line—in which case there is a hard return."))
 
 (ert-deftest whitespace-test-2 ()
   (test-dashes "Here is a sentence
-&mdash; and there is the emdash at the beginning of the line."
+— and there is the emdash at the beginning of the line."
 	       "Here is a sentence—and there is the emdash at the beginning of the line."))

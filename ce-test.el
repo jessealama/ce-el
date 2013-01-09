@@ -1,5 +1,8 @@
 
 (require 'ert)
+(require 'cl)
+
+(require 'ce-dash)
 
 ;;; endashes
 

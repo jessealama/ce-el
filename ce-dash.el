@@ -289,8 +289,15 @@ Typical example: \"25a-35b\"."
   (destructuring-bind (dash-begin . dash-end)
       occurrence
     (let ((before (ce-dash-word-before string dash-begin))
-	  (after (ce-dash-word-after string dash-end)))
-      (format "%s–%s" before after))))
+	  (after (ce-dash-word-after string dash-end))
+	  (up-to-begin (substring string 0 dash-begin))
+	  (after-end (substring string (1+ dash-end))))
+      (let ((pos-of-before (position-of-substring-in-string-from-end up-to-begin before))
+	    (pos-of-after (position-of-substring-in-string string after)))
+	(let ((before-before (substring string 0 pos-of-before))
+	      (after-after (substring string (min (length string)
+						  (+ pos-of-after (length after))))))
+	  (format "%s%s–%s%s" before-before before after after-after))))))
 
 (defun ce-dash-looks-like-a-minus (string occurrence)
   (let ((len (length string)))

@@ -6,19 +6,7 @@ unexport EMACSLOADPATH # evil emacs!
 
 project-prefix := ce
 
-elisp-files := $(project-prefix)-entries \
-               $(project-prefix)-macros \
-               $(project-prefix)-quotes \
-               $(project-prefix)-spell \
-               $(project-prefix)-tidy \
-               $(project-prefix)-unadorned \
-               $(project-prefix)-validate \
-               $(project-prefix)-dash \
-               $(project-prefix)-utils \
-               $(project-prefix)-entities \
-               $(project-prefix)-xhtml \
-               $(project-prefix)-requires \
-               $(project-prefix)
+elisp-files := $(basename $(wildcard $(project-prefix)-*.el))
 perl-scripts := validate
 
 els := $(addsuffix .el,$(elisp-files))

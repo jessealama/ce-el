@@ -268,6 +268,30 @@ be displayed is generally two times the value of this variable."
 	  (after-digit (substring string (+ dash-end 2))))
       (format "%s%c–%c%s" before-digit digit-before-dash digit-after-dash after-digit))))
 
+(defun ce-dash-numeric-range+letter-p (string occurrence)
+  "Does the dash occurrence OCCURRENCE in STRING look like a
+numeric range where the 'numbers' end in characters?
+
+Typical example: \"25a-35b\"."
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  (when (> len 4) ;; shortest possible example looks like "5a-6b"
+	    (let ((before (ce-dash-word-before string dash-begin))
+		  (after (ce-dash-word-after string dash-end))
+		  (pattern "[[:digit:]]+[[:alpha:]]"))
+	      (and (string-match pattern before)
+		   (string-match pattern after)))))))))
+
+(defun ce-dash-fix-numeric+letter-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (ce-dash-word-before string dash-begin))
+	  (after (ce-dash-word-after string dash-end)))
+      (format "%s–%s" before after))))
+
 (defun ce-dash-looks-like-a-minus (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)
@@ -330,7 +354,7 @@ be displayed is generally two times the value of this variable."
 	   (call-next-method)))))
 
 (defmethod ce-dash-word-before (string position)
-  (let ((up-to-position (substring string 0 (1+ position))))
+  (let ((up-to-position (substring string 0 position)))
     (let ((no-newlines (substitute ?\  ?\n up-to-position)))
       (cond ((string-match "^[[:alnum:]]+$" no-newlines)
 	   no-newlines)
@@ -411,6 +435,13 @@ be displayed is generally two times the value of this variable."
    :fixer 'ce-dash-fix-numeric-range
    :name "Numeric range"))
 
+(defconst +ce-dash-numeric-range+letter-fixer+
+  (dash-fixer
+   "Numeric range, where \"numbers\" end with letters, such as \"245a\"."
+   :test 'ce-dash-numeric-range+letter-p
+   :fixer 'ce-dash-fix-numeric+letter-range
+   :name "Numeric range (\"numbers\" end with letters)"))
+
 (defconst +ce-dash-emdash-fixer+
   (dash-fixer
    "Emdash"
@@ -434,6 +465,7 @@ be displayed is generally two times the value of this variable."
 
 (defconst +ce-dash-fixers+
   (list +ce-dash-numeric-range-fixer+
+	+ce-dash-numeric-range+letter-fixer+
 	+ce-dash-emdash-fixer+
 	+ce-dash-minus-sign-fixer+
 	+ce-dash-roman-numeral-range-fixer+))

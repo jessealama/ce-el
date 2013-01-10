@@ -299,6 +299,63 @@ Typical example: \"25a-35b\"."
 						  (+ pos-of-after (length after))))))
 	  (format "%s%s–%s%s" before-before before after after-after))))))
 
+(defun ce-dash-parenthesized-numeric-range-p (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  (let ((before (substring string 0 dash-begin))
+		(after (substring string (1+ dash-end)))
+		(pattern "[(][[:digit:]]+[)]"))
+	    (and (string-match (format "%s$" pattern) before)
+		 (string-match (format "^%s" pattern) after))))))))
+
+(defun ce-dash-fix-parenthesized-numeric-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s–%s" before after))))
+
+(defun ce-dash-parenthesized-roman-numeric-range-p (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  (let ((before (substring string 0 dash-begin))
+		(after (substring string (1+ dash-end)))
+		(pattern "[(][ivxmcIVMXC]+[)]"))
+	    (and (string-match (format "%s$" pattern) before)
+		 (string-match (format "^%s" pattern) after))))))))
+
+(defun ce-dash-fix-parenthesized-roman-numeric-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s–%s" before after))))
+
+(defun ce-dash-parenthesized-alphabetic-range-p (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  (let ((before (substring string 0 dash-begin))
+		(after (substring string (1+ dash-end)))
+		(pattern "[(][[:alpha:]][)]"))
+	    (and (string-match (format "%s$" pattern) before)
+		 (string-match (format "^%s" pattern) after))))))))
+
+(defun ce-dash-fix-parenthesized-alphabetic-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s–%s" before after))))
+
 (defun ce-dash-looks-like-a-minus (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)
@@ -363,9 +420,9 @@ Typical example: \"25a-35b\"."
 (defmethod ce-dash-word-before (string position)
   (let ((up-to-position (substring string 0 position)))
     (let ((no-newlines (substitute ?\  ?\n up-to-position)))
-      (cond ((string-match "^[[:alnum:]]+$" no-newlines)
+      (cond ((string-match "^[()[:alnum:]]+$" no-newlines)
 	   no-newlines)
-	  ((string-match "[^[:alnum:]]\\([[:alnum:]]+\\)$" no-newlines)
+	  ((string-match "[^()[:alnum:]]\\([()[:alnum:]]+\\)$" no-newlines)
 	   (match-string-no-properties 1 no-newlines))
 	  (t
 	   (error "Unable to find a word in%c%c%s%c%cprior to position %d." ?\n ?\n string ?\n ?\n position))))))
@@ -470,12 +527,36 @@ Typical example: \"25a-35b\"."
    :fixer 'ce-dash-fix-numeric-range
    :name "Roman numeral range"))
 
+(defconst +ce-dash-parenthesized-numeric-range-fixer+
+  (dash-fixer
+   "Parenthesized numeric range"
+   :test 'ce-dash-parenthesized-numeric-range-p
+   :fixer 'ce-dash-fix-parenthesized-numeric-range
+   :name "Parenthesized numeric range"))
+
+(defconst +ce-dash-parenthesized-roman-numeric-range-fixer+
+  (dash-fixer
+   "Parenthesized Roman numeric range"
+   :test 'ce-dash-parenthesized-roman-numeric-range-p
+   :fixer 'ce-dash-fix-parenthesized-roman-numeric-range
+   :name "Parenthesized Roman numeric range"))
+
+(defconst +ce-dash-parenthesized-alphabetic-range-fixer+
+  (dash-fixer
+   "Parenthesized alphabetic range"
+   :test 'ce-dash-parenthesized-alphabetic-range-p
+   :fixer 'ce-dash-fix-parenthesized-alphabetic-range
+   :name "Parenthesized alphabetic range"))
+
 (defconst +ce-dash-fixers+
   (list +ce-dash-numeric-range-fixer+
 	+ce-dash-numeric-range+letter-fixer+
 	+ce-dash-emdash-fixer+
 	+ce-dash-minus-sign-fixer+
-	+ce-dash-roman-numeral-range-fixer+))
+	+ce-dash-roman-numeral-range-fixer+
+	+ce-dash-parenthesized-numeric-range-fixer+
+	+ce-dash-parenthesized-roman-numeric-range-fixer+
+	+ce-dash-parenthesized-alphabetic-range-fixer+))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)
   (remove-if-not (lambda (dash-fixer)

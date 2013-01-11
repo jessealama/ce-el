@@ -250,6 +250,22 @@ be displayed is generally two times the value of this variable."
     (add-text-properties (- len 2) (- len 1) (list 'face 'trailing-whitespace) new-string)
     new-string))
 
+(defun ce-dash-might-be-an-emdash (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  (let ((window (substring string dash-begin (1+ dash-end))))
+	    (string-match "^[[:space:]]+[-]+[[:space:]]+$" window)))))))
+
+(defun ce-dash-fix-emdash (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s—%s" before after))))
+
 (defun ce-dash-numeric-range-needs-fixing (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)
@@ -385,21 +401,6 @@ Typical example: \"25a-35b\"."
 	      (t
 	       string))))))
 
-(defun ce-dash-multiple-hyphens+space (string occurrence)
-  (destructuring-bind (dash-begin . dash-end)
-      occurrence
-    (let ((fragment (substring string dash-begin (1+ dash-end))))
-      (or (string-match "^[[:space:]]+---*[[:space:]]*$" fragment)
-	  (string-match "^---*[[:space:]]+$" fragment)))))
-
-(defun ce-dash-mdash-it (string occurrence)
-  (destructuring-bind (dash-begin . dash-end)
-      occurrence
-    (let ((fragment (substring string dash-begin (1+ dash-end))))
-      (format "%s—%s"
-	      (substring string 0 dash-begin)
-	      (substring string (1+ dash-end))))))
-
 (defgeneric ce-dash-word-before (string position))
 
 (defmethod ce-dash-word-before :around (string position)
@@ -492,6 +493,13 @@ Typical example: \"25a-35b\"."
     :initarg :name
     :type string)))
 
+(defconst +ce-dash-emdash-fixer+
+  (dash-fixer
+   "Emdash"
+   :test 'ce-dash-might-be-an-emdash
+   :fixer 'ce-dash-fix-emdash
+   :name "Emdash"))
+
 (defconst +ce-dash-numeric-range-fixer+
   (dash-fixer
    "Numeric range"
@@ -505,13 +513,6 @@ Typical example: \"25a-35b\"."
    :test 'ce-dash-numeric-range+letter-p
    :fixer 'ce-dash-fix-numeric+letter-range
    :name "Numeric range (\"numbers\" end with letters)"))
-
-(defconst +ce-dash-emdash-fixer+
-  (dash-fixer
-   "Emdash"
-   :test 'ce-dash-multiple-hyphens+space
-   :fixer 'ce-dash-mdash-it
-   :name "Emdash"))
 
 (defconst +ce-dash-minus-sign-fixer+
   (dash-fixer
@@ -551,12 +552,12 @@ Typical example: \"25a-35b\"."
 (defconst +ce-dash-fixers+
   (list +ce-dash-numeric-range-fixer+
 	+ce-dash-numeric-range+letter-fixer+
-	+ce-dash-emdash-fixer+
 	+ce-dash-minus-sign-fixer+
 	+ce-dash-roman-numeral-range-fixer+
 	+ce-dash-parenthesized-numeric-range-fixer+
 	+ce-dash-parenthesized-roman-numeric-range-fixer+
-	+ce-dash-parenthesized-alphabetic-range-fixer+))
+	+ce-dash-parenthesized-alphabetic-range-fixer+
+	+ce-dash-emdash-fixer+))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)
   (remove-if-not (lambda (dash-fixer)

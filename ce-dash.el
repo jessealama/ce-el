@@ -257,7 +257,7 @@ be displayed is generally two times the value of this variable."
       (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
 	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
 	  (let ((window (substring string dash-begin (1+ dash-end))))
-	    (string-match "^[[:space:]]+[-]+[[:space:]]+$" window)))))))
+	    (string-match "^[[:space:]]+[-–—]+[[:space:]]+$" window)))))))
 
 (defun ce-dash-fix-emdash (string occurrence)
   (destructuring-bind (dash-begin . dash-end)

@@ -47,6 +47,7 @@
 
 (defconst +ce-packages+
   (list 'ce-macros
+	'ce-utils
 	'ce-entries
 	'ce-quotes
 	'ce-spell

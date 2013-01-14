@@ -267,6 +267,26 @@ be displayed is generally two times the value of this variable."
 	  (after (substring string (1+ dash-end))))
       (format "%s—%s" before after))))
 
+(defun ce-dash-endash-should-be-emdash (string occurrence)
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
+	  ;; look at the characters immediately preceding and following the occurrence
+	  (when (= dash-end dash-begin)
+	    (let ((window (substring string
+				     (- dash-begin 1)
+				     (+ dash-end 2))))
+	      (string-match "[[:alpha:]]–[[:alpha:]]" window))))))))
+
+(defun ce-dash-endash->emdash (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s—%s" before after))))
+
 (defun ce-dash-numeric-range-needs-fixing (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)
@@ -501,6 +521,13 @@ Typical example: \"25a-35b\"."
    :fixer 'ce-dash-fix-emdash
    :name "Emdash"))
 
+(defconst +ce-dash-endash-to-emdash-fixer+
+  (dash-fixer
+   "Endash-to-emdash"
+   :test 'ce-dash-endash-should-be-emdash
+   :fixer 'ce-dash-endash->emdash
+   :name "Endash-to-emdash"))
+
 (defconst +ce-dash-numeric-range-fixer+
   (dash-fixer
    "Numeric range"
@@ -558,7 +585,8 @@ Typical example: \"25a-35b\"."
 	+ce-dash-parenthesized-numeric-range-fixer+
 	+ce-dash-parenthesized-roman-numeric-range-fixer+
 	+ce-dash-parenthesized-alphabetic-range-fixer+
-	+ce-dash-emdash-fixer+))
+	+ce-dash-emdash-fixer+
+	+ce-dash-endash-to-emdash-fixer+))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)
   (remove-if-not (lambda (dash-fixer)

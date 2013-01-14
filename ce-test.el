@@ -110,3 +110,7 @@ particular, there are cases with emdashes set at the end of a line—in which ca
   (test-dashes "Here is a sentence
 — and there is the emdash at the beginning of the line."
 	       "Here is a sentence—and there is the emdash at the beginning of the line."))
+
+;; Local Variables:
+;; byte-compile-warnings: (not cl-functions)
+;; End:

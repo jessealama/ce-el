@@ -158,6 +158,7 @@ Encyclopedia of Philosophy."
   (message "Initializing CE-mode...done."))
 
 (defun ce-reload (&optional recompile)
+  "Reload CE mode."
   (interactive)
   (dolist (package +ce-packages+ t)
     (let ((package-el (format "%s.el" package)))

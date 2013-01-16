@@ -424,7 +424,7 @@ Typical example: \"25a-35b\"."
 
 (defgeneric ce-dash-word-before (string position))
 
-(defmethod ce-dash-word-before :around (string position)
+(defmethod ce-dash-word-before :before (string position)
   (unless (stringp string)
     (error "First argument of ce-dash-word-before should be a string."))
   (let ((len (length string)))
@@ -435,9 +435,7 @@ Typical example: \"25a-35b\"."
 	  ((< position 0)
 	   (error "Second argument of ce-dash-word-before should not be negative."))
 	  ((> (1+ position) len)
-	   (error "Second argument (%d) of ce-dash-word-before exceeds the length of the string%c%c%s%c" position ?\n ?\n string ?\n))
-	  (t
-	   (call-next-method)))))
+	   (error "Second argument (%d) of ce-dash-word-before exceeds the length of the string%c%c%s%c" position ?\n ?\n string ?\n)))))
 
 (defmethod ce-dash-word-before (string position)
   (let ((up-to-position (substring string 0 position)))
@@ -457,7 +455,7 @@ Typical example: \"25a-35b\"."
 
 (defgeneric ce-dash-word-after (string position))
 
-(defmethod ce-dash-word-after :around (string position)
+(defmethod ce-dash-word-after :before (string position)
   (unless (stringp string)
     (error "First argument of ce-dash-word-after should be a string."))
   (let ((len (length string)))
@@ -470,9 +468,7 @@ Typical example: \"25a-35b\"."
 	  ((> (1+ position) len)
 	   (error "Second argument (%d) of ce-dash-word-after exceeds the length of the string%c%c%s%c" position ?\n ?\n string ?\n))
 	  ((= (1+ position) len)
-	   (error "Second argument (%d) of ce-dash-word-after is equal to the length of the string%c%c%s%c" position ?\n ?\n string ?\n))
-	  (t
-	   (call-next-method)))))
+	   (error "Second argument (%d) of ce-dash-word-after is equal to the length of the string%c%c%s%c" position ?\n ?\n string ?\n)))))
 
 (defmethod ce-dash-word-after (string position)
   (let ((after-position (substring string (1+ position))))

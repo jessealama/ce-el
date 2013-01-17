@@ -16,14 +16,33 @@
     :initform ""
     :initarg :source)))
 
+(defcustom *ce-dash-string-display-window* 5
+  "The number of characters to display in a string before and after a dash occurrence."
+  :group 'ce)
+
+(defun ce-dash-narrow-string-around (string begin end window)
+  (let ((len (length string)))
+    (let ((window-begin (max 0 (- begin window)))
+	  (window-end (min (1- len) (+ end window))))
+      (let ((region (substring string begin (1+ end))))
+	(let ((before-begin (substring string window-begin begin))
+	      (after-end (substring string (1+ end) (1+ window-end))))
+	  (format "%s%s%s" region before-begin after-end))))))
+
 (defmethod ce-dash-highlight-articulated-string-region ((as articulated-string)
-							begin end)
+							begin end
+							&optional window)
+  (when (null window)
+    (setf window *ce-dash-string-display-window*))
   (let* ((string (oref as source))
-	 (len (length string)))
+	 (len (length string))
+	 (start (max 0 (- begin window)))
+	 (finish (min (1- len) (+ end window))))
+    ;; (setf string (ce-dash-narrow-string-around string begin end window))
     (with-output-to-string
       (loop
-       for i from 0
-       for c across string
+       for i from start upto finish
+       for c = (aref string i)
        do
        (when (= i begin)
 	 (princ "==> "))
@@ -200,14 +219,6 @@
     (goto-char point)
     (message "All dashes have been inspected.")
     t))
-
-(defcustom *ce-dash-preview-window-padding* 25
-  "The number of characters to be displayed before and after an occurrence of a dash.
-
-Don't give this variabe a big value unless you ensure that your
-window width is wide: the overall length of the preview string to
-be displayed is generally two times the value of this variable."
-  :group 'ce)
 
 (defun ce-dash-highlight-string-region (string begin end)
   (let ((adjusted-begin begin)
@@ -648,25 +659,8 @@ Typical example: \"25a-35b\"."
       (unless (and (< dash-end len)
 	       (<= 0 dash-begin))
 	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len))
-      (let* ((as (articulated-string "as" :source string))
-	     (highlighted-string (ce-dash-highlight-articulated-string-region as
-									      dash-begin
-									      dash-end))
-	     (string-window-padding *ce-dash-preview-window-padding*)
-	     (pos-before-window (- dash-begin string-window-padding))
-	     (pos-after-window (+ dash-end string-window-padding)))
-	(if (< dash-begin string-window-padding)
-	    (if (< len (* string-window-padding 2))
-		(ce-dash-append-$-sigil (ce-dash-prepend-^-sigil highlighted-string))
-	      (ce-dash-prepend-^-sigil (format "%s…" (substring highlighted-string
-								0
-								pos-after-window))))
-	  (if (> pos-after-window len)
-	      (ce-dash-append-$-sigil (format "…%s" (substring highlighted-string
-							       pos-before-window)))
-	    (format "…%s…" (substring highlighted-string
-				      pos-before-window
-				      pos-after-window))))))))
+      (let ((as (articulated-string "as" :source string)))
+	(ce-dash-highlight-articulated-string-region as dash-begin dash-end)))))
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns

@@ -267,6 +267,42 @@ be displayed is generally two times the value of this variable."
 	  (after (substring string (1+ dash-end))))
       (format "%s—%s" before after))))
 
+(defun ce-dash-looks-like-a-born/died-range (string occurrence)
+  "To handle cases like \"b. 1987- d. 2012\"."
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
+	(when (< (+ dash-end 2) len) ;; there should be at least a "d" following the dash occurrence
+	  (let ((window (substring string (1- dash-begin) (+ dash-end 2))))
+	    (string-match "[[:digit:]][[:space:]-–—]+[d]" window)))))))
+
+(defun ce-dash-fix-born/died-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s–%s" before after))))
+
+(defun ce-dash-looks-like-a-ce-year-range (string occurrence)
+  "To handle cases like \"6/5 BCE-38/39 CE\"."
+  (let ((len (length string)))
+    (destructuring-bind (dash-begin . dash-end)
+	occurrence
+      (when (> dash-begin 2) ;; there should be at least "CE" before
+			     ;; the dash occurrence
+	(when (< (+ dash-end 2) len) ;; there should be at least a "d"
+				     ;; following the dash occurrence
+	  (let ((window (substring string (- dash-begin 3) (+ dash-end 2))))
+	    (string-match "[C][E][[:space:]-–—]+[[:digit:]]" window)))))))
+
+(defun ce-dash-fix-ce-year-range (string occurrence)
+  (destructuring-bind (dash-begin . dash-end)
+      occurrence
+    (let ((before (substring string 0 dash-begin))
+	  (after (substring string (1+ dash-end))))
+      (format "%s–%s" before after))))
+
 (defun ce-dash-endash-should-be-emdash (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)
@@ -517,6 +553,20 @@ Typical example: \"25a-35b\"."
    :fixer 'ce-dash-fix-emdash
    :name "Emdash"))
 
+(defconst +ce-dash-life-fixer+
+  (dash-fixer
+   "Born/died range"
+   :test 'ce-dash-looks-like-a-born/died-range
+   :fixer 'ce-dash-fix-born/died-range
+   :name "Born/died range"))
+
+(defconst +ce-dash-ce-year-fixer+
+  (dash-fixer
+   "(B)CE year range"
+   :test 'ce-dash-looks-like-a-ce-year-range
+   :fixer 'ce-dash-fix-ce-year-range
+   :name "(B)CE year range"))
+
 (defconst +ce-dash-endash-to-emdash-fixer+
   (dash-fixer
    "Endash-to-emdash"
@@ -582,6 +632,8 @@ Typical example: \"25a-35b\"."
 	+ce-dash-parenthesized-roman-numeric-range-fixer+
 	+ce-dash-parenthesized-alphabetic-range-fixer+
 	+ce-dash-emdash-fixer+
+	+ce-dash-life-fixer+
+	+ce-dash-ce-year-fixer+
 	+ce-dash-endash-to-emdash-fixer+))
 
 (defun ce-dash-applicable-dash-fixers (string occurrence)

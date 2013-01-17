@@ -64,6 +64,18 @@
   (test-dashes "even letter-denoted ranges such as (a)-(d)"
 	       "even letter-denoted ranges such as (a)–(d)"))
 
+(ert-deftest endash-test-14 ()
+  (test-dashes "Politics VII.4.1325b40-1365a5."
+	       "Politics VII.4.1325b40–1365a5."))
+
+(ert-deftest endash-test-15 ()
+  (test-dashes "b. 1987- d. 2012"
+	       "b. 1987–d. 2012"))
+
+(ert-deftest endash-test-16 ()
+  (test-dashes "6/5 BCE-38/39 CE"
+	       "6/5 BCE–38/39 CE"))
+
 ;; emdashes
 
 (defconst +test-answer-2+

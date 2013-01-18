@@ -76,6 +76,10 @@
   (test-dashes "6/5 BCE-38/39 CE"
 	       "6/5 BCE–38/39 CE"))
 
+(ert-deftest endash-test-17 ()
+  (test-dashes "(1a)-(4a)"
+	       "(1a)–(4a)"))
+
 ;; emdashes
 
 (defconst +test-answer-2+

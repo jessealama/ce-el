@@ -62,4 +62,7 @@ clean:
 	rm -f $(elcs)
 	rm -f $(el-deps)
 
+test: $(project-prefix)-test.elc
+	$(emacs) --batch --directory '.' --load $(project-prefix)-test.elc -f ert-run-tests-batch-and-exit
+
 -include $(el-deps)

@@ -345,7 +345,7 @@ Typical example: \"25a-35b\"."
 	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
 	  (let ((before (substring string 0 dash-begin))
 		(after (substring string (1+ dash-end)))
-		(pattern "[(][[:digit:][:alpha:]]+[)]"))
+		(pattern "[(][[:digit:]][[:alpha:]]?+[)]"))
 	    (and (string-match (format "%s$" pattern) before)
 		 (string-match (format "^%s" pattern) after))))))))
 

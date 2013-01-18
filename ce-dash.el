@@ -6,16 +6,6 @@
 (require 'ce-entities)
 (require 'ce-utils)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Articulated strings
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defclass articulated-string ()
-  ((source
-    :type string
-    :initform ""
-    :initarg :source)))
-
 (defcustom *ce-dash-string-display-window* 10
   "The number of characters to display in a string before and after a dash occurrence."
   :group 'ce)

@@ -29,23 +29,19 @@
 	      (after-end (substring string (1+ end) (1+ window-end))))
 	  (format "%s%s%s" region before-begin after-end))))))
 
-(defmethod ce-dash-highlight-articulated-string-region ((as articulated-string)
-							begin end
-							&optional window)
+(defun ce-dash-highlight-string-region (string begin end &optional window)
   (when (null window)
     (setf window *ce-dash-string-display-window*))
-  (let* ((string (oref as source))
-	 (len (length string))
+  (let* ((len (length string))
 	 (start (max 0 (- begin window)))
 	 (finish (min (1- len) (+ end window))))
-    ;; (setf string (ce-dash-narrow-string-around string begin end window))
     (with-output-to-string
       (loop
        for i from start upto finish
        for c = (aref string i)
        do
        (when (= i begin)
-	 (princ "==> "))
+	 (princ "==>"))
        (cond ((char-equal c ?\n)
 	      (princ "[newline]"))
 	     ((char-equal c ?\t)

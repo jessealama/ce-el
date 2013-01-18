@@ -391,7 +391,7 @@ Typical example: \"25a-35b\"."
 	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
 	  (let ((before (substring string 0 dash-begin))
 		(after (substring string (1+ dash-end)))
-		(pattern "[(][[:digit:]]+[)]"))
+		(pattern "[(][[:digit:][:alpha:]]+[)]"))
 	    (and (string-match (format "%s$" pattern) before)
 		 (string-match (format "^%s" pattern) after))))))))
 
@@ -618,7 +618,7 @@ Typical example: \"25a-35b\"."
    "Parenthesized numeric range"
    :test 'ce-dash-parenthesized-numeric-range-p
    :fixer 'ce-dash-fix-parenthesized-numeric-range
-   :name "Parenthesized numeric range"))
+   :name "Parenthesized numeric range (\"number\" may end with letters)"))
 
 (defconst +ce-dash-parenthesized-roman-numeric-range-fixer+
   (dash-fixer

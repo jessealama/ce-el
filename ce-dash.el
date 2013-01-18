@@ -583,7 +583,7 @@ Typical example: \"25a-35b\"."
    "Parenthesized numeric range"
    :test 'ce-dash-parenthesized-numeric-range-p
    :fixer 'ce-dash-fix-parenthesized-numeric-range
-   :name "Parenthesized numeric range (\"number\" may end with letters)"))
+   :name "Parenthesized numeric range (\"numbers\" may end with letters)"))
 
 (defconst +ce-dash-parenthesized-roman-numeric-range-fixer+
   (dash-fixer

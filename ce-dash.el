@@ -216,36 +216,6 @@
     (message "All dashes have been inspected.")
     t))
 
-(defun ce-dash-highlight-string-region (string begin end)
-  (let ((adjusted-begin begin)
-	(adjusted-end end))
-    (let ((rendered (with-output-to-string
-		      (loop
-		       for i from 0
-		       for c across string
-		       do
-		       (when (= (1+ i) adjusted-begin)
-			 (princ "==> "))
-		       (when (= i adjusted-end)
-			 (princ " <=="))
-		       (cond ((char-equal c ?\n)
-			      (princ "\\n")
-			      (when (< i adjusted-begin)
-				(incf adjusted-begin)
-				(incf adjusted-end)))
-			     ((char-equal c ?\t)
-			      (princ "\\t")
-			      (when (< i adjusted-begin)
-				(incf adjusted-begin)
-				(incf adjusted-end)))
-			     (t
-			      (princ (format "%c" c))))))))
-      (add-text-properties adjusted-begin
-			   (1+ adjusted-end)
-			   (list 'face 'highlight)
-			   rendered)
-      rendered)))
-
 (defun ce-dash-prepend-^-sigil (string)
   (let ((new-string (format "^%s" string)))
     (add-text-properties 0 1 (list 'face 'trailing-whitespace) new-string)

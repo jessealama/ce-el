@@ -61,11 +61,9 @@
 	     ((char-equal c ?])
 	     (princ "[right-square-bracket]"))
 	     (t
-	      (princ (format "[%c]" c))))
-       (when (< (1+ i) len)
-	 (princ " "))
+	      (princ (format "%c" c))))
        (when (= i end)
-	 (princ "<== "))))))
+	 (princ "<=="))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dealing with dashes

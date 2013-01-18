@@ -624,8 +624,9 @@ Typical example: \"25a-35b\"."
       (unless (and (< dash-end len)
 	       (<= 0 dash-begin))
 	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len))
-      (let ((as (articulated-string "as" :source string)))
-	(ce-dash-highlight-articulated-string-region as dash-begin dash-end)))))
+      (ce-dash-highlight-string-region string
+				       dash-begin
+				       dash-end))))
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns

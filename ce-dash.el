@@ -331,7 +331,7 @@ Typical example: \"25a-35b\"."
 	  (when (> len 4) ;; shortest possible example looks like "5a-6b"
 	    (let ((before (ce-dash-word-before string dash-begin))
 		  (after (ce-dash-word-after string dash-end))
-		  (pattern "[[:digit:]]+[[:alpha:]]"))
+		  (pattern "^[[:digit:]]+[[:alpha:]]$"))
 	      (and (string-match pattern before)
 		   (string-match pattern after)))))))))
 

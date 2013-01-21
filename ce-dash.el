@@ -36,8 +36,6 @@
 (defun ce-dash-is-whitespace-character (c)
   (member c +ce-dash-whitespace-chars+))
 
-(defconst +ce-dash-editor-buffer-name+ "*Dash Editor*")
-
 (defvar ce-dash-document-tree nil)
 (defvar ce-dash-cdata-sections-containing-dashes nil)
 (defvar ce-dash-occurence-list nil)

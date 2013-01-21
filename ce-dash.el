@@ -608,24 +608,6 @@ an edited copy of STRING."
 	(let ((dash-fixer (first fixers)))
 	  (funcall (oref dash-fixer fixer) string occurrence))))))
 
-(defun ce-dash-mark-ambiguous-occurrence (string occurrence)
-  "Indicate that the region of STRING delimited by the dash
-occurrence OCCURRENCE could be fixed by more than one dash-fixing
-function."
-  (destructuring-bind (begin . end)
-      occurrence
-    (add-text-properties begin (1+ end) (list 'face 'comment) string)
-    string))
-
-(defun ce-dash-mark-unknown-occurrence (string occurrence)
-  "Indicate that the region of STRING delimited by the dash
-occurrence OCCURRENCE requires manual fixing because no automatic
-dash-fixing function could be applied."
-  (destructuring-bind (begin . end)
-      occurrence
-    (add-text-properties begin (1+ end) (list 'face 'highlight) string)
-    string))
-
 (provide 'ce-dash)
 
 ;; Local Variables:

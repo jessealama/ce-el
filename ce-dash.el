@@ -149,17 +149,6 @@
     (message "All dashes have been inspected.")
     t))
 
-(defun ce-dash-prepend-^-sigil (string)
-  (let ((new-string (format "^%s" string)))
-    (add-text-properties 0 1 (list 'face 'trailing-whitespace) new-string)
-    new-string))
-
-(defun ce-dash-append-$-sigil (string)
-  (let* ((new-string (format "%s$ " string))
-	 (len (length new-string)))
-    (add-text-properties (- len 2) (- len 1) (list 'face 'trailing-whitespace) new-string)
-    new-string))
-
 (defun ce-dash-might-be-an-emdash (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)

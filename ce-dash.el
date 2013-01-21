@@ -37,7 +37,7 @@
   (member c +ce-dash-whitespace-chars+))
 
 (defun ce-dash-string-contains-dash (string)
-  (not (null (string-match-p +ce-dash-dash-regexp+ string))))
+  (string-match-p +ce-dash-dash-regexp+ string))
 
 (defun ce-dash-position-of-dash (string &optional begin)
   (when (< (1+ begin) (length string))

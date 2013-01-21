@@ -36,11 +36,6 @@
 (defun ce-dash-is-whitespace-character (c)
   (member c +ce-dash-whitespace-chars+))
 
-(defvar ce-dash-document-tree nil)
-(defvar ce-dash-cdata-sections-containing-dashes nil)
-(defvar ce-dash-occurence-list nil)
-(defvar ce-dash-original-buffer nil)
-
 (defun ce-dash-string-contains-dash (string)
   (not (null (string-match-p +ce-dash-dash-regexp+ string))))
 

@@ -249,7 +249,9 @@ Typical example: \"25a-35b\"."
 	    (let ((before (ce-dash-word-before string dash-begin))
 		  (after (ce-dash-word-after string dash-end))
 		  (pattern "^[[:digit:]]+[[:alpha:]]$"))
-	      (and (string-match pattern before)
+	      (and (stringp before)
+		   (stringp after)
+		   (string-match pattern before)
 		   (string-match pattern after)))))))))
 
 (defun ce-dash-fix-numeric+letter-range (string occurrence)
@@ -374,7 +376,7 @@ Typical example: \"25a-35b\"."
 	  ((string-match "[^()[:alnum:]]\\([()[:alnum:]]+\\)$" no-newlines)
 	   (match-string-no-properties 1 no-newlines))
 	  (t
-	   (error "Unable to find a word in%c%c%s%c%cprior to position %d." ?\n ?\n string ?\n ?\n position))))))
+	   nil)))))
 
 (defun ce-dash-exists-word-after (string position)
   (not (entirely-whitespace (substring string 0 position))))
@@ -409,7 +411,7 @@ Typical example: \"25a-35b\"."
 	    ((string-match "\\([[:alnum:]]+\\)[^[:alnum:]]" no-newlines)
 	     (match-string-no-properties 1 no-newlines))
 	    (t
-	     (error "Unable to find the word in%c%c%s%c%cafter position %d." ?\n ?\n string ?\n ?\n position))))))
+	     nil)))))
 
 (defun ce-dash-roman-numeral-p (string)
   (unless (stringp string)
@@ -427,7 +429,9 @@ Typical example: \"25a-35b\"."
 	    (when (ce-dash-exists-word-before string (1- dash-end))
 	      (let ((previous-word (ce-dash-word-before string dash-begin))
 		    (next-word (ce-dash-word-after string dash-end)))
-		(and (ce-dash-roman-numeral-p previous-word)
+		(and (stringp previous-word)
+		     (stringp next-word)
+		     (ce-dash-roman-numeral-p previous-word)
 		     (ce-dash-roman-numeral-p next-word))))))))))
 
 (defclass dash-fixer ()

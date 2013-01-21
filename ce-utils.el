@@ -107,6 +107,14 @@
    collect elt into answer
    finally (return answer)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Numbers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun positivep (x)
+  (and (integerp x)
+       (> x 0)))
+
 (provide 'ce-utils)
 
 ;; Local Variables:

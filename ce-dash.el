@@ -6,10 +6,6 @@
 (require 'ce-entities)
 (require 'ce-utils)
 
-(defcustom *ce-dash-string-display-window* 10
-  "The number of characters to display in a string before and after a dash occurrence."
-  :group 'ce)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dealing with dashes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -66,6 +66,36 @@
      when (string= window substring) do (return i)
      finally (return nil))))
 
+(defun highlight-string-region (string begin end &optional window)
+  (when (null window)
+    (setf window 10))
+  (let* ((len (length string))
+	 (start (max 0 (- begin window)))
+	 (finish (min (1- len) (+ end window))))
+    (with-output-to-string
+      (loop
+       for i from start upto finish
+       for c = (aref string i)
+       do
+       (when (= i begin)
+	 (princ "==>"))
+       (cond ((char-equal c ?\n)
+	      (princ "[newline]"))
+	     ((char-equal c ?\t)
+	      (princ "[tab]"))
+	     ((char-equal c ?-)
+	      (princ "[hyphen]"))
+	     ((char-equal c ?–)
+	      (princ "[endash]"))
+	     ((char-equal c ?—)
+	      (princ "[emdash]"))
+	     ((char-equal c ?−)
+	      (princ "[minus]"))
+	     (t
+	      (princ (format "%c" c))))
+       (when (= i end)
+	 (princ "<=="))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Lists
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

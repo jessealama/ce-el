@@ -10,45 +10,6 @@
   "The number of characters to display in a string before and after a dash occurrence."
   :group 'ce)
 
-(defun ce-dash-narrow-string-around (string begin end window)
-  (let ((len (length string)))
-    (let ((window-begin (max 0 (- begin window)))
-	  (window-end (min (1- len) (+ end window))))
-      (let ((region (substring string begin (1+ end))))
-	(let ((before-begin (substring string window-begin begin))
-	      (after-end (substring string (1+ end) (1+ window-end))))
-	  (format "%s%s%s" region before-begin after-end))))))
-
-(defun ce-dash-highlight-string-region (string begin end &optional window)
-  (when (null window)
-    (setf window *ce-dash-string-display-window*))
-  (let* ((len (length string))
-	 (start (max 0 (- begin window)))
-	 (finish (min (1- len) (+ end window))))
-    (with-output-to-string
-      (loop
-       for i from start upto finish
-       for c = (aref string i)
-       do
-       (when (= i begin)
-	 (princ "==>"))
-       (cond ((char-equal c ?\n)
-	      (princ "[newline]"))
-	     ((char-equal c ?\t)
-	      (princ "[tab]"))
-	     ((char-equal c ?-)
-	      (princ "[hyphen]"))
-	     ((char-equal c ?–)
-	      (princ "[endash]"))
-	     ((char-equal c ?—)
-	      (princ "[emdash]"))
-	     ((char-equal c ?−)
-	      (princ "[minus]"))
-	     (t
-	      (princ (format "%c" c))))
-       (when (= i end)
-	 (princ "<=="))))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dealing with dashes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -606,9 +567,9 @@ Typical example: \"25a-35b\"."
       (unless (and (< dash-end len)
 	       (<= 0 dash-begin))
 	(error "Cannot elide string around a dash occurrence (%s) that is greater than the length (%d) of a string" occurrence len))
-      (ce-dash-highlight-string-region string
-				       dash-begin
-				       dash-end))))
+      (highlight-string-region string
+			       dash-begin
+			       dash-end))))
 
 (defun ce-dash-fix-dash-occurrence (string occurrence)
   "Try to fix the dash occurrence OCCURRENCE of STRING.  Returns

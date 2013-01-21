@@ -577,8 +577,11 @@ an edited copy of STRING."
 			(string= response "E"))
 		    (read-from-minibuffer "" string)
 		    (let ((n (string-to-number response)))
-		      (let ((dash-fixer (nth (1- n) fixers)))
-			(funcall (oref dash-fixer fixer) string occurrence)))))))
+		      (if (and (positivep n)
+			       (< n (length fixers)))
+			  (let ((dash-fixer (nth (1- n) fixers)))
+			    (funcall (oref dash-fixer fixer) string occurrence))
+			(message "Invalid response (%s).%c%cEnter a number between 1 and %d, or 'e' to edit the current string." response ?\n ?\n (length fixers))))))))
 	(let ((dash-fixer (first fixers)))
 	  (funcall (oref dash-fixer fixer) string occurrence))))))
 

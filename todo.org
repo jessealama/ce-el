@@ -1,7 +1,7 @@
 * Notes
 ** Symbol italiczation
    Leave off for the moment.
-** Hyphen/dash fixing
+** DONE Hyphen/dash fixing
    endash, emdash
 
    Add/remove hard wrapping
@@ -10,7 +10,7 @@
 
    corner cases: beginnings of lines, ends of lines
 * Validator
-** TODO Deal with high bit characters.
+** DONE Deal with high bit characters.
    Perfectly valid UTF8 characters are regarded as invalid, if the
    charset is changed.  Perhaps the validator should have two modes:
    accept the document as it is encoded, and as plain text.  According
@@ -75,7 +75,7 @@
    (partial-)interactive editing based on regular expressions,
    wrapping/un-wrapping, and communication with plato.
 * ce-quotes.el
-** TODO Look at nxml-mode for useful utility code
+** DONE Look at nxml-mode for useful utility code
    - nxml-forward-balanced-item
 
      This seems to do half of what we want: it moves us to the end of
@@ -87,7 +87,7 @@
 
      This goes forward one "token", and returns a symbol whose name
      expresses the kind of token over which we just jumped.
-** TODO Interaction
+** DONE Interaction
    Invoking the quote fixer will move the point to the beginning of
    buffer.  We will move forward until the next character data area.
    Then we look in the character data area for trouble spots.
@@ -95,24 +95,24 @@
    For each trouble spot, we invoke a function to recommend a fix.  If
    the recommender has a fix, apply it; otherwise, ask the user what
    to do.
-** TODO Undo edits
+** DONE Undo edits
 ** DONE One-button navigation
    Currently, one needs to hit the enter key to move along.
 ** DONE Highlighting matches
    Like isearch.
-** TODO Balance of left and right single and double quotes
-** TODO Support searching for and dealing with double sharp quotes
+** DONE Balance of left and right single and double quotes
+** DONE Support searching for and dealing with double sharp quotes
 ** DONE Support escaping unicode characters like “ and ” and ‘ and ’
 ** DONE Make a 'provide' statement for easy loading
 ** DONE Menu for checking quotes
-** TODO Single quotes: finds them inside tags
+** DONE Single quotes: finds them inside tags
    Whoops.
 ** DONE Quit and resume later, pause
-** TODO Sometimes we print "No candidate quotes to inspect" after pausing for editing.
+** DONE Sometimes we print "No candidate quotes to inspect" after pausing for editing.
 ** DONE Y-N-P-OR-Q doesn't seem to like things other than Y, N, P, and Q.
    If something other than these keys is supplied, we should warn.
 
    Kill
 ** DONE ce-quote-fix-right-quote-entities is falsely counting the # of occurrences
-** TODO Dealing with double quotes: a-or-q clone
-** TODO Rule-based operation
+** DONE Dealing with double quotes: a-or-q clone
+** DONE Rule-based operation

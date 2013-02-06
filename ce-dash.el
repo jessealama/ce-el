@@ -115,31 +115,31 @@
       (save-buffer)))
   (let* ((temp-file (make-temp-file "dash-editor-"))
 	 (current-contents (buffer-string))
-	 (current-buffer (current-buffer))
-	 (current-file (buffer-file-name))
 	 (new-contents current-contents)
-	 (point (point)))
-    (with-temp-file temp-file
-      (insert current-contents)
-      (ce-entities-resolve-named-entities-decimally)
-      (ce-xhtml-comments-as-paragraphs))
-    (let ((tree (condition-case nxml-parse-error
-		    (nxml-parse-file temp-file)
-		  (error
-		   (message "Unable to parse the current buffer as XML:
-
-%s" (error-message-string nxml-parse-error))
-		   nil))))
-      (when tree
-	(let ((new-tree (ce-xhtml-map-cdata-sections tree
-						     'ce-dash-inspect-dashes-in-string)))
-	  (setf new-contents (ce-xhtml-render-nxml-thing new-tree)))))
-    (delete-file temp-file)
-    (erase-buffer)
-    (insert new-contents)
-    (goto-char point)
-    (message "All dashes have been inspected.")
-    t))
+	 (point (point))
+	 (error-message nil))
+    (unwind-protect
+	(progn
+	  (with-temp-file temp-file
+	    (insert current-contents)
+	    (ce-entities-resolve-named-entities-decimally)
+	    (ce-xhtml-comments-as-paragraphs))
+	  (let ((tree (condition-case nxml-parse-error
+			  (nxml-parse-file temp-file)
+			(error
+			 (setf error-message
+			       (error-message-string nxml-parse-error))
+			 nil))))
+	    (if tree
+		(let ((new-tree (ce-xhtml-map-cdata-sections tree
+							     'ce-dash-inspect-dashes-in-string)))
+		  (setf new-contents (ce-xhtml-render-nxml-thing new-tree))
+		  (erase-buffer)
+		  (insert new-contents)
+		  (goto-char point))
+	      (error "Buffer is not valid XML:%c%c%s" ?\n ?\n error-message))))
+      (when (file-exists-p temp-file)
+	(delete-file temp-file)))))
 
 (defun ce-dash-might-be-an-emdash (string occurrence)
   (let ((len (length string)))

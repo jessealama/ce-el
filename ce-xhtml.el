@@ -122,15 +122,15 @@ The error was:
 	       (when (string= name "html")
 		 (princ +xhtml-1.0-transitional-doctype+)
 		 (terpri))
-	       (princ "<")
-	       (princ name))
-	     (cond ((and (string= (cdr element) "p")
-			 (find (cons "class" "comment") attributes :test 'eql)
+	       (cond ((and (string= (cdr element) "p")
+			 (find (cons "class" "comment") attributes :test 'equalp)
 			 children
 			 (stringp (first children))
 			 (not (rest children)))
 		    (princ (format "<!--%s-->" (first children))))
 		   (t
+		    (princ "<")
+		    (princ name)
 		    (dolist (attribute attributes)
 		      (princ " ")
 		      (princ (ce-xhtml-render-attribute-and-value attribute)))
@@ -141,7 +141,7 @@ The error was:
 			     (princ (ce-xhtml-render-nxml-thing child)))
 			   (princ (ce-xhtml-render-closing-tag element)))
 			  (t
-			   (princ "/>"))))))))
+			   (princ "/>")))))))))
 	(t
 	 (error "Unable to render the nXML thing
 

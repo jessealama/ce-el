@@ -133,6 +133,10 @@
       (when (file-exists-p temp-file)
 	(delete-file temp-file)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Dash predicates, dash fixers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defun ce-dash-might-be-an-emdash (string occurrence)
   (let ((len (length string)))
     (destructuring-bind (dash-begin . dash-end)

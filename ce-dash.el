@@ -85,8 +85,8 @@
 (defun ce-dash-inspect-dashes-in-string (string)
   (let ((occurrence (ce-dash-next-dash-occurrence string)))
     (if occurrence
-	(destructuring-bind (dash-begin . dash-end)
-	    occurrence
+	(let ((dash-begin (car occurrence))
+	      (dash-end (cdr occurrence)))
 	  (let ((end dash-end)
 		(edited-string (copy-seq string))
 		(len (length string))
@@ -95,9 +95,8 @@
 	    (while (and occurrence (< i num-dashes))
 	      (let ((new-string (ce-dash-fix-dash-occurrence edited-string occurrence)))
 		(cond ((stringp new-string)
-		       (setf edited-string new-string
-			     end (min (or (mismatch edited-string new-string) len)
-				      (1+ end)))
+		       (setf edited-string new-string)
+		       (incf end)
 		       (setf occurrence (ce-dash-next-dash-occurrence edited-string
 								      (1+ end))))
 		      ((null new-string) ;; no edit was made

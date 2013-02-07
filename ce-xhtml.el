@@ -141,7 +141,8 @@ The error was:
 			     (princ (ce-xhtml-render-nxml-thing child)))
 			   (princ (ce-xhtml-render-closing-tag element)))
 			  (t
-			   (princ "/>")))))))))
+			   ;; one extra space character.  Thanks, IE6.
+			   (princ " />")))))))))
 	(t
 	 (error "Unable to render the nXML thing
 

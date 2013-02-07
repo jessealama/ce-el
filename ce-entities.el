@@ -361,7 +361,8 @@ strip it."
      for decimal-string = (format "%d" c)
      for entity = (gethash decimal-string *name-for-entity*)
      do
-     (princ (if entity
+     (princ (if (and entity
+		     (not (char-equal c ?\')))
 		(format "&%s;" entity)
 	      (format "%c" c))))))
 

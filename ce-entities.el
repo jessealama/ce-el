@@ -361,10 +361,14 @@ strip it."
      for decimal-string = (format "%d" c)
      for entity = (gethash decimal-string *name-for-entity*)
      do
-     (princ (if (and entity
-		     (not (char-equal c ?\')))
-		(format "&%s;" entity)
-	      (format "%c" c))))))
+     (princ (cond ((char-equal c ?\')
+		   (format "%c" c))
+		  (entity
+		   (format "&%s;" entity))
+		  ((> c 255)
+		   (format "&#x%x;" c))
+		  (t
+		   (format "%c" c)))))))
 
 (provide 'ce-entities)
 

@@ -321,46 +321,6 @@ We start counting at 1, not 0."
 	    (ce-xhtml-node-with-address node remaining-address))))))
     node))
 
-(defun ce-xhtml-address-of-leaf-number-1 (tree leaf-number address-so-far)
-  (unless (integerp leaf-number)
-    (error "We cannot find leaf number '%s' because that is not an integer." leaf-number))
-  (when (< leaf-number 0)
-    (error "We cannot find leaf number '%d', because that is less than zero.  (We start counting at 1, not 0.)" leaf-number))
-  (if (stringp tree)
-      (if (= leaf-number 1)
-	  address-so-far
-	(error "We have arrived at a leaf (%s), but the leaf-number to inspect (%d) is not equal to 1." tree leaf-number))
-    (let ((element nil)
-	  (attributes nil)
-	  (children nil))
-      (condition-case nil
-	  (destructuring-bind (local-element local-attributes . local-children)
-	      tree
-	    (setf element local-element
-		  attributes local-attributes
-		  children local-children))
-	(error
-	 (error "Unable to make sense of the nXML node '%s'" tree)))
-      (when (null children)
-	(error "We have arrived at a node that has no children, but this is impossible."))
-      (let ((leaves-so-far 0)
-	    (child-number 0)
-	    (child (first children)))
-	(while (< leaves-so-far leaf-number)
-	  (incf leaves-so-far (if (stringp child) 1 (ce-xhtml-count-leaves child)))
-	  (incf child-number)
-	  (setf child (nth child-number children)))
-	(setf child (nth (1- child-number) children))
-	(decf leaves-so-far (ce-xhtml-count-leaves child))
-	(if (= leaves-so-far leaf-number)
-	    (cons child-number address-so-far)
-	  (ce-xhtml-address-of-leaf-number-1 child
-					     (- leaf-number leaves-so-far)
-					     (cons child-number address-so-far)))))))
-
-(defun ce-xhtml-address-of-leaf-number (tree leaf-number)
-  (reverse (ce-xhtml-address-of-leaf-number-1 tree leaf-number nil)))
-
 (defun ce-xhtml-comments-as-paragraphs ()
   "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)

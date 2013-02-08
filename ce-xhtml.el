@@ -200,25 +200,6 @@ because it is neither a string nor an nXML element." nxml-thing))))
 		  (list (ce-xhtml-replace-thing-at-address child (rest address) thing))
 		  following-children))))))
 
-(defun ce-xhtml-count-leaves (nxml-thing)
-  (if (stringp nxml-thing)
-      1
-    (let ((element nil)
-	  (attributes nil)
-	  (children nil))
-      (condition-case nil
-	  (destructuring-bind (local-element local-attributes . local-children)
-	      nxml-thing
-	    (setf element local-element
-		  attributes local-attributes
-		  children local-children))
-	(error
-	 (error "Unable to make sense of the nXML node '%s'" nxml-thing)))
-      (let ((string-children (remove-if-not 'stringp children))
-	    (element-children (remove-if 'stringp children)))
-	(+ (length string-children)
-	   (reduce '+ (mapcar 'ce-xhtml-count-leaves element-children)))))))
-
 (defun ce-xhtml-comments-as-paragraphs ()
   "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)

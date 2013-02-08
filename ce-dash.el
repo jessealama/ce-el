@@ -137,15 +137,25 @@
 ;; Dash predicates, dash fixers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun ce-dash-might-be-an-emdash (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  (let ((window (substring string dash-begin (1+ dash-end))))
-	    (or (string-match "^[[:space:]]+[-–—]+[[:space:]]+$" window)
-		(string-match "[-–—][-–—]+" window))))))))
+(defmacro define-dash-predicate (name &rest body)
+  (when body
+    (let ((docstring "A careless programmer forgot to document me."))
+      (when (stringp (first body))
+	(setf docstring (first body))
+	(setf body (rest body)))
+      `(defun ,name (string occurrence)
+	 ,docstring
+	 (destructuring-bind (dash-begin . dash-end)
+	     occurrence
+	   (when (> dash-begin 0)
+	     (when (< (1+ dash-end) (length string))
+	       ,@body)))))))
+
+(define-dash-predicate might-be-an-emdash
+  "Is this (possibly) an emdash?"
+  (let ((window (substring string dash-begin (1+ dash-end))))
+    (or (string-match "^[[:space:]]+[-–—]+[[:space:]]+$" window)
+	(string-match "[-–—][-–—]+" window))))
 
 (defun ce-dash-fix-emdash (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -154,15 +164,9 @@
 	  (after (substring string (1+ dash-end))))
       (format "%s—%s" before after))))
 
-(defun ce-dash-looks-like-a-born/died-range (string occurrence)
-  "To handle cases like \"b. 1987- d. 2012\"."
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (+ dash-end 2) len) ;; there should be at least a "d" following the dash occurrence
-	  (let ((window (substring string (1- dash-begin) (+ dash-end 2))))
-	    (string-match "[[:digit:]][[:space:]-–—]+[d]" window)))))))
+(define-dash-predicate looks-like-a-born/died-range
+  (let ((window (substring string (1- dash-begin) (+ dash-end 2))))
+    (string-match "[[:digit:]][[:space:]-–—]+[d]" window)))
 
 (defun ce-dash-fix-born/died-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -171,17 +175,12 @@
 	  (after (substring string (1+ dash-end))))
       (format "%s–%s" before after))))
 
-(defun ce-dash-looks-like-a-ce-year-range (string occurrence)
+(define-dash-predicate looks-like-a-ce-year-range
   "To handle cases like \"6/5 BCE-38/39 CE\"."
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 2) ;; there should be at least "CE" before
-			     ;; the dash occurrence
-	(when (< (+ dash-end 2) len) ;; there should be at least a "d"
-				     ;; following the dash occurrence
-	  (let ((window (substring string (- dash-begin 3) (+ dash-end 2))))
-	    (string-match "[C][E][[:space:]-–—]+[[:digit:]]" window)))))))
+  (when (> dash-begin 2) ;; "CE" before the occurrence
+    (when (< (+ dash-end 2) (length string)) ;; "d" after the occurrence
+      (let ((window (substring string (- dash-begin 3) (+ dash-end 2))))
+	(string-match "[C][E][[:space:]-–—]+[[:digit:]]" window)))))
 
 (defun ce-dash-fix-ce-year-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -190,18 +189,12 @@
 	  (after (substring string (1+ dash-end))))
       (format "%s–%s" before after))))
 
-(defun ce-dash-endash-should-be-emdash (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  ;; look at the characters immediately preceding and following the occurrence
-	  (when (= dash-end dash-begin)
-	    (let ((window (substring string
-				     (- dash-begin 1)
-				     (+ dash-end 2))))
-	      (string-match "[[:alpha:]]–[[:alpha:]]" window))))))))
+(define-dash-predicate endash-should-be-emdash
+  (when (= dash-end dash-begin)
+    (let ((window (substring string
+			     (- dash-begin 1)
+			     (+ dash-end 2))))
+      (string-match "[[:alpha:]]–[[:alpha:]]" window))))
 
 (defun ce-dash-endash->emdash (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -210,14 +203,9 @@
 	  (after (substring string (1+ dash-end))))
       (format "%s—%s" before after))))
 
-(defun ce-dash-numeric-range-needs-fixing (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
-	    (string-match "^[[:digit:]].+[[:digit:]]$" window)))))))
+(define-dash-predicate numeric-range-needs-fixing
+  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
+    (string-match "^[[:digit:]].+[[:digit:]]$" window)))
 
 (defun ce-dash-fix-numeric-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -228,24 +216,20 @@
 	  (after-digit (substring string (+ dash-end 2))))
       (format "%s%c–%c%s" before-digit digit-before-dash digit-after-dash after-digit))))
 
-(defun ce-dash-numeric-range+letter-p (string occurrence)
+(define-dash-predicate numeric-range+letter-p
   "Does the dash occurrence OCCURRENCE in STRING look like a
 numeric range where the 'numbers' end in characters?
 
 Typical example: \"25a-35b\"."
   (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  (when (> len 4) ;; shortest possible example looks like "5a-6b"
-	    (let ((before (ce-dash-word-before string dash-begin))
-		  (after (ce-dash-word-after string dash-end))
-		  (pattern "^[[:digit:]]+[[:alpha:]]$"))
-	      (and (stringp before)
-		   (stringp after)
-		   (string-match pattern before)
-		   (string-match pattern after)))))))))
+    (when (> (length string) 4) ;; shortest possible example looks like "5a-6b"
+      (let ((before (ce-dash-word-before string dash-begin))
+	    (after (ce-dash-word-after string dash-end))
+	    (pattern "^[[:digit:]]+[[:alpha:]]$"))
+	(and (stringp before)
+	     (stringp after)
+	     (string-match pattern before)
+	     (string-match pattern after))))))
 
 (defun ce-dash-fix-numeric+letter-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -261,17 +245,12 @@ Typical example: \"25a-35b\"."
 						  (+ pos-of-after (length after))))))
 	  (format "%s%s–%s%s" before-before before after after-after))))))
 
-(defun ce-dash-parenthesized-numeric-range-p (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  (let ((before (substring string 0 dash-begin))
-		(after (substring string (1+ dash-end)))
-		(pattern "[(][[:digit:]][[:alpha:]]?+[)]"))
-	    (and (string-match (format "%s$" pattern) before)
-		 (string-match (format "^%s" pattern) after))))))))
+(define-dash-predicate parenthesized-numeric-range-p
+  (let ((before (substring string 0 dash-begin))
+	(after (substring string (1+ dash-end)))
+	(pattern "[(][[:digit:]][[:alpha:]]?+[)]"))
+    (and (string-match (format "%s$" pattern) before)
+	 (string-match (format "^%s" pattern) after))))
 
 (defun ce-dash-fix-parenthesized-numeric-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -280,17 +259,12 @@ Typical example: \"25a-35b\"."
 	  (after (substring string (1+ dash-end))))
       (format "%s–%s" before after))))
 
-(defun ce-dash-parenthesized-roman-numeric-range-p (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  (let ((before (substring string 0 dash-begin))
-		(after (substring string (1+ dash-end)))
-		(pattern "[(][ivxmcIVMXC]+[)]"))
-	    (and (string-match (format "%s$" pattern) before)
-		 (string-match (format "^%s" pattern) after))))))))
+(define-dash-predicate parenthesized-roman-numeric-range-p
+  (let ((before (substring string 0 dash-begin))
+	(after (substring string (1+ dash-end)))
+	(pattern "[(][ivxmcIVMXC]+[)]"))
+    (and (string-match (format "%s$" pattern) before)
+	 (string-match (format "^%s" pattern) after))))
 
 (defun ce-dash-fix-parenthesized-roman-numeric-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -299,17 +273,12 @@ Typical example: \"25a-35b\"."
 	  (after (substring string (1+ dash-end))))
       (format "%s–%s" before after))))
 
-(defun ce-dash-parenthesized-alphabetic-range-p (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (> dash-begin 0) ;; occurrence starts after the beginning of the string
-	(when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	  (let ((before (substring string 0 dash-begin))
-		(after (substring string (1+ dash-end)))
-		(pattern "[(][[:alpha:]][)]"))
-	    (and (string-match (format "%s$" pattern) before)
-		 (string-match (format "^%s" pattern) after))))))))
+(define-dash-predicate parenthesized-alphabetic-range-p
+  (let ((before (substring string 0 dash-begin))
+	(after (substring string (1+ dash-end)))
+	(pattern "[(][[:alpha:]][)]"))
+    (and (string-match (format "%s$" pattern) before)
+	 (string-match (format "^%s" pattern) after))))
 
 (defun ce-dash-fix-parenthesized-alphabetic-range (string occurrence)
   (destructuring-bind (dash-begin . dash-end)
@@ -318,16 +287,12 @@ Typical example: \"25a-35b\"."
 	  (after (substring string (1+ dash-end))))
       (format "%s–%s" before after))))
 
-(defun ce-dash-looks-like-a-minus (string occurrence)
-  (let ((len (length string)))
-    (destructuring-bind (dash-begin . dash-end)
-	occurrence
-      (when (< (1+ dash-end) len) ;; occurrence ends before the string does
-	(if (zerop dash-begin)
-	    (let ((window (substring string 0 (+ dash-end 2))))
-	      (string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
-	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
-	    (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)))))))
+(define-dash-predicate looks-like-a-minus
+  (if (zerop dash-begin)
+      (let ((window (substring string 0 (+ dash-end 2))))
+	(string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
+    (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
+      (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window))))
 
 (defun ce-dash-make-a-minus (string occurrence)
   (destructuring-bind (dash-begin . dash-end)

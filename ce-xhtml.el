@@ -219,42 +219,6 @@ because it is neither a string nor an nXML element." nxml-thing))))
 	(+ (length string-children)
 	   (reduce '+ (mapcar 'ce-xhtml-count-leaves element-children)))))))
 
-(defun ce-xhtml-nth-leaf (nxml-tree n)
-  "In a depth-first enumeration of the leaves of NXML-TREE, what
-  is leaf N?  We start counting at 1, not 0."
-  (when (< n 1)
-    (error "Illegal value '%d'; we cannot find the leaf with that index.  (We start counting at 1, not 0.)" n))
-  (if (stringp nxml-tree)
-      (if (= n 1)
-	  nxml-tree
-	(error "A string nXML node has zero children, so we cannot compute leaf number %d.  The string we are looking at is%c%c%s%c" n ?\n ?\n nxml-tree ?\n))
-    (let ((element nil)
-	  (attributes nil)
-	  (children nil))
-      (condition-case nil
-	  (destructuring-bind (local-element local-attributes . local-children)
-	      nxml-tree
-	    (setf element local-element
-		  attributes local-attributes
-		  children local-children))
-	(error
-	 (error "Unable to make sense of the nXML node '%s'" nxml-tree)))
-      (ce-xhtml-nth-leaf-under-nodes children n))))
-
-(defun ce-xhtml-nth-leaf-under-nodes (nodes n)
-  "In a depth-first enumeration of the list of nXML nodes NODES, what is leaf N?
-
-We start counting at 1, not 0."
-  (when (< n 1)
-    (error "Illegal value '%d'; we cannot find the leaf with that index.  (We start counting from 1, not 0.)" n))
-  (when (null nodes)
-    (error "The list of nodes must be non-empty, and we were asked to compute node number #%d under this list of nodes." n))
-  (let ((node (first nodes)))
-    (let ((num-leaves (ce-xhtml-count-leaves node)))
-      (if (< num-leaves n)
-	  (ce-xhtml-nth-leaf-under-nodes (rest nodes) (- n num-leaves))
-	(ce-xhtml-nth-leaf node n)))))
-
 (defun ce-xhtml-comments-as-paragraphs ()
   "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)

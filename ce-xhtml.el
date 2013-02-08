@@ -294,33 +294,6 @@ We start counting at 1, not 0."
 						      (+ encountered earlier-leaf-count))
 	      (1+ (+ earlier-leaf-count encountered)))))))))
 
-(defun ce-xhtml-node-with-address (node address)
-  (if address
-      (let ((first-address-component (first address))
-	    (remaining-address (rest address)))
-	(assert (integerp first-address-component))
-	(assert (> first-address-component 0))
-	(if (stringp node)
-	    (if remaining-address
-		(error "The child at position %d of the current nXML tree is a string, but the address we were asked to inspect %s presumes that this child is a cons cell, not a string." first-address-component address)
-	      node)
-	  (let ((element nil)
-		(attributes nil)
-		(children nil))
-	    (condition-case nil
-		(destructuring-bind (local-element local-attributes . local-children)
-		    node
-		  (setf element local-element
-			attributes local-attributes
-			children local-children))
-	      (error
-	       (error "Unable to make sense of the nXML node '%s'" node)))
-	    (let ((num-children (length children)))
-	  (assert (<= first-address-component num-children))
-	  (let ((node (nth (1- first-address-component) children)))
-	    (ce-xhtml-node-with-address node remaining-address))))))
-    node))
-
 (defun ce-xhtml-comments-as-paragraphs ()
   "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)

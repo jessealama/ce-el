@@ -364,7 +364,7 @@ strip it."
 		   (format "%c" c))
 		  (entity
 		   (format "&%s;" entity))
-		  ((> c 255)
+		  ((> c 255) ; is this character non-ASCII?
 		   (format "&#x%x;" c))
 		  (t
 		   (format "%c" c)))))))

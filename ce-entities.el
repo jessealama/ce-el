@@ -358,8 +358,7 @@ strip it."
   (with-output-to-string
     (loop
      for c across string
-     for decimal-string = (format "%d" c)
-     for entity = (gethash decimal-string *name-for-entity*)
+     for entity = (gethash (format "%d" c) *name-for-entity*)
      do
      (princ (cond ((char-equal c ?\')
 		   (format "%c" c))

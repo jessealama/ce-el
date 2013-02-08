@@ -255,45 +255,6 @@ We start counting at 1, not 0."
 	  (ce-xhtml-nth-leaf-under-nodes (rest nodes) (- n num-leaves))
 	(ce-xhtml-nth-leaf node n)))))
 
-(defun ce-xhtml-leaf-number-of-leaf-address (tree address &optional encountered)
-  "Assuming that ADDRESS is the address of a leaf of the nXML
-  tree TREE, what is the index of that leaf in a depth-first
-  enumeration of the leaves of TREE?
-
-We start counting at 1, not 0."
-  (when (null encountered)
-    (setf encountered 0))
-  (when (null address)
-    (error "A null address is not permitted."))
-  (when (null tree)
-    (error "A null tree is not permitted."))
-  (when (stringp tree)
-    (error "We assume we are dealing with trees, not with strings."))
-  (let ((first-address-component (first address)))
-    (let ((element nil)
-	  (attributes nil)
-	  (children nil))
-      (condition-case nil
-	  (destructuring-bind (local-element local-attributes . local-children)
-	      tree
-	    (setf element local-element
-		  attributes local-attributes
-		  children local-children))
-	(error
-	 (error "Unable to make sense of the nXML node '%s'" tree)))
-      (let ((earlier-children (first-n children (1- first-address-component)))
-	    (child (nth (1- first-address-component) children)))
-	(let ((earlier-leaves (remove-if-not 'stringp earlier-children))
-	      (earlier-elements (remove-if 'stringp earlier-children)))
-	  (let ((earlier-leaf-count (+ (length earlier-leaves)
-				       (reduce '+ (mapcar 'ce-xhtml-count-leaves
-							  earlier-elements)))))
-	    (if (rest address)
-		(ce-xhtml-leaf-number-of-leaf-address child
-						      (rest address)
-						      (+ encountered earlier-leaf-count))
-	      (1+ (+ earlier-leaf-count encountered)))))))))
-
 (defun ce-xhtml-comments-as-paragraphs ()
   "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)

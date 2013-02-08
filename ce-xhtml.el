@@ -167,39 +167,6 @@ because it is neither a string nor an nXML element." thing))))
 
 because it is neither a string nor an nXML element." nxml-thing))))
 
-(defun ce-xhtml-replace-thing-at-address (tree address thing)
-  (when (null thing)
-    (error "The replacement object should not be null."))
-  (when (and (not (stringp thing))
-	     (not (listp thing)))
-    (error "The replacement object should be either a string or an nXML node."))
-  (if (null address)
-      thing
-    (let ((element nil)
-	  (attributes nil)
-	  (children nil))
-      (condition-case nil
-	  (destructuring-bind (local-element local-attributes . local-children)
-	      tree
-	    (setf element local-element
-		  attributes local-attributes
-		  children local-children))
-	(error
-	 (error "Unable to make sense of the nXML node '%s'" tree)))
-      (let ((num-children (length children))
-	    (child-number (first address)))
-	(when (< num-children child-number)
-	  (error "The current node has only %d children, but the address indicates that we are supposed to inspect child number %d." num-children child-number))
-	(when (< child-number 1)
-	  (error "The first component of the current address is less than 1."))
-	(let ((previous-children (first-n children (1- child-number)))
-	      (child (nth (1- child-number) children))
-	      (following-children (nthcdr child-number children)))
-	  (append (list element attributes)
-		  previous-children
-		  (list (ce-xhtml-replace-thing-at-address child (rest address) thing))
-		  following-children))))))
-
 (defun ce-xhtml-comments-as-paragraphs ()
   "Replace all named XHTML entities by their decimal character reference equivalents."
   (interactive)

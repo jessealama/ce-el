@@ -112,7 +112,7 @@ The error was:
 
 (defun ce-xhtml-render-nxml-thing (thing)
   (cond ((stringp thing)
-	 (ce-entities-name-unicode-characters (ce-xhtml-escape-string thing)))
+	 (ce-entities-name-unicode-characters thing))
 	((ce-xhtml-nxml-elementp thing)
 	 (destructuring-bind (element attributes . children)
 	     thing

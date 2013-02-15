@@ -271,7 +271,6 @@
 			    *xhtml-special-entities*
 			    *xhtml-symbol-entities*))
       (let ((decimal-code-point (aref triple 0))
-	    (hexidecimal-code-point (aref triple 1))
 	    (entity (aref triple 2)))
 	(setf (gethash entity code-point-hash) decimal-code-point)))
     code-point-hash))

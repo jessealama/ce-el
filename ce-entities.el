@@ -284,7 +284,8 @@
 	    (hexidecimal-code-point (aref triple 1))
 	    (entity (aref triple 2)))
 	(setf (gethash decimal-code-point name-hash) entity)
-	(setf (gethash hexidecimal-code-point name-hash) entity)))
+	;; (setf (gethash hexidecimal-code-point name-hash) entity)
+	))
     name-hash))
 
 (defun ce-entities-known-latin-1-entity (thing)

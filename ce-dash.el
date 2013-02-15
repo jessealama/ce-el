@@ -327,7 +327,10 @@ Typical example: \"25a-35b\"."
 	    (let ((window (substring string 0 (+ dash-end 2))))
 	      (string-match "^[[:space:]]*-[[:space:]]*[[:digit:]]$" window))
 	  (let ((window (substring string (- dash-begin 1) (+ dash-end 2))))
-	    (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:digit:]]$" window)))))))
+	    (or (string-match "^[[:digit:]][[:space:]]*-[[:space:]]*[[:alnum:]]$"
+			      window)
+		(string-match "^[[:alnum:]][[:space:]]*-[[:space:]]*[[:digit:]]$"
+			      window))))))))
 
 (defun ce-dash-make-a-minus (string occurrence)
   (destructuring-bind (dash-begin . dash-end)

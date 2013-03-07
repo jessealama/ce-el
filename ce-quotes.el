@@ -25,7 +25,8 @@
 	    (aref new-string dquote-2) ?\”
 	    offset dquote-2)
    when (or (not (integerp dquote-1))
-	    (not (integerp dquote-2))) do (return new-string)))
+	    (not (integerp dquote-2)))
+   do (return new-string)))
 
 (defun ce-quotes-inspect-quotes ()
   (interactive)

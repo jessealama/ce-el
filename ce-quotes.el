@@ -8,6 +8,8 @@
 ;; functionality we support.
 
 (require 'cl)
+(require 'ce-entities)
+(require 'ce-xhtml)
 
 ;;; Code:
 

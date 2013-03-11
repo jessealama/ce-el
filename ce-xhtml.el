@@ -174,7 +174,7 @@ because it is neither a string nor an nXML element." nxml-thing))))
   (foreach-xml-token
    (when (eq current-xml-token 'comment)
      (let ((data (buffer-substring-no-properties begin end)))
-       (let ((comment (subseq data 4 (- (length data) 4))))
+       (let ((comment (subseq data 4 (- (length data) 3))))
 	 ;                         ^                  ^
 	 ; for the "<!--" and the "-->" at the beginning and end of XHTML comments
 	 (delete-region begin end)

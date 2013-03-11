@@ -174,13 +174,12 @@ because it is neither a string nor an nXML element." nxml-thing))))
   (foreach-xml-token
    (when (eq current-xml-token 'comment)
      (let ((data (buffer-substring-no-properties begin end)))
-       (cond ((string-match "^<!--\\\(.*\\\)-->$" data)
-	      (let ((comment (match-string-no-properties 1 data)))
-		(delete-region begin end)
-		(insert (format "<p class=\"comment\">%s</p>" comment))
-		(setf end (point))))
-	     (t
-	      (error "We found a comment that does not match our comment regular expression.")))))))
+       (let ((comment (subseq data 4 (- (length data) 4))))
+	 ;                         ^                  ^
+	 ; for the "<!--" and the "-->" at the beginning and end of XHTML comments
+	 (delete-region begin end)
+	 (insert (format "<p class=\"comment\">%s</p>" comment))
+	 (setf end (point)))))))
 
 (provide 'ce-xhtml)
 

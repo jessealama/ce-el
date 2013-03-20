@@ -160,11 +160,21 @@ Encyclopedia of Philosophy."
 (defun ce-reload (&optional recompile)
   "Reload CE mode."
   (interactive)
-  (dolist (package +ce-packages+ t)
-    (let ((package-el (format "%s.el" package)))
-      (if recompile
-	  (byte-compile-file package-el t)
-	(load-file package-el)))))
+  (let ((location (locate-library "ce")))
+    (unless location
+      (error "Unable to find ce.el!"))
+    (let ((dir (file-name-directory location)))
+      (dolist (package +ce-packages+ t)
+	(let ((package-el (format "%s%s.el" dir package)))
+	  (unless (file-exists-p package-el)
+	    (error "We were asked to load (or possibly even compile)
+
+%s
+
+but there is no such file." package-el))
+	  (if recompile
+	      (byte-compile-file package-el t)
+	    (load-file package-el)))))))
 
 (define-minor-mode ce-mode
   "SEP copyediting utilities"

@@ -6,7 +6,7 @@ unexport EMACSLOADPATH # evil emacs!
 
 project-prefix := ce
 
-elisp-files := $(basename $(wildcard $(project-prefix)-*.el))
+elisp-files := $(basename $(wildcard $(project-prefix)-*.el)) ce
 perl-scripts := validate
 
 els := $(addsuffix .el,$(elisp-files))

@@ -332,10 +332,12 @@ strip it."
        (if (string-match "^[&]\\\([[:alnum:]]+\\\)[;]$" data)
 	   (let* ((entity (match-string 1 data))
 		  (code-point (gethash entity *decimal-code-point-for-entity*)))
-	     (when code-point
-	       (delete-region begin end)
-	       (insert ?\& ?\# code-point ?\;)
-	       (setf end (point))))
+	     (cond (code-point
+                    (delete-region begin end)
+                    (insert ?\& ?\# code-point ?\;)
+                    (setf end (point)))
+                   (t
+                    (error "What is the decimal code point for the entity '%s'?" entity))))
 	 (error "The string '%s' appears not to be an entity." data))))))
 
 (defun ce-entities-name-numeric-entities ()
